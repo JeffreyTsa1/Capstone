@@ -1,6 +1,12 @@
 from flask import Flask, request, jsonify, Response
 from flask_restful import Resource, Api, reqparse
-from utils.externalapi import fetch_nasa_geojson
+
+from utils.externalapi import (
+    fetch_nasa_geojson,
+    pm25_to_aqi,
+    openaq_param_pm25_latest,
+    openaq_param_latest_to_geojson_aqi
+)
 from flask_cors import CORS
 from dotenv import load_dotenv
 from pymongo import MongoClient
@@ -678,26 +684,53 @@ def api_openaq_latest():
       bbox=minLon,minLat,maxLon,maxLat   (required)
       min_aqi=50                         (optional)
       limit=1000                         (optional)
+      page=1                             (optional)
     """
     bbox = request.args.get('bbox')
+    
     if not bbox:
         return jsonify({"error": "Missing bbox=minLon,minLat,maxLon,maxLat"}), 400
     try:
         minx, miny, maxx, maxy = [float(x) for x in bbox.split(',')]
     except Exception:
         return jsonify({"error": "Invalid bbox format"}), 400
-
-    min_aqi = int(request.args.get('min_aqi', 50))
-    limit = int(request.args.get('limit', 1000))
+    
+    min_aqi = int(request.args.get('min_aqi', 0))
+    limit = int(request.args.get('limit', 10000))
+    page = int(request.args.get('page', 5))
 
     try:
-        payload = openaq_latest_pm25_bbox(minx, miny, maxx, maxy, limit=limit)
-        fc = openaq_to_geojson_aqi(payload, min_aqi=min_aqi)
+        # Use the parameters/2/latest endpoint via openaq_param_pm25_latest function
+        print(f"Requesting OpenAQ data with limit={limit}, page={page}")
+        payload = openaq_param_pm25_latest(limit=limit, page=page)
+        print(f"Fetched OpenAQ data using parameters/2/latest endpoint")
+        
+        if isinstance(payload, dict) and "results" in payload:
+            print(f"Found {len(payload['results'])} results in payload")
+            if payload["results"]:
+                print(f"Sample data: {payload['results'][0]}")
+                
+        fc = openaq_param_latest_to_geojson_aqi(
+            payload,
+            min_aqi=min_aqi,
+            bbox=(-170, 5, -50, 85)
+        )
+        feature_count = len(fc.get('features', []))
+        print(f"Converted to GeoJSON with {feature_count} features")
+        
+        # Add debug information to response
+        if feature_count == 0:
+            print("Warning: No features found after filtering")
+            
         return jsonify(fc), 200
     except requests.HTTPError as e:
+        print(f"OpenAQ HTTP error: {e}")
         body = getattr(e, 'response', None).text if hasattr(e, 'response') and e.response is not None else None
         return jsonify({"error": "OpenAQ HTTP error", "details": str(e), "body": body}), 502
     except Exception as e:
+        print(f"Error in api_openaq_latest: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": "Failed to fetch/convert OpenAQ data", "details": str(e)}), 500
 
 @app.route('/aq/convert/pm25', methods=['POST'])

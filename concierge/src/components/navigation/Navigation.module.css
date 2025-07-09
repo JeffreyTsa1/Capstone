@@ -1,0 +1,20 @@
+.navWrapper {
+    display: flex;
+    width: 100vw;
+    justify-content: center;
+}
+
+.nav {
+    padding: 20px;
+    width: 100%;
+    font-weight: 800;
+    /* background-color: black; */
+}
+
+.rightNav {
+
+}
+
+.rightNav > * {
+    padding: 0px 10px;
+}

@@ -1,0 +1,9 @@
+.calendarPageWrapper {
+    padding: 25px 50px;
+    margin: 0px 50px;
+    padding-bottom: 80px;
+}
+
+.calendarPageWrapper h1 {
+    margin: 20px 0px;
+}

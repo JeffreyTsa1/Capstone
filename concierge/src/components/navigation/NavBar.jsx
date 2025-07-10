@@ -4,7 +4,7 @@ import styles from './Navigation.module.css'; // Assuming you have a CSS module 
 import { usePathname } from 'next/navigation';
 
 const links = [
-    { name: 'Home', href: '/' },
+    { name: 'Calendar', href: '/calendar' },
     { name: 'Schedule', href: '/schedule' },
     { name: 'Clients', href: '/clients' },
     { name: 'Profile', href: '/profile' },

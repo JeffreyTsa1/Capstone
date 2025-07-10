@@ -1,0 +1,63 @@
+.profilePageWrapper h1 {
+    text-align: center;
+    font-size: 2.5rem;
+}
+
+.profilePageWrapper h2 {
+    color: #666;
+    font-size: 2rem;
+    font-weight: 800;
+    ;
+    padding:20px 0px;
+}
+
+.profilePicture {
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.profileContainer {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* 1:2 ratio */
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.profileContainer label {
+    font-weight: bold;
+}
+
+.contactInfo {
+    padding: 20px;
+}
+
+.contactInfo > * {
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.sidebar {
+  background: #f4f4f4;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.main {
+    padding-left: 15px;
+}
+
+.main p, .main li {
+    margin: 10px 0px;
+}
+
+.certifications, .skills {
+    padding: 15px 0px;
+}
+
+.socialMedia li {
+    margin: 5px 0;
+    list-style: none;;
+}

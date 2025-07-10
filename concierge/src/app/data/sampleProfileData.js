@@ -5,7 +5,7 @@ export const sampleProfileData = {
     phone: "555-123-4567",
     businessAddress: "123 Main St, Anytown, USA",
     businessHours: "Mon-Fri, 9 AM - 5 PM",
-    profilePicture: "https://example.com/profile-picture.jpg",
+    profilePicture: "./file.svg",
     socialMedia: {
         linkedin: "https://www.linkedin.com/in/adriansmith",
         twitter: "https://twitter.com/adriansmith",

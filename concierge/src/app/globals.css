@@ -49,3 +49,14 @@ a {
   align-items: center;
   flex-direction: row;
 }
+
+.space-evenly {
+  justify-content: space-evenly;
+}
+.space-between {
+  justify-content: space-between;
+}
+.mid-width {
+  width: 100%;
+  max-width: 60vw;
+}

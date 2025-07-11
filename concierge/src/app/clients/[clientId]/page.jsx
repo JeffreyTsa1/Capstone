@@ -10,6 +10,7 @@ export default async function ClientPage({ params }) {
 
     return (
         <div className={style.clientPageWrapper}>
+            <button> Add Client </button>
             <h1>Client #{clientId}</h1>
             {client ? (
                 <div className={style.clientInfoWrapper}>

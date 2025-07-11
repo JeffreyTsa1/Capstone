@@ -17,7 +17,7 @@ const NavBar = () => {
     return (
         <div className={styles.navWrapper}>
             <nav className={styles.nav}>
-                <div className="flex-lr">
+                <div className="flex-lr space-between">
                     {/* Brand Logo */}
                     <div className="text-2xl font-bold text-gray-800">
                         <Link href="/">Concierge</Link>

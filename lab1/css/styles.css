@@ -1,0 +1,61 @@
+/* Reset some default CSS properties */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Basic styles for the body and header */
+html {
+  font-size: 1rem; /* Base font size, 16px. REM is the often the best choice for responsive design */
+}
+
+body {
+  font-family: sans-serif;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+
+header {
+    background: #333;
+    color: white;
+    padding: 1rem;
+}
+
+/************ Typography ************/
+
+header h1 {
+  margin-bottom: 0.5rem;
+}
+
+nav a {
+  color: white;
+  margin-right: 1rem;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/************ Layout ************/
+header, footer {
+    display: flex; /* flexbox is now the standard for layout */
+    justify-content: center;
+    align-items: center;
+}
+
+main {
+  flex: 1;
+  padding: 1rem;
+}
+
+footer {
+  background: #f4f4f4;
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}

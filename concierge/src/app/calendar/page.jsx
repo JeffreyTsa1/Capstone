@@ -13,7 +13,7 @@ const page = () => {
   return (
     <div className={styles.calendarPageWrapper}> 
 
-    <div className="p-6">
+    <div className={styles.fullCalendar}>
       <h1 className="text-2xl font-bold mb-4">Your Calendar</h1>
 
       <FullCalendar

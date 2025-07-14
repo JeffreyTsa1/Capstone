@@ -1,6 +1,7 @@
 "use client"
 // import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { useEffect, useRef } from 'react';
+import styles from './dragndrop.module.css';
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 const QueueSidebar = ({ clientQueue, setClientQueue }) => {
     const sidebarRef = useRef();
@@ -49,21 +50,31 @@ const QueueSidebar = ({ clientQueue, setClientQueue }) => {
     //     id: 'queue-sidebar',
     // });
 
-    return (
-        <div className="sidebar" ref={sidebarRef}>
+        if (clientQueue.length === 0) {
+            return (
+                <div className={styles.queueSidebar} ref={sidebarRef}>
+                    <h3>Client Queue</h3>
+                    <p>No clients in the queue. Please check back later!</p>
+                </div>
+            );
+        }
+        else{
+            return (
+                        <div className={styles.queueSidebar} ref={sidebarRef}>
             <h3>Client Queue</h3>
+
+            <p>
+                Hello! You currently have {clientQueue.length} clients in your queue. You can drag and drop them onto the calendar to schedule appointments.
+            </p>
             {clientQueue.map((client) => (
                 <div
                     key={client.id}
-                    className="fc-draggable draggable-client"
+                    className={`${styles.draggableItem} fc-draggable`}
                     data-client-name={client.name}
                     data-client-duration={client.duration || '01:00'}
                     data-client-id={client.id}
                     style={{
                         cursor: 'grab',
-                        padding: '10px',
-                        margin: '5px 0',
-                        backgroundColor: '#f0f0f0',
                         border: '1px solid #ccc',
                         borderRadius: '4px',
                         userSelect: 'none',
@@ -80,7 +91,9 @@ const QueueSidebar = ({ clientQueue, setClientQueue }) => {
                 </div>
             ))}
         </div>
-    );
+            )
+        }
+
 }
 
 

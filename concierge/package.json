@@ -14,7 +14,7 @@
     "@fullcalendar/react": "^6.1.18",
     "@fullcalendar/timegrid": "^6.1.18",
     "@hello-pangea/dnd": "^18.0.1",
-    "framer-motion": "^12.23.1",
+    "framer-motion": "^12.23.3",
     "next": "15.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

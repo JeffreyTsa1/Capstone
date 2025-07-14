@@ -10,10 +10,187 @@
   grid-template-rows: 20px 1fr 20px;
   align-items: center;
   justify-items: center;
-  min-height: 100svh;
-  padding: 80px;
-  gap: 64px;
+  min-height: 80svh;
+  padding:  50px;
+  gap: 0px;
   font-family: var(--font-geist-sans);
+}
+
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.card {
+  background: var(--background);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Card variations */
+.upcomingAppointments {
+  background: linear-gradient(135deg, #ffa200 0%, #ffb940 100%);
+  color: white;
+  border-left: 4px solid #ff8c00;
+}
+
+.TodaySchedule {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #2563eb;
+}
+
+.clientsInQueue {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7ec 100%);
+  border-top: 4px solid #6366f1;
+}
+
+.clientsActivity {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  border-bottom: 4px solid #059669;
+  background: rgba(5, 150, 105, 0.05);
+}
+
+/* Card content styling */
+.cardTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardContent {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.appointmentList, .activityList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.appointmentList li, .activityList li {
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.appointmentList li:not(:last-child), .activityList li:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.upcomingAppointments .appointmentList li:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.highlight {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.welcomeText {
+  margin-bottom: 32px;
+  line-height: 1.8;
+}
+
+/* Card footer with action links */
+.cardFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.upcomingAppointments .cardFooter {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cardLink {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.cardLink:hover {
+  text-decoration: underline;
+  transform: translateX(2px);
+}
+
+.upcomingAppointments .cardLink {
+  color: white;
+}
+
+/* Schedule item styling */
+.scheduleItem {
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* Card metrics styling */
+.cardMetrics {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 8px 16px;
+  border-radius: 8px;
+  flex: 1;
+}
+
+.metricValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+.metricLabel {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: 500;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +201,44 @@
 
     --button-primary-hover: #ccc;
     --button-secondary-hover: #1a1a1a;
+  }
+  
+  .clientsInQueue {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%);
+    border-top: 4px solid #6366f1;
+  }
+  
+  .clientsActivity {
+    background: rgba(5, 150, 105, 0.1);
+  }
+  
+  .highlight {
+    color: #60a5fa;
+  }
+  
+  .TodaySchedule {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #3b82f6;
+  }
+  
+  .cardLink {
+    color: #60a5fa;
+  }
+  
+  .cardFooter {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .metric {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .metricValue {
+    color: #10b981;
+  }
+  
+  .metricLabel {
+    color: rgba(255, 255, 255, 0.7);
   }
 }
 
@@ -54,31 +269,6 @@
   padding: 2px 4px;
   border-radius: 4px;
   font-weight: 600;
-}
-
-.ctas {
-  display: flex;
-  gap: 16px;
-}
-
-.ctas a {
-  appearance: none;
-  border-radius: 128px;
-  height: 48px;
-  padding: 0 20px;
-  border: none;
-  border: 1px solid transparent;
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  line-height: 20px;
-  font-weight: 500;
 }
 
 a.primary {
@@ -132,37 +322,26 @@ a.secondary {
     padding-bottom: 80px;
   }
 
+  .cardContainer {
+    max-width: 100%;
+  }
+  
   .main {
     align-items: center;
   }
-
-  .main ol {
-    text-align: center;
-  }
-
-  .ctas {
+  
+  .cardMetrics {
     flex-direction: column;
+    gap: 8px;
   }
-
-  .ctas a {
-    font-size: 14px;
-    height: 40px;
-    padding: 0 16px;
+  
+  .metric {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
   }
-
-  a.secondary {
-    min-width: auto;
-  }
-
-  .footer {
-    flex-wrap: wrap;
-    align-items: center;
+  
+  .cardFooter {
     justify-content: center;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
   }
 }

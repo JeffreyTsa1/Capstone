@@ -123,7 +123,37 @@ def createReport(userId=None, location=None, radiusMeters=250, indicator="smoke"
   "syncedAt": datetime.datetime.utcnow().isoformat()
 }
 
+@app.route('/wildfires', methods=['GET'])
+def getWildfires():
+    # Fetch wildfires data from the database
+    wildfires = []  # Replace with actual database query
 
+    # return geojson
+    if not wildfires:
+        return jsonify({"error": "No wildfires found"}), 404
+    else:
+        # Convert wildfires data to GeoJSON format
+        geojson = {
+            "type": "FeatureCollection",
+            "features": []
+        }
+        for wildfire in wildfires:
+            feature = {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [wildfire['location']['longitude'], wildfire['location']['latitude']]
+                },
+                "properties": {
+                    "id": wildfire['id'],
+                    "severity": wildfire['severity'],
+                    "description": wildfire.get('description', ''),
+                    "timestamp": wildfire.get('timestamp', '')
+                }
+            }
+            geojson['features'].append(feature)
+        return jsonify(geojson), 200
+    # return json_util.dumps({"wildfires": wildfires}), 200, {'Content-Type': 'application/json'}
 
 if __name__ == '__main__':
     app.run(debug=True)

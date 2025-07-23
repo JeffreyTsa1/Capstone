@@ -20,87 +20,7 @@ const MapComponent = () => {
     latitude: 43.4436,
     zoom: 4,
   });
-  const [earthquakes, setEarthquakes] = useState({
-  "type": "FeatureCollection",
-  "crs": {
-    "type": "name",
-    "properties": {
-      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
-    }
-  },
-  "features": [
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "wf202501",
-        "mag": 23448,
-        "start": 1736227200000,
-        "contained": 1737679200000,
-        "status": "contained"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [-118.512, 34.041, 0]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "wf202502",
-        "mag": 14021,
-        "start": 1736227200000,
-        "contained": 1737679200000,
-        "status": "contained"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [-118.141, 34.177, 0]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "wf202503",
-        "mag": 39000,
-        "start": 1721625600000,
-        "contained": 1733174400000,
-        "status": "extinguished"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [-118.035, 52.873, 0]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "wf202504",
-        "mag": 8620,
-        "start": 1736803200000,
-        "contained": null,
-        "status": "active"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [-119.753, 37.865, 0]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "wf202505",
-        "mag": 12100,
-        "start": 1736361600000,
-        "contained": null,
-        "status": "active"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [-123.3656, 48.4284, 0]
-      }
-    }
-  ]
-});
+  const [earthquakes, setEarthquakes] = useState(null);
 
 
   // Default location (San Francisco)
@@ -140,19 +60,15 @@ const MapComponent = () => {
   // Example dummy markers for testing
   useEffect(() => {
     // Fetch geojson data for wildfires
-    // fetch('/api/wildfires').then(response => response.json())
-    //   .then(data => {
-    //     console.log("Wildfire data loaded:", data);
-    //     // Assuming data is in the format of a GeoJSON FeatureCollection
-    //     if (mapRef.current) {
-    //       mapRef.current.getSource('wildfires').setData(data);
-    //     }
-    //   })
-    //   .catch(error => {
-    //     console.error("Error loading wildfire data:", error);
-    //   }
-    // );  
-    
+    fetch('http://127.0.0.1:5000/wildfires/all').then(response => response.json())
+      .then(data => {
+        console.log("Wildfire data loaded:", data);
+        // Assuming data is in the format of a GeoJSON FeatureCollection
+        setEarthquakes(data);
+      })
+      .catch(error => {
+        console.error("Error loading wildfire data:", error);
+      });
   }, []);
 
   // const centerMap = (newLongitude, newLatitude, newZoomLevel) => {

@@ -1,0 +1,104 @@
+.buttonContainer {
+    position: fixed;
+    z-index: 1000;
+    top: 0px;
+    left: 0px;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+
+.reportForm {
+    font-family: nexa-text, sans-serif;
+    padding: 20px 30px;
+    color: white;
+}
+
+.reportForm h2{
+    margin: 10px 0px 20px 0px;
+    font-size: 24px;
+}
+
+.reportForm p {
+    font-size: 1rem;
+
+}
+
+.reportDescription {
+    width: 100%;
+    font-weight: 600;
+    resize: none;
+    background: #60569f44;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    color: white;
+}
+
+.reportFormField {
+    margin-bottom: 20px;
+}
+
+.reportDescription:focus {
+    outline: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.reportForm label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    font-weight: 800;;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+    align-items: center;
+}
+
+.buttonGroup button {
+    background: rgb(255, 207, 34);
+    color: black;
+    border: none;
+    outline: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-weight: 800;
+}
+
+.reportDropdown {
+    background: #60569f44;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 5px;
+    color: white;
+    width: 100%;
+    font-weight: 800;
+}
+
+.reportContainer {
+    bottom: 4vh;
+    right: 8vw;
+    border-radius: 10px;
+    position: fixed;
+    background-color: black;
+}
+
+.reportButtonWrapper {
+    height: 100%;
+    color: white;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 800;
+}   

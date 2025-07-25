@@ -19,7 +19,12 @@ export const metadata = {
 export default function RootLayout({ children, map }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        <link rel="stylesheet" href="https://use.typekit.net/gaf4wjv.css"></link>
+
+
+      </head>
+            <body className={`${geistSans.variable} ${geistMono.variable}`}>
         
         <div>
           {children}

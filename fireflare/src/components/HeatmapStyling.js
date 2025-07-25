@@ -1,28 +1,30 @@
-import {FeatureCollection, Feature, Point} from 'geojson';
-import {LayerProps} from 'react-map-gl/mapbox';
-import {useMemo} from 'react';
+import { FeatureCollection, Feature, Point } from 'geojson';
+import { LayerProps } from 'react-map-gl/mapbox';
+import { useMemo } from 'react';
 // import { FeatureCollection } from "geojson";
 
-const MAX_ZOOM_LEVEL = 9;
+const MAX_ZOOM_LEVEL = 18;
 
 export const heatmapLayer = {
   id: 'wildfire-heatmap',
   type: 'heatmap',
   source: 'wildfires', // must match source name
-  maxzoom: 9,
+  maxzoom: MAX_ZOOM_LEVEL,
   paint: {
-    'heatmap-weight': ['interpolate', ['linear'], ['get', 'mag'], 0, 0, 100000, 1],
-    'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 5, 20],
+    'heatmap-weight': ['interpolate', ['linear'], ['get', 'mag'], 0, 5, 10, 1],
+    'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 5, 8, 12, 20],
     'heatmap-color': [
-      'interpolate', ['linear'], ['heatmap-density'],
-      0, 'rgba(33,102,172,0)',
-      0.2, 'rgba(222, 243, 255, 1)',
-      0.4, 'rgb(209,229,240)',
-      0.6, 'rgb(253,219,199)',
-      0.8, 'rgb(239,138,98)',
-      0.9, 'rgb(255,201,101)'
+      'interpolate',
+      ['linear'],
+      ['heatmap-density'],
+      0, 'rgba(255, 237, 204, 0)',       // very light tan, transparent
+      0.2, 'rgba(255, 208, 138, 0.8)',   // soft sand orange
+      0.4, 'rgba(255, 153, 0, 0.85)',    // orange
+      0.6, 'rgba(255, 94, 0, 0.85)',     // burnt orange
+      0.8, 'rgba(192, 38, 0, 0.9)',      // deep ember red
+      1, 'rgba(128, 0, 0, 1)'          // dark fire red
     ],
-    'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 40],
-    'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 9, 0]
+    'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 5, MAX_ZOOM_LEVEL, 22],
+    'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, MAX_ZOOM_LEVEL, .2]
   }
 };

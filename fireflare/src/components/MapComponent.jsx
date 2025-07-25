@@ -1,7 +1,7 @@
 "use client";
 
 import mapboxgl from "mapbox-gl";
-import MapGL, { Layer, NavigationControl, GeolocateControl,Source, Map, useMap, Popup } from "react-map-gl/mapbox";
+import MapGL, { Layer, Marker, NavigationControl, GeolocateControl,Source, Popup } from "react-map-gl/mapbox";
 // import { Map, Marker, NavigationControl, GeolocateControl } from "react-map-gl";
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -9,7 +9,7 @@ import "./MapComponent.css";
 import {heatmapLayer} from './HeatmapStyling';
 // import { useUser } from "@auth0/nextjs-auth0";
 
-const MapComponent = () => {
+const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline }) => {
   // const { user, isLoading, error } = useUser();
   const [userDefinedLocation, setUserDefinedLocation] = useState(null);
   // const [showOnboarding, setShowOnboarding] = useState(false);
@@ -20,6 +20,7 @@ const MapComponent = () => {
     latitude: 43.4436,
     zoom: 4,
   });
+  const [marker, setMarker] = useState(null);
   const [earthquakes, setEarthquakes] = useState(null);
 
 
@@ -60,7 +61,7 @@ const MapComponent = () => {
   // Example dummy markers for testing
   useEffect(() => {
     // Fetch geojson data for wildfires
-    fetch('http://127.0.0.1:5000/wildfires/all').then(response => response.json())
+    fetch('http://127.0.0.1:5000/wildfires/nasa').then(response => response.json())
       .then(data => {
         console.log("Wildfire data loaded:", data);
         // Assuming data is in the format of a GeoJSON FeatureCollection
@@ -71,6 +72,17 @@ const MapComponent = () => {
       });
   }, []);
 
+
+  const handleMarkerDrop = useCallback((event) => {
+    const { lngLat } = event;
+    console.log("Marker dropped at:", lngLat);
+    setMarker({longitude: lngLat.lng, latitude: lngLat.lat});
+    setReportMarker({longitude: lngLat.lng, latitude: lngLat.lat, id: Date.now(), name: "New Marker"});
+  })
+
+  const handleDragEnd = useCallback((event) => {
+    setMarker({ longitude: event.lngLat.lng, latitude: event.lngLat.lat })
+  }, [])
   // const centerMap = (newLongitude, newLatitude, newZoomLevel) => {
   //   console.log("Centered the map to: " + newLongitude + ", " + newLatitude + ", zoom: " + newZoomLevel);
   //   if (mapRef.current) {
@@ -114,6 +126,7 @@ const MapComponent = () => {
         mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
         // mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
         pitch={10}
+        onClick={handleMarkerDrop}
         onLoad={handleMapLoad}
         initialViewState={initialViewState}
         maxZoom={20}
@@ -138,22 +151,25 @@ const MapComponent = () => {
           </Source>
         )} 
 
-
-        {/* Render markers
-        {markers.map(marker => (
-          <Marker
+        {/* Render markers */}
+        { marker && isReporting &&
+                  <Marker
             key={marker.id}
-            longitude={marker.addressLngLat[0]}
-            latitude={marker.addressLngLat[1]}
+            longitude={marker.longitude}
+            latitude={marker.latitude}
+            draggable
+            onDragEnd={handleDragEnd}
             onClick={() => console.log(`Clicked marker: ${marker.name}`)}
           />
-        ))} */}
+
+
+        }        
       </MapGL>
       
       {/* Additional controls could go here */}
-      <div className="map_controls">
+      {/* <div className="map_controls">
         <h3>FireFlare Map</h3>
-      </div>
+      </div> */}
     </div>
   );
 };

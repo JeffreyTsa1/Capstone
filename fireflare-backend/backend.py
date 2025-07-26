@@ -179,7 +179,7 @@ def getNasaWildfires():
             map_key= mapbox_api,
             source="VIIRS_SNPP_NRT",
             bbox=[-140, 24, -50, 72],
-            days=10
+            days=2
         )
     # print(geojson_data[0:3])
     # if response.status_code == 200:

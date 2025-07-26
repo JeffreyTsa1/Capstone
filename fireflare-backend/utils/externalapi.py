@@ -16,7 +16,7 @@ def fetch_nasa_geojson(map_key, source, bbox, days):
     reader = csv.DictReader(f)
 
     for row in reader:
-        print(row)
+        # print(row)
         try:
             lat = float(row["latitude"])
             lon = float(row["longitude"])

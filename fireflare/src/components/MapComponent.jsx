@@ -104,9 +104,15 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline }) 
     return earthquakes }, [earthquakes]);
 
   return (
-    <div className="map_wrapper">
-      <div className="location_overlay">
-        Longitude: {viewState.longitude.toFixed(4)} | Latitude: {viewState.latitude.toFixed(4)} | Zoom: {viewState.zoom.toFixed(2)}
+    <div className="mapWrapper">
+      <div className="locationOverlay">
+        {/* <pre>
+          [Longitude, Latitude] | Zoom
+        </pre> */}
+        <p>
+
+        [{viewState.longitude.toFixed(2)}, {viewState.latitude.toFixed(2)}] | {viewState.zoom.toFixed(2)}
+        </p>
       </div>
       {!mapLoaded && (
         <div className="map-loading">

@@ -18,11 +18,11 @@ export const heatmapLayer = {
       ['linear'],
       ['heatmap-density'],
       0, 'rgba(255, 237, 204, 0)',       // very light tan, transparent
-      0.2, 'rgba(255, 208, 138, 0.8)',   // soft sand orange
-      0.4, 'rgba(255, 153, 0, 0.85)',    // orange
-      0.6, 'rgba(255, 94, 0, 0.85)',     // burnt orange
-      0.8, 'rgba(192, 38, 0, 0.9)',      // deep ember red
-      1, 'rgba(128, 0, 0, 1)'          // dark fire red
+      0.2, 'rgba(255, 89, 0, 0.8)',   // soft sand orange
+      0.4, 'rgba(255, 132, 0, 0.85)',    // orange
+      0.6, 'rgba(255, 153, 0, 0.85)',     // burnt orange
+      0.8, 'rgba(252, 188, 12, 1)',      // deep ember red
+      1, 'rgba(255, 218, 115, 1)'          // dark fire red
     ],
     'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 5, MAX_ZOOM_LEVEL, 22],
     'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, MAX_ZOOM_LEVEL, .2]

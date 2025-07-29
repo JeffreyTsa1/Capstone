@@ -10,6 +10,7 @@
 
 
 .reportForm {
+    overflow: scroll;
     font-family: nexa-text, sans-serif;
     padding: 20px 30px;
     color: white;
@@ -51,11 +52,14 @@
 }
 
 .closeButton {
+    right: 20px;
+    cursor: pointer;
+    position: absolute;
     background: none;
     border: none;
     color: white;
     font-size: 24px;
-    font-weight: 800;;
+    font-weight: 800;
 }
 
 .buttonGroup {
@@ -87,7 +91,7 @@
 
 .reportContainer {
     bottom: 4vh;
-    right: 8vw;
+    right: 4vw;
     border-radius: 10px;
     position: fixed;
     background-color: black;

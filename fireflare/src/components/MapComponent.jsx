@@ -106,12 +106,12 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline }) 
   return (
     <div className="mapWrapper">
       <div className="locationOverlay">
-        <pre>
+        {/* <pre>
           [Longitude, Latitude] | Zoom
-        </pre>
+        </pre> */}
         <p>
 
-        [{viewState.longitude.toFixed(4)}, {viewState.latitude.toFixed(4)}] | {viewState.zoom.toFixed(2)}
+        [{viewState.longitude.toFixed(2)}, {viewState.latitude.toFixed(2)}] | {viewState.zoom.toFixed(2)}
         </p>
       </div>
       {!mapLoaded && (

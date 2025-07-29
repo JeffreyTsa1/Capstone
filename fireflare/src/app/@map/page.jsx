@@ -13,7 +13,8 @@ const containerVariants = {
   },
   open: {
     width: '300px',
-    height: '500px',
+    height: '450px',
+    // maxHeight: '50vh',
     justifyContent: 'flex-start',
     transition: {
         delay: 0.1,
@@ -105,7 +106,7 @@ const Page = () => {
                             </motion.div>
                             <motion.div className={styles.reportFormField} variants={itemVariants}>
                                 <label htmlFor="reportDescription">Description</label>
-                                <textarea className={styles.reportDescription} id="reportDescription" name="description" rows="4"></textarea>
+                                <textarea className={styles.reportDescription} id="reportDescription" name="description" rows="2"></textarea>
                             </motion.div>
                             <motion.div className={styles.buttonGroup} variants={itemVariants}>
                                 <button type="submit" style={{

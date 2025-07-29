@@ -10,6 +10,7 @@
 
 
 .reportForm {
+    overflow: scroll;
     font-family: nexa-text, sans-serif;
     padding: 20px 30px;
     color: white;

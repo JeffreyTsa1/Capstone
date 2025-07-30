@@ -1,6 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { PopupNav } from "@/components/PopupNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +32,6 @@ export default function RootLayout({ children, map }) {
         <div style={{ height: '100vh', width: '100vw' }}>
           {map}
         </div>
-        <PopupNav />
       </body>
     </html>
   );

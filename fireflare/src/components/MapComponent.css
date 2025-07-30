@@ -29,6 +29,10 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+.locationOverlay span {
+  font-weight: 800;
+}
+
 /* Map controls and overlay styles */
 .map_controls {
   position: absolute;

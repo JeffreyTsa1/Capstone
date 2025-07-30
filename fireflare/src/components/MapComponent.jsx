@@ -110,8 +110,26 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline }) 
           [Longitude, Latitude] | Zoom
         </pre> */}
         <p>
+          <span>
 
-        [{viewState.longitude.toFixed(2)}, {viewState.latitude.toFixed(2)}] | {viewState.zoom.toFixed(2)}
+        
+          Longitude: 
+          </span>
+          {viewState.longitude.toFixed(2)} 
+        </p>
+        <p>
+          <span>
+
+          Latitude: 
+          </span>
+          {viewState.latitude.toFixed(2)}
+        </p>
+        <p>
+          <span>
+
+          Zoom:
+          </span>
+           {viewState.zoom.toFixed(2)}
         </p>
       </div>
       {!mapLoaded && (

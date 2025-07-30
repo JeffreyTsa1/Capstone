@@ -1,3 +1,4 @@
+"use client"
 import './components.css'
 import { motion } from 'motion/react';
 

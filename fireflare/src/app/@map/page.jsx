@@ -127,6 +127,7 @@ const Page = () => {
                             cursor: "pointer",
                             opacity: isReporting ? 0 : 1,
                         }}
+                        
                         >
                             Report Fire
                         </motion.span>

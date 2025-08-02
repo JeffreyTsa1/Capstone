@@ -54,7 +54,7 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline }) 
       // });
 
     // map.addLayer(heatmapLayer);
-      // mapRef.current.setConfigProperty('basemap', 'lightPreset', 'dusk');
+      mapRef.current.setConfigProperty('basemap', 'lightPreset', 'dusk');
     }
   }, [earthquakes]);
 
@@ -129,7 +129,7 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline }) 
           height: '100vh',
         }}
         mapboxAccessToken={mapboxToken}
-        mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
+        mapStyle="mapbox://styles/mapbox/standard"
         // mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
         pitch={10}
         onClick={handleMarkerDrop}

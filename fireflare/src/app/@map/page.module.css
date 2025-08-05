@@ -26,6 +26,14 @@
 
 }
 
+
+.radioField {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+
+}
+
 .reportDescription {
     width: 100%;
     font-weight: 600;

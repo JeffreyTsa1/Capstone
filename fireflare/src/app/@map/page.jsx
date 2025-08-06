@@ -32,10 +32,35 @@ const itemVariants = {
     },
 };
 
+const submitReport = async (reportData) => {
+    try {
+        const response = await fetch('/api/report/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reportData),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log('Report submitted successfully:', data);
+        return data;
+    } catch (error) {
+        console.error('Error submitting report:', error);
+        throw error;
+    }
+};
+
+
+
 const Page = () => {
     const [isReporting, setIsReporting] = useState(false);
     const [reportMarker, setReportMarker] = useState(null);
     const [isOnline, setIsOnline] = useState(true);
+    
 
     useEffect(() => {
         const updateOnline = () => setIsOnline(navigator.onLine)
@@ -51,10 +76,27 @@ const Page = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Form submitted");
+        console.log(reportMarker);
+        alert(reportMarker.radiusMeters);
+        // alert(reportMarker);
         // Add form submission logic here
-
-
-        setIsReporting(false); // Close form on submit
+        const reportData = {
+            userId: "user123", // Replace with actual user ID
+            location: reportMarker, // Use the marker location
+            radiusMeters: reportMarker.radiusMeters, // Default radius
+            // indicator: e.target.indicator.value, // Get indicator from form
+            description: e.target.description.value,
+            reportedAt: new Date().toISOString(), // Use current time
+            marker: reportMarker,
+            severity: e.target.severity.value,
+        };
+        submitReport(reportData)
+            .then(() => {
+                setIsReporting(false);
+            })
+            .catch((error) => {
+                console.error("Error submitting report:", error);
+            });
     }
 
     return (

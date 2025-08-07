@@ -7,10 +7,11 @@ import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./MapComponent.css";
 import { heatmapLayer } from './HeatmapStyling';
+import { useUser } from "@auth0/nextjs-auth0"
 // import { useUser } from "@auth0/nextjs-auth0";
 
 const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, isOnline, setIsReporting }) => {
-  // const { user, isLoading, error } = useUser();
+  const { user, isLoading, error } = useUser();
   const [userDefinedLocation, setUserDefinedLocation] = useState(null);
   // const [showOnboarding, setShowOnboarding] = useState(false);
   const [popupInfo, setPopupInfo] = useState(null);
@@ -165,36 +166,60 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
           [Longitude, Latitude] | Zoom
         </pre> */}
         {
-          isReporting &&
           <>
 
             <div className="locationOverlay" style={{
 
             }}>
-                <p>
-                  [{viewState.longitude.toFixed(2)}, {viewState.latitude.toFixed(2)}] | {viewState.zoom.toFixed(2)}
-                </p>
-              <label>
-                Radius: {radiusMeters}m
-                <input
-                  type="range"
-                  min="100"
-                  max="10000"
-                  step="100"
-                  value={radiusMeters}
-                  onChange={(e) => {
-                    setRadiusMeters(Number(e.target.value));
-                    setRadius(Number(e.target.value));
-                  }}
-                  style={{ display: 'block', marginTop: '5px' }}
-                />
-              </label>
+              {}
+              {
+                isReporting && user && <>
+                  <div></div>
+                  <p>
+                    [{viewState.longitude.toFixed(2)}, {viewState.latitude.toFixed(2)}] | {viewState.zoom.toFixed(2)}
+                  </p>
+                <label>
+                  Radius: {radiusMeters}m
+                  <input
+                    type="range"
+                    min="100"
+                    max="10000"
+                    step="100"
+                    value={radiusMeters}
+                    onChange={(e) => {
+                      setRadiusMeters(Number(e.target.value));
+                      setRadius(Number(e.target.value));
+                    }}
+                    style={{ display: 'block', marginTop: '5px' }}
+                    />
+                </label>
+                </>
+              }
+              {
+                user && !isReporting && <>
+                  <div>
+                    <h2>
+                      {user.nickname}
+                    </h2>
+                    <p>
+                      {user.email}
+                    </p>
+
+                  </div>
+                </>
+              }
+              {
+                !user && <>
+                  <a href="/auth/login" className="login-link">
+                    <button className="login-button">Login to FireFlare</button>
+                  </a>  
+                </>
+
+              }
             </div>
 
 
           </>
-
-
         }
       </div>
 

@@ -3,7 +3,6 @@ flask-restful
 flask-cors
 python-dotenv
 pymongo
-bson
 pandas
 numpy
 requests

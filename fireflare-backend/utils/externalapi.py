@@ -6,6 +6,7 @@ def fetch_nasa_geojson(map_key, source, bbox, days):
     base_url = "https://firms.modaps.eosdis.nasa.gov/api/area/csv"
     coords = ",".join(map(str, bbox))  # [west, south, east, north]
     url = f"{base_url}/{map_key}/{source}/{coords}/{days}/"
+    print(url)
     features = []
     response = requests.get(url, timeout=15)
 

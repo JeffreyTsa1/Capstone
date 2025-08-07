@@ -14,6 +14,8 @@
     font-family: nexa-text, sans-serif;
     padding: 20px 30px;
     color: white;
+    height: 100%;
+    
 }
 
 .reportForm h2{
@@ -31,7 +33,24 @@
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
+}
 
+.radioGroupRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.radioFieldWrapper {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+.radioFieldWrapper label {
+    margin-top: 5px;
+    font-weight: 600;
 }
 
 .reportDescription {

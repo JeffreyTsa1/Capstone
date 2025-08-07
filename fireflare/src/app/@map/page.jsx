@@ -32,10 +32,149 @@ const itemVariants = {
     },
 };
 
+// Function to collect device and browser information
+const getDeviceInfo = () => {
+    const userAgent = navigator.userAgent;
+    
+    // Device type detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent);
+    const isDesktop = !isMobile && !isTablet;
+    
+    // Operating System detection
+    let os = 'Unknown';
+    if (userAgent.includes('Windows')) os = 'Windows';
+    else if (userAgent.includes('Mac')) os = 'macOS';
+    else if (userAgent.includes('Linux')) os = 'Linux';
+    else if (userAgent.includes('Android')) os = 'Android';
+    else if (userAgent.includes('iOS') || userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
+    
+    // Browser detection
+    let browser = 'Unknown';
+    if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) browser = 'Chrome';
+    else if (userAgent.includes('Firefox')) browser = 'Firefox';
+    else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
+    else if (userAgent.includes('Edg')) browser = 'Edge';
+    
+    return {
+        userAgent,
+        deviceType: isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop',
+        isMobile,
+        isTablet,
+        isDesktop,
+        os,
+        browser,
+        screenWidth: window.screen.width,
+        screenHeight: window.screen.height,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        language: navigator.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        online: navigator.onLine,
+        cookieEnabled: navigator.cookieEnabled,
+        platform: navigator.platform,
+    };
+};
+
+// Function to get IP address (client-side approach)
+const getClientIP = async () => {
+    try {
+        // Using a free IP service - you might want to replace with your own endpoint
+        const response = await fetch('https://api.ipify.org?format=json');
+        if (response.ok) {
+            const data = await response.json();
+            return data.ip;
+        }
+    } catch (error) {
+        console.warn('Could not fetch IP address:', error);
+    }
+    return null;
+};
+
+// Function to get geolocation if user permits
+const getUserLocation = () => {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            resolve(null);
+            return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy,
+                    timestamp: position.timestamp,
+                });
+            },
+            (error) => {
+                console.warn('Geolocation error:', error);
+                resolve(null);
+            },
+            { timeout: 10000, enableHighAccuracy: false }
+        );
+    });
+};
+
+const submitReport = async (reportData) => {
+    try {
+        const response = await fetch('/api/report/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reportData),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log('Report submitted successfully:', data);
+        return data;
+    } catch (error) {
+        console.error('Error submitting report:', error);
+        throw error;
+    }
+};
+
+
+
 const Page = () => {
     const [isReporting, setIsReporting] = useState(false);
     const [reportMarker, setReportMarker] = useState(null);
     const [isOnline, setIsOnline] = useState(true);
+    const [radius, setRadius] = useState(1000); // Default radius in meters
+    const [deviceInfo, setDeviceInfo] = useState(null);
+    const [userIP, setUserIP] = useState(null);
+    const [userLocation, setUserLocation] = useState(null);
+    
+    const [metadata, setMetadata] = useState({
+        userId: "user123", // Replace with actual user ID
+        location: reportMarker, // Use the marker location
+        radiusMeters: radius, // Default radius
+        // indicator: e.target.indicator.value, // Get indicator from form 
+    });
+
+    // Initialize device info and IP on component mount
+    useEffect(() => {
+        const initializeMetadata = async () => {
+            // Get device information
+            const deviceData = getDeviceInfo();
+            setDeviceInfo(deviceData);
+            
+            // Get IP address
+            const ip = await getClientIP();
+            setUserIP(ip);
+            
+            // Get user's actual location (optional - requires permission)
+            const location = await getUserLocation();
+            setUserLocation(location);
+        };
+        
+        initializeMetadata();
+    }, []);
 
     useEffect(() => {
         const updateOnline = () => setIsOnline(navigator.onLine)
@@ -48,13 +187,55 @@ const Page = () => {
         }
     }, [])
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Form submitted");
-        // Add form submission logic here
-
-
-        setIsReporting(false); // Close form on submit
+        console.log(reportMarker);
+        
+        // Create comprehensive metadata
+        const enhancedMetadata = {
+            // User info
+            userId: "user123", // Replace with actual user ID from auth
+            sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            
+            // Device info
+            device: deviceInfo,
+            
+            // Network info
+            ipAddress: userIP,
+            isOnline: isOnline,
+            
+            // Location info
+            reportLocation: reportMarker, // Fire location from map
+            userLocation: userLocation, // User's actual location (if permitted)
+            
+            // Timestamp info
+            reportedAt: new Date().toISOString(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            
+            // App state
+            radiusMeters: reportMarker?.radiusMeters || radius,
+        };
+        
+        const reportData = {
+            userId: "user123", // Replace with actual user ID
+            location: reportMarker, // Use the marker location
+            radiusMeters: reportMarker.radiusMeters, // Default radius
+            description: e.target.description.value,
+            reportedAt: new Date().toISOString(), // Use current time
+            marker: reportMarker,
+            severity: e.target.severity.value,
+            metadata: enhancedMetadata, // Add the enhanced metadata
+        };
+        
+        console.log("Enhanced report data:", reportData);
+        
+        try {
+            await submitReport(reportData);
+            setIsReporting(false);
+        } catch (error) {
+            console.error("Error submitting report:", error);
+        }
     }
 
     return (
@@ -66,6 +247,7 @@ const Page = () => {
                     onMarkerDrop={setReportMarker}
                     isReporting={isReporting}
                     setIsReporting={setIsReporting}
+                    setRadius={setRadius}
                 />
             </Suspense>
 
@@ -73,6 +255,7 @@ const Page = () => {
                 <motion.div
                     className={styles.reportContainer}
                     variants={containerVariants}
+                    whileTap={{ scale: !isReporting ? 0.95 : 1 }}
                     initial="closed"
                     animate={isReporting ? "open" : "closed"}
                     onClick={() => setIsReporting(true)}
@@ -102,58 +285,57 @@ const Page = () => {
                             <motion.h2 variants={itemVariants}>Report a Fire</motion.h2>
                             <motion.p className={styles.reportFormField} variants={itemVariants}>Click anywhere on the map to place a marker. Drag the marker on the map to set the fire location.</motion.p>
                             <motion.div className={styles.reportFormField} variants={itemVariants}>
-                                <label htmlFor="severity">Severity</label>
-                                <select className={styles.reportDropdown} id="severity" name="severity">
-                                    <option value="low">Low</option>
-                                    <option value="moderate">Moderate</option>
-                                    <option value="high">High</option>
-                                    <option value="extreme">Extreme</option>
-                                </select>
+                                    <label htmlFor="type">What are you currently experiencing?</label>
+                                    <div className={styles.radioGroupRow}>
+                                        <div className={styles.radioFieldWrapper}>
+                                            <input type="radio" id="contactChoice1" name="indicator" value="smell_smoke" />
+                                            <label htmlFor="contactChoice1">Smoke Smell</label>
+                                        </div>
+                                        <div className={styles.radioFieldWrapper}>
+                                            <input type="radio" id="contactChoice2" name="indicator" value="visible_smoke" />
+                                            <label htmlFor="contactChoice2">Smoke Visible</label>
+                                        </div>
+                                        <div className={styles.radioFieldWrapper}>
+                                            <input type="radio" id="contactChoice3" name="indicator" value="visible_fire" />
+                                            <label htmlFor="contactChoice3">Fire Visible</label>
+                                        </div>
+                                    </div>
                             </motion.div>
-                            <motion.div className={styles.radioField} variants={itemVariants}>
-
-                                What symptoms are you currently experiencing?
-
-                                Smell Smoke
-                                Visible Smoke
-                                Visible Fire
-
-
-
-                                <fieldset>
-                                    <legend>Please select your preferred contact method:</legend>
-                                    <div>
-                                        <input type="radio" id="contactChoice1" name="contact" value="email" />
-                                        <label >Smell Smoke</label>
-
-                                        <input type="radio" id="contactChoice2" name="contact" value="phone" />
-                                        <label >Visible Smoke</label>
-
-                                        <input type="radio" id="contactChoice3" name="contact" value="mail" />
-                                        <label >Visible Fire</label>
+                            <motion.div className={styles.reportFormField} variants={itemVariants}>
+                                <label htmlFor="severity">How would you rate the severity?</label>
+                                <div className={styles.radioGroupRow}>
+                                    <div className={styles.radioFieldWrapper}>
+                                        <input type="radio" id="severity-low" name="severity" value="low" defaultChecked />
+                                        <label htmlFor="severity-low">Low</label>
                                     </div>
-                                    <div>
-                                        <button type="submit">Submit</button>
+                                    <div className={styles.radioFieldWrapper}>
+                                        <input type="radio" id="severity-moderate" name="severity" value="moderate" />
+                                        <label htmlFor="severity-moderate">Fair</label>
                                     </div>
-                                </fieldset>
+                                    <div className={styles.radioFieldWrapper}>
+                                        <input type="radio" id="severity-high" name="severity" value="high" />
+                                        <label htmlFor="severity-high">High</label>
+                                    </div>
+                                </div>
                             </motion.div>
-                            <motion.div className={styles.radioField} variants={itemVariants}>
-                                <fieldset>
-                                    <legend>Please select your preferred contact method:</legend>
-                                    <div>
-                                        <input type="radio" id="contactChoice1" name="contact" value="email" />
-                                        <label >Weak</label>
+                            <motion.div className={styles.reportFormField} variants={itemVariants}>
+                                    <label htmlFor='contactChoice1'>Please select your preferred contact method:</label>
+                                    <div className={styles.radioGroupRow}>
+                                        <div className={styles.radioFieldWrapper}>
+                                            <input type="radio" id="contactChoice1" name="contact" value="email" />
+                                            <label >Smell Smoke</label>
+                                        </div>
 
-                                        <input type="radio" id="contactChoice2" name="contact" value="phone" />
-                                        <label >Moderate</label>
+                                        <div className={styles.radioFieldWrapper}>
+                                            <input type="radio" id="contactChoice2" name="contact" value="phone" />
+                                            <label >Visible Smoke</label>
+                                        </div>
 
-                                        <input type="radio" id="contactChoice3" name="contact" value="mail" />
-                                        <label >Strong</label>
+                                        <div className={styles.radioFieldWrapper}>
+                                            <input type="radio" id="contactChoice3" name="contact" value="mail" />
+                                            <label >Visible Fire</label>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <button type="submit">Submit</button>
-                                    </div>
-                                </fieldset>
                             </motion.div>
                             <motion.div className={styles.reportFormField} variants={itemVariants}>
                                 <label htmlFor="reportDescription">Description</label>
@@ -170,11 +352,6 @@ const Page = () => {
                                     setIsReporting(false);
                                 }}>Cancel</button>
                             </motion.div>
-                            <motion.div className={styles.reportPreview} variants={itemVariants}>
-                                <h3>Report Preview</h3>
-                                {/* <pre>{JSON.stringify(sampleReportSchema, null, 2)}</pre> */}
-                            </motion.div>
-
 
                             {/* sampleReportSchema = {
   "radiusMeters": 250,

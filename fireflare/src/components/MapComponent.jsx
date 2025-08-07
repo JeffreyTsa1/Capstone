@@ -9,7 +9,7 @@ import "./MapComponent.css";
 import { heatmapLayer } from './HeatmapStyling';
 // import { useUser } from "@auth0/nextjs-auth0";
 
-const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline, setIsReporting }) => {
+const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, isOnline, setIsReporting }) => {
   // const { user, isLoading, error } = useUser();
   const [userDefinedLocation, setUserDefinedLocation] = useState(null);
   // const [showOnboarding, setShowOnboarding] = useState(false);
@@ -21,7 +21,7 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline, se
     zoom: 4,
   });
   const [marker, setMarker] = useState(null);
-  const [earthquakes, setEarthquakes] = useState(null);
+  const [wildfires, setWildfires] = useState(null);
   const [radiusMeters, setRadiusMeters] = useState(1000); // Default radius in meters
 
 
@@ -41,6 +41,17 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline, se
     zoom: defaultZoom,
   };
 
+  const centerMap = (newLongitude, newLatitude, newZoomLevel) => {
+    console.log("Centered the map to: " + newLongitude + ", " + newLatitude + ", zoom: " + newZoomLevel);
+    mapRef.current?.flyTo({
+      // center: [newLongitude-0.04, newLatitude-0.04],
+      center: [newLongitude, newLatitude],
+      essential: true,
+      zoom: newZoomLevel,
+      speed: 2.5
+    });
+  };
+  
   const handleMapLoad = useCallback(() => {
     console.log("Map loaded successfully");
     setMapLoaded(true);
@@ -51,13 +62,13 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline, se
       // const map = mapRef.current?.getMap();
       // map.addSource('wildfires', {
       //   type: 'geojson',
-      //   data: earthquakes
+      //   data: wildfires
       // });
 
       // map.addLayer(heatmapLayer);
       // mapRef.current.setConfigProperty('basemap', 'lightPreset', 'dusk');
     }
-  }, [earthquakes]);
+  }, [wildfires]);
 
   // Example dummy markers for testing
   useEffect(() => {
@@ -66,7 +77,7 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline, se
       .then(data => {
         console.log("Wildfire data loaded:", data);
         // Assuming data is in the format of a GeoJSON FeatureCollection
-        setEarthquakes(data);
+        setWildfires(data);
       })
       .catch(error => {
         console.error("Error loading wildfire data:", error);
@@ -105,13 +116,13 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline, se
   // };
 
   // const data = useMemo(() => {
-  //   return allDays ? earthquakes : filterFeaturesByDay(earthquakes, selectedTime);
-  // }, [earthquakes, allDays, selectedTime]);
+  //   return allDays ? wildfires : filterFeaturesByDay(wildfires, selectedTime);
+  // }, [wildfires, allDays, selectedTime]);
 
 
   const data = useMemo(() => {
-    return earthquakes
-  }, [earthquakes]);
+    return wildfires
+  }, [wildfires]);
 
   // Create circle GeoJSON for radius visualization
   const createCircle = useCallback((center, radiusInMeters) => {
@@ -171,7 +182,10 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline, se
                   max="10000"
                   step="100"
                   value={radiusMeters}
-                  onChange={(e) => setRadiusMeters(Number(e.target.value))}
+                  onChange={(e) => {
+                    setRadiusMeters(Number(e.target.value));
+                    setRadius(Number(e.target.value));
+                  }}
                   style={{ display: 'block', marginTop: '5px' }}
                 />
               </label>
@@ -222,7 +236,7 @@ const MapComponent = ({ isReporting, setReportMarker, onMarkerDrop, isOnline, se
         )} */}
 
         {mapLoaded && (
-          <Source key="wildfires-source" id="wildfires" type="geojson" data={earthquakes}>
+          <Source key="wildfires-source" id="wildfires" type="geojson" data={wildfires}>
             <Layer key="wildfires-heatmap-layer" {...heatmapLayer} />
           </Source>
         )}

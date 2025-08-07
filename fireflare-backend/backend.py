@@ -164,8 +164,9 @@ def updateUser():
         return jsonify({"error": "No user ID provided"}), 400
     
     userId = data['userID']
+    print("finished printing userObject")
     userObject = userCollection.find_one({"userID": userId})
-
+    print(userObject)
     if not userObject:
         return jsonify({"error": "Invalid user ID"}), 400
 

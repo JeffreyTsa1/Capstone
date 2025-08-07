@@ -1,0 +1,12 @@
+Flask
+flask-restful
+flask-cors
+python-dotenv
+pymongo
+bson
+pandas
+numpy
+requests
+pytest
+pytest-flask
+gunicorn

@@ -17,12 +17,13 @@
 }
 
 .locationOverlay {
+  transition: all 0.2s;
   position: absolute;
   top: 20px;
   left: 20px;
   z-index: 10;
   background: black;
-  opacity: 0.8;
+  opacity: 0.85;
   color: white;
   padding: 20px;
   border-radius: 10px;

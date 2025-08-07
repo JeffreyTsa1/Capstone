@@ -117,30 +117,6 @@ const getUserLocation = () => {
     });
 };
 
-const submitReport = async (reportData) => {
-    try {
-        const response = await fetch('/api/report/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(reportData),
-        });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        console.log('Report submitted successfully:', data);
-        return data;
-    } catch (error) {
-        console.error('Error submitting report:', error);
-        throw error;
-    }
-};
-
-
-
 const Page = () => {
     const [isReporting, setIsReporting] = useState(false);
     const [reportMarker, setReportMarker] = useState(null);
@@ -188,6 +164,10 @@ const Page = () => {
     }, [])
 
     const handleSubmit = async (e) => {
+        if (!reportMarker) {
+            alert("Please place a marker on the map to indicate the fire location.");
+            return;
+        }
         e.preventDefault();
         console.log("Form submitted");
         console.log(reportMarker);
@@ -221,17 +201,23 @@ const Page = () => {
             userId: "user123", // Replace with actual user ID
             location: reportMarker, // Use the marker location
             radiusMeters: reportMarker.radiusMeters, // Default radius
+            type: e.target.indicator.value, // Get indicator from form
+            severity: e.target.severity.value,
             description: e.target.description.value,
             reportedAt: new Date().toISOString(), // Use current time
-            marker: reportMarker,
-            severity: e.target.severity.value,
             metadata: enhancedMetadata, // Add the enhanced metadata
         };
         
         console.log("Enhanced report data:", reportData);
         
         try {
-            await submitReport(reportData);
+            await fetch("http://127.0.0.1:5000/report/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(reportData),
+            });
             setIsReporting(false);
         } catch (error) {
             console.error("Error submitting report:", error);
@@ -288,16 +274,16 @@ const Page = () => {
                                     <label htmlFor="type">What are you currently experiencing?</label>
                                     <div className={styles.radioGroupRow}>
                                         <div className={styles.radioFieldWrapper}>
-                                            <input type="radio" id="contactChoice1" name="indicator" value="smell_smoke" />
-                                            <label htmlFor="contactChoice1">Smoke Smell</label>
+                                            <input type="radio" id="typeChoice1" name="indicator" value="smell_smoke" />
+                                            <label htmlFor="typeChoice1">Smoke Smell</label>
                                         </div>
                                         <div className={styles.radioFieldWrapper}>
-                                            <input type="radio" id="contactChoice2" name="indicator" value="visible_smoke" />
-                                            <label htmlFor="contactChoice2">Smoke Visible</label>
+                                            <input type="radio" id="typeChoice2" name="indicator" value="visible_smoke" />
+                                            <label htmlFor="typeChoice2">Smoke Visible</label>
                                         </div>
                                         <div className={styles.radioFieldWrapper}>
-                                            <input type="radio" id="contactChoice3" name="indicator" value="visible_fire" />
-                                            <label htmlFor="contactChoice3">Fire Visible</label>
+                                            <input type="radio" id="typeChoice3" name="indicator" value="visible_fire" />
+                                            <label htmlFor="typeChoice3">Fire Visible</label>
                                         </div>
                                     </div>
                             </motion.div>
@@ -318,7 +304,7 @@ const Page = () => {
                                     </div>
                                 </div>
                             </motion.div>
-                            <motion.div className={styles.reportFormField} variants={itemVariants}>
+                            {/* <motion.div className={styles.reportFormField} variants={itemVariants}>
                                     <label htmlFor='contactChoice1'>Please select your preferred contact method:</label>
                                     <div className={styles.radioGroupRow}>
                                         <div className={styles.radioFieldWrapper}>
@@ -336,7 +322,7 @@ const Page = () => {
                                             <label >Visible Fire</label>
                                         </div>
                                     </div>
-                            </motion.div>
+                            </motion.div> */}
                             <motion.div className={styles.reportFormField} variants={itemVariants}>
                                 <label htmlFor="reportDescription">Description</label>
                                 <textarea className={styles.reportDescription} id="reportDescription" name="description" rows="2"></textarea>

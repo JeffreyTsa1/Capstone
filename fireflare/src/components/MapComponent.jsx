@@ -8,12 +8,16 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import "./MapComponent.css";
 import { heatmapLayer } from './HeatmapStyling';
 import { useUser } from "@auth0/nextjs-auth0"
+import Onboarding from "./Onboarding";
+
 // import { useUser } from "@auth0/nextjs-auth0";
 
 const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, isOnline, setIsReporting }) => {
   const { user, isLoading, error } = useUser();
   const [userDefinedLocation, setUserDefinedLocation] = useState(null);
-  // const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [userExistsInDB, setUserExistsInDB] = useState(null);
+  const [checkingUser, setCheckingUser] = useState(false);
   const [popupInfo, setPopupInfo] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [viewState, setViewState] = useState({
@@ -74,7 +78,7 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
   // Example dummy markers for testing
   useEffect(() => {
     // Fetch geojson data for wildfires
-    fetch('http://127.0.0.1:5000/wildfires/nasa').then(response => response.json())
+    fetch('http://127.0.0.1:8080/wildfires/nasa').then(response => response.json())
       .then(data => {
         console.log("Wildfire data loaded:", data);
         // Assuming data is in the format of a GeoJSON FeatureCollection
@@ -84,6 +88,109 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
         console.error("Error loading wildfire data:", error);
       });
   }, []);
+
+  // Check if user exists in database when Auth0 user is loaded
+  useEffect(() => {
+    const checkUserInDatabase = async () => {
+      // Only check if we have a user from Auth0 and haven't checked yet
+      if (!user || isLoading || checkingUser || userExistsInDB !== null) return;
+      
+      setCheckingUser(true);
+      console.log("Checking if user exists in database:", user.sub);
+      
+      try {
+        // First check if user exists in Users collection
+        const userResponse = await fetch(`http://127.0.0.1:8080/users/check/${user.sub}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          if (userData.exists) {
+            setUserExistsInDB(true);
+            console.log("User found in database:", userData.user);
+            return;
+          }
+        }
+        
+        // If not found in Users, check Moderators collection
+        const moderatorResponse = await fetch(`http://127.0.0.1:8080/moderators/check/${user.sub}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (moderatorResponse.ok) {
+          const moderatorData = await moderatorResponse.json();
+          if (moderatorData.exists) {
+            setUserExistsInDB(true);
+            console.log("User found as moderator:", moderatorData.moderator);
+            return;
+          }
+        }
+        
+        // User doesn't exist in either collection - show onboarding
+        setUserExistsInDB(false);
+        setShowOnboarding(true);
+        console.log("User not found in database, showing onboarding");
+        
+      } catch (error) {
+        console.error("Error checking user in database:", error);
+        // On error, assume user doesn't exist and show onboarding
+        setUserExistsInDB(false);
+        setShowOnboarding(true);
+      } finally {
+        setCheckingUser(false);
+      }
+    };
+    
+    checkUserInDatabase();
+  }, [user, isLoading, checkingUser, userExistsInDB]);
+
+  // Function to handle onboarding completion
+  const handleOnboardingComplete = async (onboardingData) => {
+    try {
+      const userData = {
+        userID: user.sub, // Auth0 user ID
+        email: user.email,
+        firstName: onboardingData.firstName,
+        lastName: onboardingData.lastName,
+        location: onboardingData.location || {"type": "Point", "coordinates": [0, 0]},
+        verified: user.email_verified || false,
+        address: onboardingData.address || "",
+        trustScore: 0, // New users start with 0 trust score
+      };
+      
+      const response = await fetch('http://127.0.0.1:8080/users/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log("User created successfully:", result);
+        setUserExistsInDB(true);
+        setShowOnboarding(false);
+      } else {
+        throw new Error('Failed to create user');
+      }
+    } catch (error) {
+      console.error("Error creating user:", error);
+      // Handle error - maybe show error message to user
+    }
+  };
+
+  const handleOnboardingSkip = () => {
+    setShowOnboarding(false);
+    setUserExistsInDB(false); // Keep as false so they can be prompted again later
+  };
 
 
   const handleMarkerDrop = useCallback((event) => {
@@ -226,6 +333,31 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
       {!mapLoaded && (
         <div className="map-loading">
           Loading map...
+        </div>
+      )}
+
+      {/* Onboarding Modal */}
+      {showOnboarding && user && (
+        <Onboarding 
+          user={user}
+          onComplete={handleOnboardingComplete}
+        />
+      )}
+
+      {/* Loading indicator for user check */}
+      {checkingUser && (
+        <div className="user-check-loading" style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          padding: '10px 15px',
+          borderRadius: '4px',
+          zIndex: 999,
+          fontSize: '14px',
+        }}>
+          Checking user profile...
         </div>
       )}
 

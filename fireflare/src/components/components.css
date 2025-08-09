@@ -41,7 +41,7 @@
     font-weight: 800;
     font-size: 1.1rem;
     background: #f9f9f9;
-    border:none;
+    border: none;
     width: 65vw;
     text-align: center;
     z-index: 2;
@@ -59,6 +59,7 @@
     /* outline-width: 0.5px; */
     /* outline-color: blue; */
 }
+
 .trendingWrapper {
     display: flex;
     justify-content: center;
@@ -100,7 +101,7 @@
 }
 
 .active {
-    background-color:#9e1d1d;
+    background-color: #9e1d1d;
     color: white;
 
 }
@@ -109,7 +110,7 @@
     /* background-color: #ccc; */
     /* transform: translateY(-5px); */
     color: white;
-    background-color:#9e1d1d;
+    background-color: #9e1d1d;
 }
 
 .trendingCard h3 {
@@ -141,7 +142,7 @@
     z-index: -1;
     background-color: #f9f9f9;
     color: black;
-    width: 65vw; 
+    width: 65vw;
     border-radius: 15px;
 
 }
@@ -151,9 +152,14 @@
     flex-direction: column;
 }
 
+.onboardingContent ul li {
+    list-style: none;
+    ;
+}
 
 .addressSearchResults ul li {
     padding: 15px 20px 15px 20px;
+    list-style: none;
     transition: background-color 0.2s;
     background-color: #000;
     /* border-radius: 0px !important; */
@@ -178,7 +184,7 @@
 
 .onboardingWrapper {
     /* width: 1050px; */
-    width:100vw;
+    width: 100vw;
     height: 100vh;
 
     display: flex;
@@ -207,17 +213,21 @@
 }
 
 .onboardingContent {
-    background-color: #0C1821; /* Rich Black */
+    background-color: #0C1821;
+    /* Rich Black */
     max-width: 800px;
-    border-radius: 20px;
+    padding: 10px 20px;
     gap: 20px;
     display: flex;
-    padding: 50px 80px; 
     justify-content: center;
     align-items: center;
     z-index: 4;
     position: absolute;
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    width: 100vw;
+
 }
 
 
@@ -229,6 +239,7 @@
     gap: 20px;
     /* padding: 20px 0px;    */
 }
+
 .rowSplitAddress {
     display: flex;
     align-items: center;
@@ -247,26 +258,37 @@
     color: #fff !important;
     background: #223646;
 }
-.inputTextBox::-webkit-input-placeholder { /* WebKit, Blink, Edge */
-    color:    #ddd;
-}
-.inputTextBox:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-   color:    #ddd;
-   opacity:  1;
-}
-.inputTextBox::-moz-placeholder { /* Mozilla Firefox 19+ */
-   color:    #ddd;
-   opacity:  1;
-}
-.inputTextBox:-ms-input-placeholder { /* Internet Explorer 10-11 */
-   color:    #ddd;
-}
-.inputTextBox::-ms-input-placeholder { /* Microsoft Edge */
-   color:    #ddd;
+
+.inputTextBox::-webkit-input-placeholder {
+    /* WebKit, Blink, Edge */
+    color: #ddd;
 }
 
-.inputTextBox::placeholder { /* Most modern browsers support this now. */
-   color:    #ddd;
+.inputTextBox:-moz-placeholder {
+    /* Mozilla Firefox 4 to 18 */
+    color: #ddd;
+    opacity: 1;
+}
+
+.inputTextBox::-moz-placeholder {
+    /* Mozilla Firefox 19+ */
+    color: #ddd;
+    opacity: 1;
+}
+
+.inputTextBox:-ms-input-placeholder {
+    /* Internet Explorer 10-11 */
+    color: #ddd;
+}
+
+.inputTextBox::-ms-input-placeholder {
+    /* Microsoft Edge */
+    color: #ddd;
+}
+
+.inputTextBox::placeholder {
+    /* Most modern browsers support this now. */
+    color: #ddd;
 }
 
 .inputTextBox:focus {
@@ -275,23 +297,33 @@
     outline-width: 2px;
     /* outline: #FFDD00 !important; */
     /* outline: none !important; */
-    caret-color: #223600;}
+    caret-color: #223600;
+}
 
 .smallInput {
     width: 80px;
     padding: 15px 20px;
 }
+
 .bigInput {
     padding: 15px 20px;
 
 }
 
 .addressInput {
-    z-index: 4;    
+    z-index: 4;
 }
 
 .onboardingSearchButton {
     z-index: 5;
+    padding: 10px 15px;
+    background-color: #0088FF;
+    border-radius: 5px;
+    margin-right: -65px;
+    color: white;
+    font-weight: 800;
+    border: none;
+    cursor: pointer
 }
 
 .onboardingWrapper form {
@@ -322,7 +354,7 @@
     border-radius: 15px;
     color: white;
     margin-bottom: 10px;
-} 
+}
 
 /* buttons */
 .onboardingVerify {
@@ -331,7 +363,7 @@
     background: #FF0000;
     opacity: 0.8;
     padding: 15px 25px;
-    height:min-content;
+    height: min-content;
     font-size: 0.9rem;
     font-family: 'Greycliff CF', sans-serif;
     font-weight: 700;
@@ -348,7 +380,7 @@
     padding: 15px 29px;
     border-radius: 50px;
     border: none;
-    font-weight:900;
+    font-weight: 900;
     text-align: center;
     background: #FFD400;
     transition: ease-out 0.12s;
@@ -364,7 +396,7 @@
     position: absolute;
     right: 90px;
     z-index: 5;
-}  
+}
 
 /* fonts */
 
@@ -374,8 +406,9 @@
     letter-spacing: 0.1px;
     color: #fff;
     padding: 20px 0px;
-    margin-bottom:10px;
-    font-weight: 500;;
+    margin-bottom: 10px;
+    font-weight: 500;
+    ;
 }
 
 .onboardingWrapper p {
@@ -383,7 +416,11 @@
     font-size: 0.9rem;
     font-weight: 300;
     color: #fff;
-    
+
+}
+
+.onboardingContent form {
+    /* width: 500px; */
 }
 
 .inputTextBox {
@@ -394,8 +431,28 @@
 }
 
 
+.onboardingContent h3 {
+    font-weight: 800;
+    font-size: 1.5rem;
+}
 
 @media screen and (min-width: 768px) {
+    .onboardingContent {
+        padding: 50px 80px;
+        height: auto;
+        max-width: 600px;
+        border-radius: 20px;
+        min-height: unset;
+    }
+
+    .onboardingSearchButton {
+        position: relative;
+        margin-right: -5px;
+    }
+
+    .onboardingContent h3 {
+        font-size: 3rem;
+    }
 
 
     .welcomeSearchBar {
@@ -405,10 +462,5 @@
     .addressSearchResults {
         width: 40vw;
     }
-    
+
 }
-
-
-
-
-

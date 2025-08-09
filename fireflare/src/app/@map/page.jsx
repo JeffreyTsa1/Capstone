@@ -211,7 +211,7 @@ const Page = () => {
         console.log("Enhanced report data:", reportData);
         
         try {
-            await fetch("http://127.0.0.1:5000/report/create", {
+            await fetch("http://127.0.0.1:8080/report/create", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

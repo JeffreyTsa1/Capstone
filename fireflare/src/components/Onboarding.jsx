@@ -1,15 +1,14 @@
 "use client"
 import { useState, useEffect } from "react";
 // import { useRouter } from "next/navigation";
+import "./components.css";
 import { motion } from "framer-motion"
-import { fetchCoordsFromAddress } from "../../lib/api/fetchCoordsFromAddress";
-import "./Welcome.css";
-import { markerStore } from "../../store/markerStore";
-// import { useUser } from "@auth0/nextjs-auth0"
-// import { auth0 } from "../../lib/auth0";
+import { fetchCoordsFromAddress } from "../lib/api/fetchCoordsFromAddress";
+import { auth0 } from "@/lib/auth0";
 
 const Onboarding = ({onComplete, user}) => {
     // const router = useRouter();
+    console.log(user)
     const [results, setResults ] = useState([])
     const [searchQuery, setSearchQuery] = useState("")
     const [isInputFocused, setIsInputFocused] = useState(false);
@@ -23,13 +22,16 @@ const Onboarding = ({onComplete, user}) => {
     const [phone, setPhone] = useState("")
     const [age, setAge] = useState("")
     
-    const setUserLocationStore = markerStore((state) => state.setUserLocation);
 
-
+  // const session = auth0.getSession()
 
   const handleAddressInputKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault(); // prevent form submission on enter
+      if (searchQuery.trim() === "") {
+        setResults([]); // clear results if input is empty
+
+      }
       if (searchQuery) {
         const encodedSearchQuery = encodeURIComponent(searchQuery || "");
         findUserLocation(encodedSearchQuery)  
@@ -46,9 +48,6 @@ const Onboarding = ({onComplete, user}) => {
     }
     );
   }
-
-  console.log("Outside useEffect - current user:", user);
-
 
   // console.log("User: ", user)
   // console.log(user.name)
@@ -78,22 +77,41 @@ const Onboarding = ({onComplete, user}) => {
 
 
     const submitUserInfo = async (e) => {
+        console.log("Submitting user info")
+
+        console.log("Address: ", selectedAddress.properties.coordinates.latitude)
       e.preventDefault();
 
-      if (!firstName || !lastName || !phone || !age || !selectedAddress || !user) {
+      if (!firstName || !lastName || !phone || !selectedAddress || !user) {
         alert("Please fill in all required fields.");
         return;
       }
 
       try {
+        const bodyContent = JSON.stringify({ 
+                    auth0Id: user.sub,
+                    email: user.email,
+                    firstName: firstName,
+                    lastName: lastName,
+                    location: [selectedAddress.properties.coordinates.latitude, selectedAddress.properties.coordinates.longitude],
+                    address: selectedAddress.properties.full_address,
+                    phone: phone,
+                    // age: age,
+            });
+            console.log("Submitting User Info");
+            console.log(bodyContent);
+            console.log(`API_URL: ${process.env.NEXT_PUBLIC_API_URL}`);
         // console.log("Submitting User Info");
         // console.log({ firstName, lastName, phone, age, selectedAddress, user });
-        const res = await fetch("http://127.0.0.1:5000/onboardUser", {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const res = await fetch(`${apiUrl}/users/create`, {
             method: "POST",
             headers: {
+
+                // #6C2058
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ firstName, lastName, phone, age, selectedAddress, user}),
+            body: bodyContent,
             cache: "no-store",
         });
 
@@ -151,17 +169,17 @@ const Onboarding = ({onComplete, user}) => {
                     />
 
                     {/************************************************ Still need to build verification systme *************************************************/}
-                    <button className="onboardingVerify">
+                    {/* <button className="onboardingVerify">
                         Verify
-                    </button>
+                    </button> */}
                     </div>
 
-                    <input 
+                    {/* <input 
                         type="text"
                         placeholder="Age"
                         onChange={(e) => setAge(e.target.value)}
                         className='inputTextBox smallInput'
-                    />
+                    /> */}
                 </div>
 
                 <div className="rowSplitAddress">
@@ -176,22 +194,25 @@ const Onboarding = ({onComplete, user}) => {
                       value={searchQuery || ""}
                       className='inputTextBox bigInput addressInput'
                       />
-                      <button 
+                      <motion.button 
                       className="onboardingSearchButton"
+                      whileTap ={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
                       onClick={(event)=>{
                         event.preventDefault();
                         const encodedSearchQuery = encodeURIComponent(searchQuery || "");
                         findUserLocation(encodedSearchQuery)  
                       }}>
                         Search
-                      </button>
+                      </motion.button>
                   </div>
         <motion.div
           className="onboardingResults"
+          initial={{ opacity: 0, marginTop: "0px", height: "50px" }}
           animate={{
             opacity: results.length > 0 ? "1" : "0",
-            marginTop: results.length > 0 ? "-50px" : "0px",
-
+            // marginTop: results.length > 0 ? "-50px" : "0px",
+            height: results.length > 0 ? "auto" : "50px",
           }}
           transition={{
             duration: 0.1,
@@ -214,10 +235,10 @@ const Onboarding = ({onComplete, user}) => {
                   key={index}
                   onClick={() => {
                     setSelectedAddress(results[index]);
-                    setUserLocationStore({
-                      lat: result.geometry.coordinates[1],
-                      lng: result.geometry.coordinates[0],
-                    });
+                    // setUserLocationStore({
+                    //   lat: result.geometry.coordinates[1],
+                    //   lng: result.geometry.coordinates[0],
+                    // });
                     alert("Location set to: " + result.properties.full_address);
                     setSearchQuery(result.properties.full_address);
                     setResults([]);
@@ -232,13 +253,16 @@ const Onboarding = ({onComplete, user}) => {
                 </form>
 
                 <div className="submitButtonWrapper">
-                    <button 
+                    <motion.button
                     type="submit"
+                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+
                     className="submitButton"
                     onClick={(e)=> {
                       submitUserInfo(e)
                     }}
-                    >Submit</button>
+                    >Submit</motion.button>
                 </div>
         {/* <button onClick={()=> {
             close()

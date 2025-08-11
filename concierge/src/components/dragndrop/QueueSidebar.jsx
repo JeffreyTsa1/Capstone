@@ -80,12 +80,6 @@ const QueueSidebar = ({ clientQueue, setClientQueue }) => {
                         userSelect: 'none',
                         // transition: 'all 0.01s'
                     }}
-                    onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = '#e8e8e8';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = '#f0f0f0';
-                    }}
                 >
                     {client.name}
                 </div>

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import "./components.css";
 import { motion } from "framer-motion"
 import { fetchCoordsFromAddress } from "../lib/api/fetchCoordsFromAddress";
-import { auth0 } from "@/lib/auth0";
 
 const Onboarding = ({onComplete, user}) => {
     // const router = useRouter();

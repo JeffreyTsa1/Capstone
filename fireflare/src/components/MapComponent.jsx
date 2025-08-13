@@ -78,7 +78,7 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
   // Example dummy markers for testing
   useEffect(() => {
     // Fetch geojson data for wildfires
-    fetch('http://127.0.0.1:8080/wildfires/nasa').then(response => response.json())
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/wildfires/nasa`).then(response => response.json())
       .then(data => {
         console.log("Wildfire data loaded:", data);
         // Assuming data is in the format of a GeoJSON FeatureCollection
@@ -100,35 +100,21 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
       
       try {
         // First check if user exists in Users collection
-        const userResponse = await fetch(`http://127.0.0.1:8080/users/check/${user.sub}`, {
+        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/check/${user.sub}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
         
-        if (userResponse.ok) {
+        if (userResponse.status === 200) {
           const userData = await userResponse.json();
+          console.log("User data from Users collection:", userData);
+          
           if (userData.exists) {
             setUserExistsInDB(true);
             console.log("User found in database:", userData.user);
-            return;
-          }
-        }
-        
-        // If not found in Users, check Moderators collection
-        const moderatorResponse = await fetch(`http://127.0.0.1:8080/moderators/check/${user.sub}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (moderatorResponse.ok) {
-          const moderatorData = await moderatorResponse.json();
-          if (moderatorData.exists) {
-            setUserExistsInDB(true);
-            console.log("User found as moderator:", moderatorData.moderator);
+            setShowOnboarding(false);
             return;
           }
         }
@@ -152,41 +138,6 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
   }, [user, isLoading, checkingUser, userExistsInDB]);
 
   // Function to handle onboarding completion
-  const handleOnboardingComplete = async (onboardingData) => {
-    try {
-      const userData = {
-        userID: user.sub, // Auth0 user ID
-        email: user.email,
-        firstName: onboardingData.firstName,
-        lastName: onboardingData.lastName,
-        location: onboardingData.location || {"type": "Point", "coordinates": [0, 0]},
-        verified: user.email_verified || false,
-        address: onboardingData.address || "",
-        trustScore: 0, // New users start with 0 trust score
-      };
-      
-      const response = await fetch('http://127.0.0.1:8080/users/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log("User created successfully:", result);
-        setUserExistsInDB(true);
-        setShowOnboarding(false);
-      } else {
-        throw new Error('Failed to create user');
-      }
-    } catch (error) {
-      console.error("Error creating user:", error);
-      // Handle error - maybe show error message to user
-    }
-  };
-
   const handleOnboardingSkip = () => {
     setShowOnboarding(false);
     setUserExistsInDB(false); // Keep as false so they can be prompted again later
@@ -340,7 +291,7 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
       {showOnboarding && user && (
         <Onboarding 
           user={user}
-          onComplete={handleOnboardingComplete}
+          setShowOnboarding={setShowOnboarding}
         />
       )}
 

@@ -5,7 +5,7 @@ import "./components.css";
 import { motion } from "framer-motion"
 import { fetchCoordsFromAddress } from "../lib/api/fetchCoordsFromAddress";
 
-const Onboarding = ({onComplete, user}) => {
+const Onboarding = ({setShowOnboarding, user}) => {
     // const router = useRouter();
     console.log(user)
     const [results, setResults ] = useState([])
@@ -116,9 +116,9 @@ const Onboarding = ({onComplete, user}) => {
 
         if (!res.ok) throw new Error("Failed to onboard user");
 
-        if (res.status === 200) {
+        if ( res.status === 201) {
           console.log("User onboarded successfully");
-          onComplete();
+          setShowOnboarding(false);
         }
       } catch (err) {
         console.error("Error submitting user info:", err);

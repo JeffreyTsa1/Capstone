@@ -10,7 +10,7 @@ export async function fetchUser(userEmail) {
 
   // if (!res.ok) throw new Error("Failed to fetch user");
   // return res.json();
-  const url = new URL("http://127.0.0.1:5000/getUserByEmail");
+  const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/getUserByEmail`);
   url.searchParams.append("email", userEmail);
   const res = await fetch(url.toString(), {
     method: "GET",

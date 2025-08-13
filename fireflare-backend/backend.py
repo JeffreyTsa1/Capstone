@@ -115,20 +115,75 @@ moderatorCollection = db.Moderators
 #     return "<p>Hello, World!</p>"
 
 
+#    const userResponse = await fetch(`http://127.0.0.1:8080/users/check/${user.sub}`, {
+      
+@app.route('/users/check/<user_id>', methods=['GET'])
+def checkUser(user_id):
+    print("Checking User")
+    if not user_id:
+        return jsonify({"error": "No user ID provided"}), 400
+    
+    # First check Users collection
+    userObject = userCollection.find_one({"userID": user_id})
+    print("User Object:", userObject)
+    if userObject:
+        # Convert ObjectId to string for JSON serialization
+        userObject['_id'] = str(userObject['_id'])
+        
+        # Convert datetime fields to string for JSON serialization
+        if 'createdAt' in userObject and isinstance(userObject['createdAt'], datetime.datetime):
+            userObject['createdAt'] = userObject['createdAt'].isoformat()
+        if 'updatedAt' in userObject and isinstance(userObject['updatedAt'], datetime.datetime):
+            userObject['updatedAt'] = userObject['updatedAt'].isoformat()
+            
+        return jsonify({"exists": True, "type": "user", "user": userObject}), 200
+    
+    # If not found in Users, check Moderators collection
+    moderatorObject = moderatorCollection.find_one({"userID": user_id})
+    if moderatorObject:
+        # Convert ObjectId to string for JSON serialization
+        moderatorObject['_id'] = str(moderatorObject['_id'])
+        
+        # Convert datetime fields to string for JSON serialization
+        if 'createdAt' in moderatorObject and isinstance(moderatorObject['createdAt'], datetime.datetime):
+            moderatorObject['createdAt'] = moderatorObject['createdAt'].isoformat()
+        if 'updatedAt' in moderatorObject and isinstance(moderatorObject['updatedAt'], datetime.datetime):
+            moderatorObject['updatedAt'] = moderatorObject['updatedAt'].isoformat()
+            
+        return jsonify({"exists": True, "type": "moderator", "user": moderatorObject}), 200
+    
+    # User not found in either collection
+    return jsonify({"exists": False}), 200
+
+
+
+
+
 
 
 @app.route('/users/create', methods=['POST'])
 def createUser():
     print("Creating User")
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "No data provided"}), 400
-    else:
-        userId = data.get("userID", f"user_{str(ObjectId())[:16]}")
+    try:
+        data = request.get_json()
+        print("Received data:", data)
+        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        userId = data.get("auth0Id")  # Changed from userID to auth0Id to match frontend
         email = data.get("email")
         firstName = data.get("firstName")
         lastName = data.get("lastName")
-        location = data.get("location", {"type": "Point", "coordinates": [0, 0]})
+        phone = data.get("phone")  # Added phone field
+        location_coords = data.get("location", [0, 0])
+        
+        # Convert location to GeoJSON format
+        location = {
+            "type": "Point", 
+            "coordinates": location_coords
+        }
+        
         verified = data.get("verified", False)
         address = data.get("address", "")
         trustScore = data.get("trustScore", 0)
@@ -136,10 +191,11 @@ def createUser():
         updatedAt = createdAt
 
         newUser = {
-            "userID": userId,
+            "userID": userId,  # Store as userID in database
             "email": email,
             "firstName": firstName,
             "lastName": lastName,
+            "phone": phone,
             "location": location,
             "verified": verified,
             "address": address,
@@ -147,12 +203,19 @@ def createUser():
             "createdAt": createdAt,
             "updatedAt": updatedAt
         }
+        
+        print("Creating user with data:", newUser)
+        
         # Insert the new user into the database
         result = userCollection.insert_one(newUser)
         if result.acknowledged:
             return jsonify({"message": "User created successfully", "userID": str(result.inserted_id)}), 201
         else:
             return jsonify({"error": "Failed to create user"}), 500
+            
+    except Exception as e:
+        print(f"Error creating user: {str(e)}")
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
 
 @app.route('/users/update', methods=['PATCH'])
 def updateUser():
@@ -387,7 +450,7 @@ def getNasaWildfires():
             map_key= mapbox_api,
             source="VIIRS_SNPP_NRT",
             bbox=[-140, 24, -50, 72],
-            days=1
+            days=2
         )
     # print(geojson_data[0:3])
     # if response.status_code == 200:

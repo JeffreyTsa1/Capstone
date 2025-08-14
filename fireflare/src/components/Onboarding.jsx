@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 // import { useRouter } from "next/navigation";
 import "./components.css";
-import { motion } from "framer-motion"
+import { motion } from "motion/react";
 import { fetchCoordsFromAddress } from "../lib/api/fetchCoordsFromAddress";
 
 const Onboarding = ({setShowOnboarding, user}) => {

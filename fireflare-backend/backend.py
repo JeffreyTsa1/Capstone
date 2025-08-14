@@ -103,7 +103,7 @@ db = client.Fireflare
 reportCollection = db.Reports
 userCollection = db.Users
 moderatorCollection = db.Moderators
-
+nasaWildfiresCollection = db.NasaWildfires
 # cachedWildfireData = db.wildfireCache
 
 # requestCollection = db.PayoutRequests
@@ -250,6 +250,55 @@ def updateUser():
         return jsonify({"error": "Failed to update user"}), 500
 
 
+
+@app.route('/users/migrate', methods=['POST'])
+def migrateUser():
+    print("Migrating User")
+    data = request.get_json()
+    if not data or 'userID' not in data:
+        return jsonify({"error": "No user ID provided"}), 400
+    
+    userId = data['userID']
+    userObject = userCollection.find_one({"userID": userId})
+
+    if not userObject:
+        return jsonify({"error": "Invalid user ID"}), 400
+
+    # Check if the user already exists in Moderators collection
+    existingModerator = moderatorCollection.find_one({"userID": userId})
+    if existingModerator:
+        return jsonify({"error": "User already exists as a moderator"}), 400
+
+    # Create a new moderator object based on the user object
+    newModerator = {
+        "userID": userObject["userID"],
+        "email": userObject["email"],
+        "firstName": userObject["firstName"],
+        "lastName": userObject["lastName"],
+        "location": userObject["location"],
+        "verified": userObject.get("verified", False),
+        "address": userObject.get("address", ""),
+        "createdAt": datetime.datetime.now().isoformat(),
+        "updatedAt": datetime.datetime.now().isoformat(),
+        "lastModeratedAt": datetime.datetime.now().isoformat(),
+        "status": "active",
+        "approvedReports": [],
+        "moderatorName": "",
+        "moderatorBackground": "",
+        "moderatorContact": {}
+    }
+
+    # Insert the new moderator into the Moderators collection
+    result = moderatorCollection.insert_one(newModerator)
+    if result.acknowledged:
+        # Optionally, you can remove the user from the Users collection if needed
+        userCollection.delete_one({"userID": userId})
+        # Return the new moderator object
+        return jsonify({"message": "User migrated to moderator successfully", "userID": newModerator["userID"]}), 201
+    else:
+        return jsonify({"error": "Failed to insert user"}), 500
+
+
 @app.route('/moderators/create', methods=['POST'])
 def createModerator():
     print("Creating Moderator")
@@ -309,13 +358,13 @@ def disableModerator():
 
 
 
-@app.route('/report/all', methods=['GET'])
+@app.route('/reports/all', methods=['GET'])
 def getAllReports():
     print("Test")
     reports = reportCollection.find({})
     return json_util.dumps({"reports": reports}), 200, {'Content-Type': 'application/json'} 
 
-@app.route('/report/<report_id>', methods=['GET'])
+@app.route('/reports/<report_id>', methods=['GET'])
 def getReportById(report_id):
     print("Test")
     if not ObjectId.is_valid(report_id):
@@ -331,7 +380,7 @@ def getReportById(report_id):
     return json_util.dumps({"report": report}), 200, {'Content-Type': 'application/json'}
 
 
-@app.route('/report/create', methods=['POST'])
+@app.route('/reports/create', methods=['POST'])
 def createReport(userId=None, location=None, radiusMeters=250, type="smoke", severity="moderate", description=None, photos=None, reportedAt=None, metadata=None):
 
     data = request.get_json()
@@ -348,7 +397,7 @@ def createReport(userId=None, location=None, radiusMeters=250, type="smoke", sev
         metadata = data.get("metadata", {})
         
         newReport = {
-        "id": f"report_{str(ObjectId())[:16]}",  # Generate a unique report ID
+        "reportID": f"report_{str(ObjectId())[:16]}",  # Generate a unique report ID
         "author": userId,
         "location": {
             "latitude": location.get("latitude", 0),
@@ -377,13 +426,14 @@ def createReport(userId=None, location=None, radiusMeters=250, type="smoke", sev
         return jsonify({"message": "Report created successfully", "reportId": newReport["id"]}), 201
     
 
-@app.route('/report/approve', methods=['POST'])
+@app.route('/reports/approve', methods=['POST'])
 def approveReport():
     data = request.get_json()
     if not data or "userId" not in data:
         return jsonify({"error": "Invalid request"}), 400
     
     userId = data["userId"]
+    reportID = data.get("reportID")
     moderatorObject = moderatorCollection.find_one({"userID": userId})
     if not moderatorObject:
         return jsonify({"error": "Invalid user ID"}), 400
@@ -396,10 +446,9 @@ def approveReport():
         "moderatorContact": moderatorObject.get("moderatorContact", {}),
         "lastModeratedAt": datetime.datetime.now().isoformat()
     }
-
-    result = moderatorCollection.update_one({"userID": userId}, {"$set": update_fields})
+    result = reportCollection.update_one({"userID": userId, "reportID": reportID}, {"$set": update_fields})
     if result.modified_count > 0:
-        return jsonify({"message": "Moderator approved successfully"}), 200
+        return jsonify({"message": "Moderator approved report"+ reportID +" successfully"}), 200
     elif result.matched_count == 0:
         return jsonify({"error": "No results updated, userId does exist, but no changes made"}), 200
     else:
@@ -439,28 +488,122 @@ def getWildfires():
 
 @app.route('/wildfires/nasa', methods=['GET'])
 def getNasaWildfires():
-    # url = "https://firms.modaps.eosdis.nasa.gov/api/area/csv/1027666d5687783ceeb6f012af7044ce/VIIRS_SNPP_NRT/-140,24,-50,72/5/"
-    # test_url = "https://jsonplaceholder.typicode.com/todos"
-    # response = requests.get(test_url)
-#   database_url = os.getenv("DATABASE_URL")
-#   debug_mode = os.getenv("DEBUG_MODE")
-    
-    # print(response.status_code)
-    geojson_data = fetch_nasa_geojson (
-            map_key= mapbox_api,
+    try:
+        # Check if we have recent data in the database
+        latest_data = nasaWildfiresCollection.find_one(
+            {}, 
+            sort=[("lastUpdated", -1)]  # Get the most recent entry
+        )
+        
+        current_time = datetime.datetime.now()
+        should_fetch_new = True
+        
+        if latest_data:
+            last_updated = latest_data.get("lastUpdated")
+            if isinstance(last_updated, str):
+                last_updated = datetime.datetime.fromisoformat(last_updated)
+            elif isinstance(last_updated, datetime.datetime):
+                pass  # Already a datetime object
+            else:
+                last_updated = datetime.datetime.min  # Force update if invalid format
+            print(f"Last updated: {last_updated}, Current time: {current_time}")
+            
+            # Check if data is less than 4 hours old (adjust as needed)
+            time_diff = current_time - last_updated
+            if time_diff.total_seconds() < 14400:  # 4 hours in seconds
+                should_fetch_new = False
+                print("Using cached wildfire data from database")
+                
+                # Return cached data
+                geojson_data = latest_data.get("geojsonData", {
+                    "type": "FeatureCollection",
+                    "features": []
+                })
+                return jsonify(geojson_data), 200, {'Content-Type': 'application/json'}
+        
+        if should_fetch_new:
+            print("Fetching fresh wildfire data from NASA API")
+            # Fetch fresh data from NASA API
+            geojson_data = fetch_nasa_geojson(
+                map_key=mapbox_api,
+                source="VIIRS_SNPP_NRT",
+                bbox=[-140, 24, -50, 72],
+                days=2
+            )
+            
+            # Store the new data in the database
+            wildfire_document = {
+                "lastUpdated": current_time.isoformat(),
+                "geojsonData": geojson_data,
+                "source": "NASA_VIIRS_SNPP_NRT",
+                "bbox": [-140, 24, -50, 72],
+                "days": 2,
+                "fetchedAt": current_time.isoformat()
+            }
+            
+            # Remove old entries (keep only the latest 5 for backup)
+            old_entries = list(nasaWildfiresCollection.find({}, sort=[("lastUpdated", -1)]).skip(4))
+            for entry in old_entries:
+                nasaWildfiresCollection.delete_one({"_id": entry["_id"]})
+            
+            # Insert new data
+            nasaWildfiresCollection.insert_one(wildfire_document)
+            print(f"Updated wildfire database with {len(geojson_data.get('features', []))} features")
+            
+            return jsonify(geojson_data), 200, {'Content-Type': 'application/json'}
+            
+    except Exception as e:
+        print(f"Error in getNasaWildfires: {str(e)}")
+        # Fallback: try to return any available data from database
+        try:
+            fallback_data = nasaWildfiresCollection.find_one({}, sort=[("lastUpdated", -1)])
+            if fallback_data:
+                return jsonify(fallback_data.get("geojsonData", {
+                    "type": "FeatureCollection", 
+                    "features": []
+                })), 200, {'Content-Type': 'application/json'}
+        except:
+            pass
+        
+        return jsonify({"error": "Failed to fetch wildfire data", "message": str(e)}), 500
+
+
+@app.route('/wildfires/nasa/refresh', methods=['POST'])
+def refreshNasaWildfires():
+    """Force refresh wildfire data from NASA API"""
+    try:
+        print("Force refreshing wildfire data from NASA API")
+        geojson_data = fetch_nasa_geojson(
+            map_key=mapbox_api,
             source="VIIRS_SNPP_NRT",
             bbox=[-140, 24, -50, 72],
             days=2
         )
-    # print(geojson_data[0:3])
-    # if response.status_code == 200:
-        # geojson_data = response.json()
-        # print(geojson_data)
-        # print(geojson_data["features"][:3])  # preview 3 hotspots
-    # else:
-        # print("Error:", response.status_code)
-    
-    return jsonify(geojson_data), 200, {'Content-Type': 'application/json'}
+        
+        current_time = datetime.datetime.now()
+        wildfire_document = {
+            "lastUpdated": current_time.isoformat(),
+            "geojsonData": geojson_data,
+            "source": "NASA_VIIRS_SNPP_NRT",
+            "bbox": [-140, 24, -50, 72],
+            "days": 2,
+            "fetchedAt": current_time.isoformat(),
+            "forceRefresh": True
+        }
+        
+        # Insert new data
+        nasaWildfiresCollection.insert_one(wildfire_document)
+        print(f"Force updated wildfire database with {len(geojson_data.get('features', []))} features")
+        
+        return jsonify({
+            "message": "Wildfire data refreshed successfully",
+            "features_count": len(geojson_data.get('features', [])),
+            "updated_at": current_time.isoformat()
+        }), 200
+        
+    except Exception as e:
+        print(f"Error in refreshNasaWildfires: {str(e)}")
+        return jsonify({"error": "Failed to refresh wildfire data", "message": str(e)}), 500
 
 
 

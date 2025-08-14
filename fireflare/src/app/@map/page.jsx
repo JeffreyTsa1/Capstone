@@ -22,6 +22,7 @@ const containerVariants = {
     },
 };
 
+
 const itemVariants = {
     closed: { opacity: 0, y: 20 },
     open: {
@@ -164,6 +165,7 @@ const Page = () => {
     }, [])
 
     const handleSubmit = async (e) => {
+        
         if (!reportMarker) {
             alert("Please place a marker on the map to indicate the fire location.");
             return;

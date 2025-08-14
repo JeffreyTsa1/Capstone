@@ -6,26 +6,35 @@ import MapGL, { Layer, Marker, NavigationControl, GeolocateControl, Source, Popu
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./MapComponent.css";
+import Link from "next/link";
 import { heatmapLayer } from './HeatmapStyling';
 import { useUser } from "@auth0/nextjs-auth0"
 import Onboarding from "./Onboarding";
+import { AnimatePresence, motion } from "motion/react";
+import ModeratorOverlay from "./ModeratorOverlay";
+import UserOverlay from "./UserOverlay";
 
 // import { useUser } from "@auth0/nextjs-auth0";
 
 const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, isOnline, setIsReporting }) => {
   const { user, isLoading, error } = useUser();
-  const [userDefinedLocation, setUserDefinedLocation] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userExistsInDB, setUserExistsInDB] = useState(null);
   const [checkingUser, setCheckingUser] = useState(false);
-  const [popupInfo, setPopupInfo] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [moderator, setModerator] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [viewState, setViewState] = useState({
     longitude: -95.4460,
     latitude: 43.4436,
     zoom: 4,
   });
+  const [reports, setReports] = useState([]);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [marker, setMarker] = useState(null);
+  const [currentReport, setCurrentReport] = useState(null);
+  const [reportMarker, setReportMarkerState] = useState(null);
+  const [userMarker, setUserMarker] = useState(null);
   const [wildfires, setWildfires] = useState(null);
   const [radiusMeters, setRadiusMeters] = useState(1000); // Default radius in meters
 
@@ -46,16 +55,20 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
     zoom: defaultZoom,
   };
 
-  const centerMap = (newLongitude, newLatitude, newZoomLevel) => {
+
+const memoizedSetUserMenuOpen = useCallback(setUserMenuOpen, []);
+const memoizedUserData = useMemo(() => userData, [userData]);
+
+
+  const centerMap = useCallback((newLongitude, newLatitude, newZoomLevel) => {
     console.log("Centered the map to: " + newLongitude + ", " + newLatitude + ", zoom: " + newZoomLevel);
     mapRef.current?.flyTo({
-      // center: [newLongitude-0.04, newLatitude-0.04],
       center: [newLongitude, newLatitude],
       essential: true,
       zoom: newZoomLevel,
       speed: 2.5
     });
-  };
+  }, []);
   
   const handleMapLoad = useCallback(() => {
     console.log("Map loaded successfully");
@@ -87,6 +100,17 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
       .catch(error => {
         console.error("Error loading wildfire data:", error);
       });
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/reports/all`)
+      .then(response => response.json())
+      .then(data => {
+        console.log("Reports data loaded:", data);
+        setReports(data); 
+      })
+      .catch(error => {
+        console.error("Error loading reports data:", error);
+      }
+    );
   }, []);
 
   // Check if user exists in database when Auth0 user is loaded
@@ -113,7 +137,10 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
           
           if (userData.exists) {
             setUserExistsInDB(true);
-            console.log("User found in database:", userData.user);
+            if (userData.type === 'moderator') {
+              setModerator(true);
+            }
+            setUserData(userData.user);
             setShowOnboarding(false);
             return;
           }
@@ -143,6 +170,7 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
     setUserExistsInDB(false); // Keep as false so they can be prompted again later
   };
 
+                // console.log("User data:", userData)
 
   const handleMarkerDrop = useCallback((event) => {
     console.log("clicked, but not reporting")
@@ -224,20 +252,18 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
           [Longitude, Latitude] | Zoom
         </pre> */}
         {
-          <>
+          <div className="topLeftOverlay">
 
-            <div className="locationOverlay" style={{
 
-            }}>
-              {}
+
               {
                 isReporting && user && <>
-                  <div></div>
+                <motion.div className="locationOverlay" style={{}}>
                   <p>
                     [{viewState.longitude.toFixed(2)}, {viewState.latitude.toFixed(2)}] | {viewState.zoom.toFixed(2)}
                   </p>
                 <label>
-                  Radius: {radiusMeters}m
+                  Radius: {radiusMeters} m
                   <input
                     type="range"
                     min="100"
@@ -251,33 +277,33 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
                     style={{ display: 'block', marginTop: '5px' }}
                     />
                 </label>
+                </motion.div>
                 </>
               }
               {
-                user && !isReporting && <>
-                  <div>
-                    <h2>
-                      {user.nickname}
-                    </h2>
-                    <p>
-                      {user.email}
-                    </p>
-
-                  </div>
-                </>
+                user && !isReporting && (
+                  <UserOverlay
+                    userMenuOpen={userMenuOpen}
+                    setUserMenuOpen={setUserMenuOpen}
+                    moderator={moderator}
+                    userData={memoizedUserData}
+                  />
+                )
               }
               {
                 !user && <>
-                  <a href="/auth/login" className="login-link">
-                    <button className="login-button">Login to FireFlare</button>
-                  </a>  
+                  <motion.a href="/auth/login"
+                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.05 }}
+                  className="loginLink">
+                    Login
+                  </motion.a>
                 </>
 
               }
-            </div>
 
 
-          </>
+          </div>
         }
       </div>
 
@@ -294,7 +320,13 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
           setShowOnboarding={setShowOnboarding}
         />
       )}
+      {
+        moderator && user && !isReporting && (
+          <ModeratorOverlay centerMap={centerMap} setCurrentReport={setCurrentReport} />
+        )
 
+
+      }
       {/* Loading indicator for user check */}
       {checkingUser && (
         <div className="user-check-loading" style={{
@@ -385,6 +417,51 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
             onClick={() => console.log(`Clicked marker: ${marker.name}`)}
           />
         )}
+        {moderator && reports && reports.reports.map((report) => (
+          <Marker
+            key={report._id.$oid}
+            longitude={report.location.longitude}
+            latitude={report.location.latitude}
+            color="red"
+            onClick={() => {setCurrentReport(report)
+              console.log(currentReport)
+
+            }}
+          />
+        ))}
+
+        {
+          moderator && currentReport && <Popup
+            longitude={currentReport ? currentReport.location.longitude : 0}
+            latitude={currentReport ? currentReport.location.latitude : 0}
+            closeButton={true}
+            closeOnClick={false}
+            onClose={() => setCurrentReport(null)}
+            anchor="top"
+            className="reportPopup"
+          >
+            <div>
+              <h3>Report Details</h3>
+              <p>{currentReport.description}</p>
+              <p><strong>Reported By:</strong> {currentReport.author}</p>
+              <p><strong>Reported At:</strong> {new Date(currentReport.reportedAt).toLocaleString()}</p>
+              <p><strong>Synced At:</strong> {new Date(currentReport.syncedAt).toLocaleString()}</p>
+              <div className="splitRow">
+                <div>
+                  <label>Longitude</label>
+                  <h5>{currentReport.location.longitude.toFixed(4)}</h5>
+                </div>
+                <div>
+                  <label>Latitude</label>
+                  <h5>{currentReport.location.latitude.toFixed(4)}</h5>
+                </div> 
+              </div>
+              </div>
+              </Popup>
+        }
+
+
+
       </MapGL>
 
       {/* Additional controls could go here */}

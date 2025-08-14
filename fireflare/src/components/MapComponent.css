@@ -80,6 +80,7 @@
 .locationOverlay h2 {
   font-size: 1.2rem;
   font-family: 'nexa', sans-serif;
+  width:200px;
   margin-bottom: 10px;
   font-weight: 800;
   text-align: center;
@@ -89,13 +90,19 @@
   text-align: center;
 }
 .locationOverlayContent .splitRow label {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
+  padding-bottom: 50px;
+  font-family: 'nexa', sans-serif;
 }
 
+.locationOverlayContent .splitRow h5 {
+  font-family: 'proxima-nova', sans-serif;
+  margin-top: 5px;
+}
 
 .userOverlay {
   z-index: 10;
-  border-radius: 5px;
+  border-radius: 10px;
 
   background: rgba(0, 0, 0, 0.83);
   backdrop-filter: blur(500px);
@@ -155,9 +162,9 @@
 }
 
 .userOverlay h2 {
-  letter-spacing: 0.15rem;
+  letter-spacing: 0.5px;
   margin: 0;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   font-weight:800;
   font-size: 50rem;
   padding: 10px 0px;  

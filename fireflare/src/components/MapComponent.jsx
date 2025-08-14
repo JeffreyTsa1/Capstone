@@ -278,7 +278,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
                       </div>
                     </div>
                     <div style={{ marginTop: 16 }}>
-                      <h2 >Marker Location:</h2>
+                      <h2 >Marker Location</h2>
                       <div className="splitRow">
                         <div>
                           <label>Longitude</label>
@@ -289,10 +289,10 @@ const memoizedUserData = useMemo(() => userData, [userData]);
                           <h5>{marker ? marker.latitude.toFixed(4) : '--'}</h5>
                         </div>
                       </div>
-                      {!marker && <p style={{ color: '#ffb4b4', margin: 0, fontSize: '0.95rem' }}>Please click on the map to set a marker.</p>}
+                      {!marker && <p style={{ fontFamily: 'nexa', color: '#fa7878ff', margin: 0, fontSize: '0.95rem', textAlign: 'center' }}>Please place a marker.</p>}
                     </div>
                     <div style={{ marginTop: 10, textAlign: 'center' }}>
-                      <label><span style={{fontWeight:600}}>Radius:</span> <span style={{ fontSize: '1.25rem' }}>{radiusMeters} m</span></label>
+                      <label><span style={{fontFamily: 'nexa',fontWeight:600}}>Radius:</span> <span style={{ fontFamily: 'nexa-text',fontSize: '1.25rem' }}>{radiusMeters} m</span></label>
                       <input
                         type="range"
                         min="100"

@@ -16,7 +16,7 @@ import UserOverlay from "./UserOverlay";
 
 // import { useUser } from "@auth0/nextjs-auth0";
 
-const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, isOnline, setIsReporting }) => {
+const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
   const { user, isLoading, error } = useUser();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userExistsInDB, setUserExistsInDB] = useState(null);
@@ -33,8 +33,8 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius, onMarkerDrop, i
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [marker, setMarker] = useState(null);
   const [currentReport, setCurrentReport] = useState(null);
-  const [reportMarker, setReportMarkerState] = useState(null);
-  const [userMarker, setUserMarker] = useState(null);
+  // const [reportMarker, setReportMarkerState] = useState(null);
+  // const [userMarker, setUserMarker] = useState(null);
   const [wildfires, setWildfires] = useState(null);
   const [radiusMeters, setRadiusMeters] = useState(1000); // Default radius in meters
 
@@ -258,25 +258,55 @@ const memoizedUserData = useMemo(() => userData, [userData]);
 
               {
                 isReporting && user && <>
-                <motion.div className="locationOverlay" style={{}}>
-                  <p>
-                    [{viewState.longitude.toFixed(2)}, {viewState.latitude.toFixed(2)}] | {viewState.zoom.toFixed(2)}
-                  </p>
-                <label>
-                  Radius: {radiusMeters} m
-                  <input
-                    type="range"
-                    min="100"
-                    max="10000"
-                    step="100"
-                    value={radiusMeters}
-                    onChange={(e) => {
-                      setRadiusMeters(Number(e.target.value));
-                      setRadius(Number(e.target.value));
-                    }}
-                    style={{ display: 'block', marginTop: '5px' }}
-                    />
-                </label>
+                <motion.div className="locationOverlay">
+                  <div className="locationOverlayHeader">
+                    <h2>Current Viewpoint</h2>
+                  </div>
+                  <div className="locationOverlayContent">
+                    <div className="splitRow">
+                      <div>
+                        <label>Longitude</label>
+                        <h5>{viewState.longitude.toFixed(4)}</h5>
+                      </div>
+                      <div>
+                        <label>Latitude</label>
+                        <h5>{viewState.latitude.toFixed(4)}</h5>
+                      </div>
+                      <div>
+                        <label>Zoom</label>
+                        <h5>{viewState.zoom.toFixed(2)}</h5>
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 16 }}>
+                      <h2 >Marker Location:</h2>
+                      <div className="splitRow">
+                        <div>
+                          <label>Longitude</label>
+                          <h5>{marker ? marker.longitude.toFixed(4) : '--'}</h5>
+                        </div>
+                        <div>
+                          <label>Latitude</label>
+                          <h5>{marker ? marker.latitude.toFixed(4) : '--'}</h5>
+                        </div>
+                      </div>
+                      {!marker && <p style={{ color: '#ffb4b4', margin: 0, fontSize: '0.95rem' }}>Please click on the map to set a marker.</p>}
+                    </div>
+                    <div style={{ marginTop: 10, textAlign: 'center' }}>
+                      <label><span style={{fontWeight:600}}>Radius:</span> <span style={{ fontSize: '1.25rem' }}>{radiusMeters} m</span></label>
+                      <input
+                        type="range"
+                        min="100"
+                        max="10000"
+                        step="100"
+                        value={radiusMeters}
+                        className="radiusSlider"
+                        onChange={(e) => {
+                          setRadiusMeters(Number(e.target.value));
+                          setRadius(Number(e.target.value));
+                        }}
+                      />
+                    </div>
+                  </div>
                 </motion.div>
                 </>
               }

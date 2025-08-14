@@ -444,20 +444,22 @@
   left: 20px;
   z-index: 10;
   max-width: 300px;
-    overflow: scroll;
-    z-index: 10;
-    max-height: 380px;
-    padding: 20px 0px;
+  overflow: scroll;
+  z-index: 10;
+  max-height: 380px;
+  padding: 20px 0px;
   position: absolute;
-  background: black;
-  opacity: 0.85;
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.83);
+  backdrop-filter: blur(500px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(500px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
   font-family: 'nexa', sans-serif;
   font-size: 1.3rem;
   /* min-width: 150px; */
   text-align: center;
   color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -510,12 +512,12 @@
     padding: 5px 0px;
 }
 
-.splitRow label {
+.moderatorOverlay   .splitRow label {
     font-weight: 600;
     font-size: 0.9rem;
 }
 
-.splitRow p {
+.moderatorOverlay .splitRow p {
     font-family: 'proxima-nova', sans-serif;
     font-weight: 300;
     margin: 0px;

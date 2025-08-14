@@ -273,24 +273,24 @@ const Page = () => {
                             <motion.h2 variants={itemVariants}>Report a Fire</motion.h2>
                             <motion.p className={styles.reportFormField} variants={itemVariants}>Click anywhere on the map to place a marker. Drag the marker on the map to set the fire location.</motion.p>
                             <motion.div className={styles.reportFormField} variants={itemVariants}>
-                                    <label htmlFor="type">What are you currently experiencing?</label>
+                                    <label className={styles.reportFormFieldLabel} htmlFor="type">What are you currently experiencing?</label>
                                     <div className={styles.radioGroupRow}>
                                         <div className={styles.radioFieldWrapper}>
                                             <input type="radio" id="typeChoice1" name="indicator" value="smell_smoke" />
-                                            <label htmlFor="typeChoice1">Smoke Smell</label>
+                                            <label htmlFor="typeChoice1">I smell smoke</label>
                                         </div>
                                         <div className={styles.radioFieldWrapper}>
                                             <input type="radio" id="typeChoice2" name="indicator" value="visible_smoke" />
-                                            <label htmlFor="typeChoice2">Smoke Visible</label>
+                                            <label htmlFor="typeChoice2">I see smoke</label>
                                         </div>
                                         <div className={styles.radioFieldWrapper}>
                                             <input type="radio" id="typeChoice3" name="indicator" value="visible_fire" />
-                                            <label htmlFor="typeChoice3">Fire Visible</label>
+                                            <label htmlFor="typeChoice3">I see fire</label>
                                         </div>
                                     </div>
                             </motion.div>
                             <motion.div className={styles.reportFormField} variants={itemVariants}>
-                                <label htmlFor="severity">How would you rate the severity?</label>
+                                <label className={styles.reportFormFieldLabel} htmlFor="severity">How would you rate the severity?</label>
                                 <div className={styles.radioGroupRow}>
                                     <div className={styles.radioFieldWrapper}>
                                         <input type="radio" id="severity-low" name="severity" value="low" defaultChecked />

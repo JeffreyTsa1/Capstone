@@ -44,24 +44,34 @@
 
 .radioFieldWrapper {
     display: flex;
+    text-align: center;
     flex-direction: column;
-    margin-right: 20px;
+    width: 50px;
 }
 
 .radioFieldWrapper label {
+    font-family: 'Proxima-Nova', sans-serif;
     margin-top: 5px;
+    font-weight: 400;
+}
+
+.reportFormFieldLabel {
+    /* font-family: 'Proxima-Nova', sans-serif; */
     font-weight: 600;
+    /* margin-bottom: 10px; */
 }
 
 .reportDescription {
     width: 100%;
-    font-weight: 600;
+    font-weight: 300;
+    letter-spacing: 0.4px;
     resize: none;
     background: #60569f44;
     border: none;
     border-radius: 5px;
     padding: 10px;
     color: white;
+    font-family: 'Proxima-Nova', sans-serif;
 }
 
 .reportFormField {
@@ -75,7 +85,7 @@
 .reportForm label {
     display: block;
     margin-bottom: 10px;
-    font-weight: 600;
+    /* font-weight: 600; */
 }
 
 .closeButton {

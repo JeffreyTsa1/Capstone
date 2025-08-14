@@ -6,13 +6,13 @@ import { memo } from "react";
 
   const userMenuVariants = {
     closed: {
-        width: 'unset',
-        height: 'unset',
+        width: '180px',
+        height: '100px',
         justifyContent: 'center',
     },
     open: {
-        width: '200px',
-        height: '220px',
+        width: '220px',
+        height: '240px',
         // maxHeight: '50vh',
         justifyContent: 'flex-start',
         // transition: {
@@ -28,6 +28,7 @@ const UserOverlay = memo(({ userMenuOpen, setUserMenuOpen, moderator, userData }
     <motion.div
       className="userOverlay"
       initial="closed"
+        whileTap={{ scale: 0.95 }}
       animate={userMenuOpen ? "open" : "closed"}
       onClick={() => setUserMenuOpen(!userMenuOpen)}
       variants={userMenuVariants}

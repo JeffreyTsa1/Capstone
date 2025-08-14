@@ -213,7 +213,7 @@ const Page = () => {
         console.log("Enhanced report data:", reportData);
         
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/report/create`, {
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reports/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

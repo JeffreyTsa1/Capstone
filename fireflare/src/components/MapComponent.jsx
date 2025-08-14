@@ -486,6 +486,18 @@ const memoizedUserData = useMemo(() => userData, [userData]);
                   <h5>{currentReport.location.latitude.toFixed(4)}</h5>
                 </div> 
               </div>
+
+              <div className="reportActions">
+                <button className="approveButton">
+                  Approve
+                </button>
+                <button className="rejectButton">
+                  Reject
+                </button>
+                <button className="escalateButton">
+                  Escalate
+                </button>
+              </div>
               </div>
               </Popup>
         }

@@ -13,6 +13,7 @@
 
 
 
+
 /* onboarding.css */
 
 .welcomeWrapper {
@@ -435,6 +436,105 @@
     font-weight: 800;
     font-size: 1.5rem;
 }
+
+
+.moderatorOverlay {
+  bottom: 20px;
+  min-width: 300px;
+  left: 20px;
+  z-index: 10;
+  max-width: 300px;
+    overflow: scroll;
+    z-index: 10;
+    max-height: 380px;
+    padding: 20px 0px;
+  position: absolute;
+  background: black;
+  opacity: 0.85;
+  border-radius: 10px;
+  font-family: 'nexa', sans-serif;
+  font-size: 1.3rem;
+  /* min-width: 150px; */
+  text-align: center;
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+
+.moderatorOverlay ul {
+    padding: 10px 0px;
+}
+
+.moderatorOverlay li {
+    list-style: none;
+    padding: 10px 20px;
+}
+
+.moderatorOverlay li h3 {
+    text-align: start;
+    font-size: 1rem;
+    font-family: 'proxima-nova', sans-serif;
+    font-weight: 600;
+    margin: 0px;
+}
+.moderatorOverlay li h3 span {
+    font-weight: 300;
+    font-size: 1rem;
+}
+.moderatorOverlay li h5 {
+    font-size: 1.4rem;
+    font-family: 'proxima-nova', sans-serif;
+    font-weight: 300;
+    margin: 0px;
+}   
+
+
+.moderatorOverlay li:hover {
+    background-color: var(--accent);
+    color: white;
+    cursor: pointer;
+}
+
+.moderatorOverlay h2 {
+    letter-spacing: 0.25rem;
+    text-transform: uppercase;
+}
+
+
+
+.splitRow{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 5px 0px;
+}
+
+.splitRow label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.splitRow p {
+    font-family: 'proxima-nova', sans-serif;
+    font-weight: 300;
+    margin: 0px;
+}
+
+
+
+
+.reportPopup {
+    position: absolute;
+    width: 90vw;
+    max-width: 600px;
+    /* background-color: #0C1821; */
+    color: black;
+    /* padding: 20px; */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
 
 @media screen and (min-width: 768px) {
     .onboardingContent {

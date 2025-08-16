@@ -84,7 +84,9 @@ const getClientIP = async () => {
         const response = await fetch('https://api.ipify.org?format=json');
         if (response.ok) {
             const data = await response.json();
+            console.log("")
             return data.ip;
+
         }
     } catch (error) {
         console.warn('Could not fetch IP address:', error);
@@ -340,19 +342,6 @@ const Page = () => {
                                     setIsReporting(false);
                                 }}>Cancel</button>
                             </motion.div>
-
-                            {/* sampleReportSchema = {
-  "radiusMeters": 250,
-  "type": "smoke",
-  "severity": "moderate",
-} */}
-
-
-
-
-
-
-
                         </motion.form>}
                         <motion.span
                             key="report-button"

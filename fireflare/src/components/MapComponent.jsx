@@ -86,7 +86,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
       // map.addLayer(heatmapLayer);
       // mapRef.current.setConfigProperty('basemap', 'lightPreset', 'dusk');
     }
-  }, [wildfires]);
+  }, []);
 
   // Example dummy markers for testing
   useEffect(() => {

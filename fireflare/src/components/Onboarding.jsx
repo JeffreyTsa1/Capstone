@@ -3,14 +3,11 @@ import { useState, useEffect } from "react";
 // import { useRouter } from "next/navigation";
 import "./components.css";
 import { motion } from "motion/react";
-import { fetchCoordsFromAddress } from "../lib/api/fetchCoordsFromAddress";
+import AddressSearch from "./AddressSearch";
 
 const Onboarding = ({setShowOnboarding, user}) => {
     // const router = useRouter();
     console.log(user)
-    const [results, setResults ] = useState([])
-    const [searchQuery, setSearchQuery] = useState("")
-    const [isInputFocused, setIsInputFocused] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [formComplete, setFormComplete] = useState(false);
     // const { user, isLoading, error } = useUser()
@@ -24,31 +21,13 @@ const Onboarding = ({setShowOnboarding, user}) => {
 
   // const session = auth0.getSession()
 
-  const handleAddressInputKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault(); // prevent form submission on enter
-      if (searchQuery.trim() === "") {
-        setResults([]); // clear results if input is empty
-
-      }
-      if (searchQuery) {
-        const encodedSearchQuery = encodeURIComponent(searchQuery || "");
-        findUserLocation(encodedSearchQuery)  
-      }
-    }
-    
+  const handleAddressSelect = (address) => {
+    setSelectedAddress(address);
+    alert("Location set to: " + address.properties.full_address);
   };
 
-  const findUserLocation = async (query) => {
-    fetchCoordsFromAddress(query).then((data) => {
-      console.log(data)
-          setResults(data.data.features);
-          console.log(results)
-    }
-    );
-  }
-
   // console.log("User: ", user)
+  
   // console.log(user.name)
 
   //   useEffect(() => {
@@ -180,75 +159,10 @@ const Onboarding = ({setShowOnboarding, user}) => {
                         className='inputTextBox smallInput'
                     /> */}
                 </div>
-
-                <div className="rowSplitAddress">
-                  <input 
-                      type="text"
-                      placeholder="Please enter your address"
-                      onKeyDown={handleAddressInputKeyDown}
-
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                      }}
-                      value={searchQuery || ""}
-                      className='inputTextBox bigInput addressInput'
-                      />
-                      <motion.button 
-                      className="onboardingSearchButton"
-                      whileTap ={{ scale: 0.95 }}
-                      whileHover={{ scale: 1.02 }}
-                      onClick={(event)=>{
-                        event.preventDefault();
-                        const encodedSearchQuery = encodeURIComponent(searchQuery || "");
-                        findUserLocation(encodedSearchQuery)  
-                      }}>
-                        Search
-                      </motion.button>
-                  </div>
-        <motion.div
-          className="onboardingResults"
-          initial={{ opacity: 0, marginTop: "0px", height: "50px" }}
-          animate={{
-            opacity: results.length > 0 ? "1" : "0",
-            // marginTop: results.length > 0 ? "-50px" : "0px",
-            height: results.length > 0 ? "auto" : "50px",
-          }}
-          transition={{
-            duration: 0.1,
-          }}
-        >
-          <motion.ul
-            animate= {{
-              // opacity: results.length > 0 ? "1" : "0",
-            }}
-            transition={{
-              duration: 0.2,
-              delay: 0.4
-            }}
-          >
-            { results && results.map((result, index) => {
-              console.log(result)
-
-              return (
-                <li
-                  key={index}
-                  onClick={() => {
-                    setSelectedAddress(results[index]);
-                    // setUserLocationStore({
-                    //   lat: result.geometry.coordinates[1],
-                    //   lng: result.geometry.coordinates[0],
-                    // });
-                    alert("Location set to: " + result.properties.full_address);
-                    setSearchQuery(result.properties.full_address);
-                    setResults([]);
-                  }}
-                >
-                  {result.properties.full_address}
-                </li>
-              );
-            })}
-          </motion.ul>
-        </motion.div>
+                <AddressSearch 
+                  onAddressSelect={handleAddressSelect}
+                  placeholder="Please enter your address"
+                />
                 </form>
 
                 <div className="submitButtonWrapper">

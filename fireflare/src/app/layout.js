@@ -1,5 +1,4 @@
 import "./globals.css";
-import { UserProvider } from "../UserContext";
 
 export const metadata = {
   title: "Create Next App",
@@ -15,14 +14,12 @@ export default function RootLayout({ children, map }) {
 
       </head>
             <body>
-        <UserProvider initialUser={null}>
         <div style={{ height: '100vh', width: '100vw' }}>
           {map}
         </div>
         <div style={{}}>
           {children}
         </div>
-        </UserProvider>
       </body>
     </html>
   );

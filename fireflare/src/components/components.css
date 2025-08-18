@@ -9,9 +9,26 @@
     background-color: blue;
 }
 
+ .addressSearchInput {
+        width: 80%;
+    border-radius: 5px;
+    font-size: 16px;
+    color: #000;
+    background-color: #EAEAEA;
+    outline: none;
+    border: none;
+    padding: 15px 25px;
+    /* min-height:50px; */
+    font-family: sofia-pro, sans-serif;
+    font-size: 1rem;
+    border-radius: 7.5px;
+ }
 
-
-
+.addressSearchWrapper label {
+    padding-bottom: 10px;
+    font-weight: 700;
+    display: block
+}
 
 
 /* onboarding.css */
@@ -241,6 +258,10 @@
     /* padding: 20px 0px;    */
 }
 
+.addressSearchWrapper {
+    width:100%;
+}
+
 .rowSplitAddress {
     display: flex;
     align-items: center;
@@ -318,6 +339,8 @@
 .onboardingSearchButton {
     z-index: 5;
     padding: 10px 15px;
+    /* position: absolute; */
+    /* right: 90px; */
     background-color: #0088FF;
     border-radius: 5px;
     margin-right: -65px;
@@ -393,12 +416,6 @@
 }
 
 
-.rowSplitAddress button {
-    position: absolute;
-    right: 90px;
-    z-index: 5;
-}
-
 /* fonts */
 
 .onboardingWrapper h3 {
@@ -449,7 +466,7 @@
   max-height: 380px;
   padding: 20px 0px;
   position: absolute;
-  background: rgba(0, 0, 0, 0.83);
+  background: rgba(0, 0, 0, 0.69);
   backdrop-filter: blur(500px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   -webkit-backdrop-filter: blur(500px);

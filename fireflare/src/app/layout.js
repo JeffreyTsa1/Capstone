@@ -1,15 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata = {
   title: "Create Next App",
@@ -24,13 +13,12 @@ export default function RootLayout({ children, map }) {
 
 
       </head>
-            <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        
-        <div>
-          {children}
-        </div>
+            <body>
         <div style={{ height: '100vh', width: '100vw' }}>
           {map}
+        </div>
+        <div style={{}}>
+          {children}
         </div>
       </body>
     </html>

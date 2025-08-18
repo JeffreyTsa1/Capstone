@@ -3,11 +3,114 @@
     flex-direction: column;
 }
 
-.settingsForm input {
-    width: 50%;
-    padding: 10px;
+
+
+.editInputWrapper {
+    width: 100%;
+    padding: 10px 0px;
+    font-family: greycliff-cf, sans-serif;
+    display: flex;
+    flex-direction: column;
+    /* z-index: 5; */
+    /* width: 100vw; */
+    color: #000;
+}
+
+.editInputWrapper label {
+    padding-bottom: 10px;
+    font-weight: 700;;
+}
+
+.editInputWrapper input{
+    width: 100%;
     margin-bottom: 10px;
     border-radius: 5px;
-    border: 1px solid #ccc;
     font-size: 16px;
+    color: #000;
+    background-color: #EAEAEA;
+    outline: none;
+    border: none;
+    padding: 15px 25px;
+    /* min-height:50px; */
+    font-family: sofia-pro, sans-serif;
+    font-size: 1rem;
+    border-radius: 7.5px;
+}
+
+
+.editInputWrapper input:focus {
+    outline-style: solid;
+    outline-color: #5384ac;
+    outline-width: 2px;
+    /* outline: #FFDD00 !important; */
+    /* outline: none !important; */
+    caret-color: #223600;
+}
+
+
+.inputTextBox {
+    margin: 10px 0px;
+    border-radius: 8px;
+    border: none;
+    width: 100%;
+    color: black !important;
+    background: #223646;
+}
+.inputTextBox::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:    #ddd;
+}
+.inputTextBox:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+   color:    #ddd;
+   opacity:  1;
+}
+.inputTextBox::-moz-placeholder { /* Mozilla Firefox 19+ */
+   color:    #ddd;
+   opacity:  1;
+}
+.inputTextBox:-ms-input-placeholder { /* Internet Explorer 10-11 */
+   color:    #ddd;
+}
+.inputTextBox::-ms-input-placeholder { /* Microsoft Edge */
+   color:    #ddd;
+}
+
+.inputTextBox::placeholder { /* Most modern browsers support this now. */
+   color:    #ddd;
+}
+
+.inputTextBox:focus {
+    outline-style: solid;
+    outline-color: #5384ac;
+    outline-width: 2px;
+    /* outline: #FFDD00 !important; */
+    /* outline: none !important; */
+    caret-color: #223600;
+}
+
+
+.settingsPageWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 800px;
+    width: 100vw;
+    height: auto;
+    padding: 20px;
+
+}
+
+.settingsPageWrapper h1 {
+    font-size: 3rem;;
+    font-family: 'nexa-text', sans-serif;
+}
+
+
+
+.settingsPageWrapper input, .settingsPageWrapper label {
+    font-family: 'proxima-nova', sans-serif;
+}
+
+.bigInput {
+    /* padding: 15px 20px; */
+
 }

@@ -7,7 +7,7 @@ import { memo } from "react";
   const userMenuVariants = {
     closed: {
         width: '180px',
-        height: '100px',
+        height: '90px',
         justifyContent: 'center',
     },
     open: {

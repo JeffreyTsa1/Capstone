@@ -1,34 +1,95 @@
-import React from 'react'
+"use client";
+import { useEffect, useState } from 'react'; // Import useState to manage local state
 import styles from './page.module.css'; // Adjust the path as necessary
-
+import EditInput from './EditInput'; // Import the EditInput component
+import AddressSearch from '@/components/AddressSearch';
 
 const page = () => {
+  const [userDataDB, setUserDataDB] = useState(null);
+
+
+  // What happens when the user isn't onboarded? 
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [address, setAddress] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const handleAddressSelect = (address) => {
+    setSelectedAddress(address);
+    alert("Location set to: " + address.properties.full_address);
+  };
+
+  useEffect(() => {
+    const checkUserInDatabase = async () => {
+      // Only check if we have a user from Auth0 and haven't checked yet
+      if (!user || isLoading || checkingUser || userExistsInDB !== null) return;
+      
+      setCheckingUser(true);
+      console.log("Checking if user exists in database:", user.sub);
+      
+      try {
+        // First check if user exists in Users collection
+        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/check/${user.sub}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (userResponse.status === 200) {
+          const userData = await userResponse.json();
+          console.log("User data from Users collection:", userData);
+        }
+        
+        
+      } catch (error) {
+        console.error("Error checking user in database:", error);
+        setUserExistsInDB(false);
+      } finally {
+        setCheckingUser(false);
+      }
+    }
+    checkUserInDatabase();
+  }, []);
+
   // const userData = dataStore
   return (
-    <div>
+    <div className={styles.settingsPageWrapper}>
+      <div>
+        
       <h1>
-          Settings Page
+          Settings
       </h1>
       <p>
 
-          This is the settings page. You can adjust your preferences here.
+          This is your settings page. You can adjust your preferences here.
 
       </p>
 
         <div className={styles.settingsForm}>
             <h2>General Settings</h2>
             <p>Adjust your general preferences here.</p>
-            <input type="text" placeholder="Enter your preference" />   
-            <input type="text" placeholder="Enter your preference" />   
-            <input type="text" placeholder="Enter your preference" />   
-            <input type="text" placeholder="Enter your preference" />   
-            <input type="text" placeholder="Enter your preference" />   
-            <input type="text" placeholder="Enter your preference" />   
-            <input type="text" placeholder="Enter your preference" />   
-            <input type="text" placeholder="Enter your preference" />   
-            <input type="text" placeholder="Enter your preference" />   
+            <form>
+                <label>
+                    <input type="checkbox" name="notifications" />
+                    Enable Notifications
+                </label>
+                <br />
+                <EditInput category={"Email"} />
+                <EditInput category={"First Name"} />
+                <EditInput category={"Last Name"} />
+                <AddressSearch 
+                  onAddressSelect={handleAddressSelect}
+                  placeholder="Please enter your address"
+                  textColor='white'
+                  backgroundColor='#333'
+                />
+
+            </form>
         </div>
     </div>
+      </div>
+
   )
 }
 

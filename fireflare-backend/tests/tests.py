@@ -246,7 +246,7 @@ def test_get_all_reports_success(client, mock_collections):
     ]
     mock_collections['reports'].find.return_value = mock_reports
     
-    response = client.get('/report/all')
+    response = client.get('/reports/all')
     
     assert response.status_code == 200
     assert response.content_type == 'application/json'
@@ -261,14 +261,14 @@ def test_get_report_by_id_success(client, mock_collections):
     }
     mock_collections['reports'].find_one.return_value = mock_report
     
-    response = client.get(f'/report/{report_id}')
+    response = client.get(f'/reports/{report_id}')
     
     assert response.status_code == 200
     assert response.content_type == 'application/json'
 
 def test_get_report_by_id_invalid_id(client, mock_collections):
     """Test getting report by invalid ID."""
-    response = client.get('/report/invalid_id')
+    response = client.get('/reports/invalid_id')
     
     assert response.status_code == 400
     data = json.loads(response.data)
@@ -279,7 +279,7 @@ def test_get_report_by_id_not_found(client, mock_collections):
     report_id = str(ObjectId())
     mock_collections['reports'].find_one.return_value = None
     
-    response = client.get(f'/report/{report_id}')
+    response = client.get(f'/reports/{report_id}')
     
     assert response.status_code == 404
     data = json.loads(response.data)
@@ -287,7 +287,7 @@ def test_get_report_by_id_not_found(client, mock_collections):
 
 def test_create_report_success(client, mock_collections, sample_report_data):
     """Test successful report creation."""
-    response = client.post('/report/create',
+    response = client.post('/reports/create',
                           data=json.dumps(sample_report_data),
                           content_type='application/json')
     
@@ -299,7 +299,7 @@ def test_create_report_success(client, mock_collections, sample_report_data):
 
 def test_create_report_no_data(client, mock_collections):
     """Test report creation with no data."""
-    response = client.post('/report/create',
+    response = client.post('/reports/create',
                           data=json.dumps({}),
                           content_type='application/json')
     
@@ -309,7 +309,7 @@ def test_create_report_no_data(client, mock_collections):
 
 def test_create_report_no_userid(client, mock_collections):
     """Test report creation without userId."""
-    response = client.post('/report/create',
+    response = client.post('/reports/create',
                           data=json.dumps({"description": "test"}),
                           content_type='application/json')
     
@@ -329,7 +329,7 @@ def test_approve_report_success(client, mock_collections):
     mock_collections['moderators'].find_one.return_value = mock_moderator
     
     approve_data = {"userId": "mod_user_123"}
-    response = client.post('/report/approve',
+    response = client.post('/reports/approve',
                           data=json.dumps(approve_data),
                           content_type='application/json')
     
@@ -339,7 +339,7 @@ def test_approve_report_success(client, mock_collections):
 
 def test_approve_report_no_data(client, mock_collections):
     """Test report approval with no data."""
-    response = client.post('/report/approve',
+    response = client.post('/reports/approve',
                           data=json.dumps({}),
                           content_type='application/json')
     
@@ -352,7 +352,7 @@ def test_approve_report_invalid_userid(client, mock_collections):
     mock_collections['moderators'].find_one.return_value = None
     
     approve_data = {"userId": "invalid_mod"}
-    response = client.post('/report/approve',
+    response = client.post('/reports/approve',
                           data=json.dumps(approve_data),
                           content_type='application/json')
     
@@ -420,7 +420,7 @@ def test_user_moderator_report_workflow(client, mock_collections, sample_user_da
     assert mod_response.status_code == 201
     
     # Create report
-    report_response = client.post('/report/create',
+    report_response = client.post('/reports/create',
                                  data=json.dumps(sample_report_data),
                                  content_type='application/json')
     assert report_response.status_code == 201
@@ -429,7 +429,7 @@ def test_user_moderator_report_workflow(client, mock_collections, sample_user_da
     mock_collections['moderators'].find_one.return_value = sample_moderator_data
     
     # Approve report
-    approve_response = client.post('/report/approve',
+    approve_response = client.post('/reports/approve',
                                   data=json.dumps({"userId": sample_moderator_data["userID"]}),
                                   content_type='application/json')
     assert approve_response.status_code == 200

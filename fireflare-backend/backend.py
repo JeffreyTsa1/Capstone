@@ -235,7 +235,7 @@ def updateUser():
 
     update_fields = {}
     for key in data:
-        if key not in ['userID', 'email', 'firstName', 'lastName', 'location', 'verified', 'address', 'trustScore']:
+        if key not in ['email', 'firstName', 'lastName', 'location', 'address']:
             return jsonify({"error": f"Invalid field: {key}"}), 400
         update_fields[key] = data[key]
     update_fields['updatedAt'] = datetime.datetime.now().isoformat()
@@ -364,6 +364,33 @@ def getAllReports():
     reports = reportCollection.find({})
     return json_util.dumps({"reports": reports}), 200, {'Content-Type': 'application/json'} 
 
+@app.route('/reports/<user_id>', methods=['GET'])
+def getReportsByUserId(user_id):
+    print("Fetching Reports by User ID")
+    if not user_id:
+        return jsonify({"error": "No user ID provided"}), 400
+    
+    
+
+    # Fetch reports by user ID
+    reports = reportCollection.find({"author": user_id})
+    
+    if not reports:
+        return jsonify({"error": "No reports found for this user"}), 404
+    
+    # Convert ObjectId to string for JSON serialization
+    reports_list = []
+    for report in reports:
+        report['_id'] = str(report['_id'])
+        # Convert datetime fields to string for JSON serialization
+        if 'created_at' in report and isinstance(report['created_at'], datetime.datetime):
+            report['created_at'] = report['created_at'].isoformat()
+        reports_list.append(report)
+    
+    return json_util.dumps({"reports": reports_list}), 200, {'Content-Type': 'application/json'}
+
+
+
 @app.route('/reports/<report_id>', methods=['GET'])
 def getReportById(report_id):
     print("Test")
@@ -397,7 +424,6 @@ def createReport(userId=None, location=None, radiusMeters=250, type="smoke", sev
         metadata = data.get("metadata", {})
         
         newReport = {
-        "reportID": f"report_{str(ObjectId())[:16]}",  # Generate a unique report ID
         "author": userId,
         "location": {
             "latitude": location.get("latitude", 0),
@@ -422,9 +448,11 @@ def createReport(userId=None, location=None, radiusMeters=250, type="smoke", sev
         "editedAt": "2025-07-17T21:00:00Z",
         "isDeleted": False
         }
-        reportCollection.insert_one(newReport)
-        return jsonify({"message": "Report created successfully", "reportId": newReport["id"]}), 201
-    
+        result = reportCollection.insert_one(newReport)
+        
+
+        return jsonify({"message": "Report created successfully", "reportId": str(result.inserted_id)}), 201
+
 
 @app.route('/reports/approve', methods=['POST'])
 def approveReport():
@@ -453,6 +481,41 @@ def approveReport():
         return jsonify({"error": "No results updated, userId does exist, but no changes made"}), 200
     else:
         return jsonify({"error": "Failed to approve moderator"}), 500
+
+
+@app.route('/reports/reject', methods=['POST'])
+def rejectReport():
+    data = request.get_json()
+    if not data or "userId" not in data:
+        return jsonify({"error": "Invalid request"}), 400
+    
+    userId = data["userId"]
+    reportID = data.get("reportID")
+    moderatorObject = moderatorCollection.find_one({"userID": userId})
+    if not moderatorObject:
+        return jsonify({"error": "Invalid user ID"}), 400
+    
+    # Update the report's status to rejected
+    update_fields = {
+        "status": "rejected",
+        "moderatorName": moderatorObject.get("moderatorName", "Unknown"),
+        "moderatorBackground": moderatorObject.get("moderatorBackground", ""),
+        "moderatorContact": moderatorObject.get("moderatorContact", {}),
+        "lastModeratedAt": datetime.datetime.now().isoformat()
+    }
+    
+    result = reportCollection.update_one({"userID": userId, "reportID": reportID}, {"$set": update_fields})
+    
+    if result.modified_count > 0:
+        return jsonify({"message": "Moderator rejected report "+ reportID +" successfully"}), 200
+    elif result.matched_count == 0:
+        return jsonify({"error": "No results updated, userId does exist, but no changes made"}), 200
+    else:
+        return jsonify({"error": "Failed to reject moderator"}), 500
+
+
+
+##################### NASA Firms API #####################
 
 @app.route('/wildfires/get', methods=['GET'])
 def getWildfires():
@@ -606,7 +669,71 @@ def refreshNasaWildfires():
         return jsonify({"error": "Failed to refresh wildfire data", "message": str(e)}), 500
 
 
+##################### AQI Data #####################
+@app.route('/aq/openaq/latest', methods=['GET'])
+def api_openaq_latest():
+    """
+    Fetch OpenAQ v3 latest PM2.5 within a bbox, convert to AQI, filter by min_aqi, return GeoJSON.
+    Query params:
+      bbox=minLon,minLat,maxLon,maxLat   (required)
+      min_aqi=50                         (optional)
+      limit=1000                         (optional)
+    """
+    bbox = request.args.get('bbox')
+    if not bbox:
+        return jsonify({"error": "Missing bbox=minLon,minLat,maxLon,maxLat"}), 400
+    try:
+        minx, miny, maxx, maxy = [float(x) for x in bbox.split(',')]
+    except Exception:
+        return jsonify({"error": "Invalid bbox format"}), 400
+
+    min_aqi = int(request.args.get('min_aqi', 50))
+    limit = int(request.args.get('limit', 1000))
+
+    try:
+        payload = openaq_latest_pm25_bbox(minx, miny, maxx, maxy, limit=limit)
+        fc = openaq_to_geojson_aqi(payload, min_aqi=min_aqi)
+        return jsonify(fc), 200
+    except requests.HTTPError as e:
+        body = getattr(e, 'response', None).text if hasattr(e, 'response') and e.response is not None else None
+        return jsonify({"error": "OpenAQ HTTP error", "details": str(e), "body": body}), 502
+    except Exception as e:
+        return jsonify({"error": "Failed to fetch/convert OpenAQ data", "details": str(e)}), 500
+
+@app.route('/aq/convert/pm25', methods=['POST'])
+def api_convert_pm25_list():
+    """
+    Convert a JSON list of PM2.5 measurements to AQI.
+    Body: { "values": [12.0, 35.5, ...] }
+    Returns: { "aqi": [..] }
+    """
+    data = request.get_json(silent=True) or {}
+    values = data.get('values')
+    if not isinstance(values, list):
+        return jsonify({"error": "Body must include list 'values'"}), 400
+    aqi_list = [pm25_to_aqi(v) for v in values]
+    return jsonify({"aqi": aqi_list}), 200
+
+
+
+##################### Health Check Endpoint #####################
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint to verify server status"""
+    try:
+        # Perform a simple database operation to check connectivity
+        db.command("ping")
+        return jsonify({"status": "ok"}), 200
+    except Exception as e:
+        print(f"Health check failed: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
+
+
+
+
+

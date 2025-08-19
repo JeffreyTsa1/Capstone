@@ -30,12 +30,12 @@ OPENAQ_BASE = os.getenv("OPEN_AQ_BASE")
 OPENAQ_API_KEY = os.getenv("OPEN_AQ_API_KEY")
 
 # Debug output
-print(f"OPENAQ_BASE: {OPENAQ_BASE}")
-print(f"OPENAQ_API_KEY loaded: {OPENAQ_API_KEY is not None}")
-if OPENAQ_API_KEY:
-    print(f"OPENAQ_API_KEY starts with: {OPENAQ_API_KEY[:10]}...")
-print(f"Current working directory: {os.getcwd()}")
-print(f"Script location: {current_file}")
+# print(f"OPENAQ_BASE: {OPENAQ_BASE}")
+# print(f"OPENAQ_API_KEY loaded: {OPENAQ_API_KEY is not None}")
+# if OPENAQ_API_KEY:
+#     print(f"OPENAQ_API_KEY starts with: {OPENAQ_API_KEY[:10]}...")
+# print(f"Current working directory: {os.getcwd()}")
+# print(f"Script location: {current_file}")
 
 
 
@@ -80,16 +80,16 @@ def fetch_nasa_geojson(map_key, source, bbox, days):
 
 def _openaq_headers():
     print("=== OpenAQ Headers Debug ===")
-    print("OPENAQ_API_KEY:", OPENAQ_API_KEY)
-    print("OPENAQ_BASE:", OPENAQ_BASE)
+    # print("OPENAQ_API_KEY:", OPENAQ_API_KEY)
+    # print("OPENAQ_BASE:", OPENAQ_BASE)
     h = {"Accept": "application/json"}
     if OPENAQ_API_KEY:
         h["X-API-Key"] = OPENAQ_API_KEY
         print("Added API key to headers")
     else:
         print("WARNING: No API key found - requests may be rate limited")
-    print("Final headers:", h)
-    print("=== End Debug ===")
+    # print("Final headers:", h)
+    # print("=== End Debug ===")
     return h
 
 
@@ -128,7 +128,7 @@ def openaq_latest_pm25_bbox(minx, miny, maxx, maxy, limit=1000):
         "key": OPENAQ_API_KEY
     }
     url = f"{OPENAQ_BASE}/latest"
-    print("Requesting OpenAQ URL:", url, "with params:", params)
+    # print("Requesting OpenAQ URL:", url, "with params:", params)
     r = requests.get(url, params=params, headers=_openaq_headers(), timeout=20)
     r.raise_for_status()
     return r.json()
@@ -150,7 +150,7 @@ def open_aq_to_geojson_aqi(payload, min_aqi=0):
     """Convert OpenAQ /latest payload → GeoJSON FeatureCollection, filter by AQI."""
     features = []
     for item in payload:
-        print("Processing item:", item)
+        # print("Processing item:", item)
         coords = item.get("coordinates") or {}
         lon, lat = coords.get("longitude"), coords.get("latitude")
         if lon is None or lat is None:
@@ -265,7 +265,7 @@ def openaq_param_latest_to_geojson_aqi(payload, min_aqi=0, bbox=None):
         })
     
     # Print debug information
-    print(f"Conversion results: {debug_counts}")
+    # print(f"Conversion results: {debug_counts}")
     print(f"Generated {len(features)} GeoJSON features")
     
     return {"type": "FeatureCollection", "features": features}

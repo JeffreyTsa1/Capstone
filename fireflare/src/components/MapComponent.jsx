@@ -37,6 +37,9 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
   // const [userMarker, setUserMarker] = useState(null);
   const [wildfires, setWildfires] = useState(null);
   const [radiusMeters, setRadiusMeters] = useState(1000); // Default radius in meters
+  
+    // 1) state to hold AQ geojson
+  const [aqGeoJSON, setAqGeoJSON] = useState({ type: 'FeatureCollection', features: [] });
 
 
   // Default location (San Francisco)
@@ -55,6 +58,27 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
     zoom: defaultZoom,
   };
 
+// 2) helper to build bbox from the map
+const getBbox = useCallback(() => {
+  const map = mapRef.current?.getMap?.();
+  if (!map) return null;
+  const [[minX, minY], [maxX, maxY]] = map.getBounds().toArray();
+  return [minX, minY, maxX, maxY];
+}, []);
+
+// 3) fetch function (debounced)
+const fetchAQ = useCallback(async () => {
+  const bbox = getBbox();
+  if (!bbox) return;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/aq/openaq/latest?bbox=${bbox.join(',')}&min_aqi=50&limit=1000`;
+  const res = await fetch(url);
+  if (!res.ok) return;
+  const fc = await res.json();
+  console.log("Fetched AQ data:", fc);
+  setAqGeoJSON(fc);
+}, [getBbox]);
+
+// 4) kick off on load, and on moveend
 
 const memoizedSetUserMenuOpen = useCallback(setUserMenuOpen, []);
 const memoizedUserData = useMemo(() => userData, [userData]);
@@ -86,31 +110,6 @@ const memoizedUserData = useMemo(() => userData, [userData]);
       // map.addLayer(heatmapLayer);
       // mapRef.current.setConfigProperty('basemap', 'lightPreset', 'dusk');
     }
-  }, []);
-
-  // Example dummy markers for testing
-  useEffect(() => {
-    // Fetch geojson data for wildfires
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/wildfires/nasa`).then(response => response.json())
-      .then(data => {
-        console.log("Wildfire data loaded:", data);
-        // Assuming data is in the format of a GeoJSON FeatureCollection
-        setWildfires(data);
-      })
-      .catch(error => {
-        console.error("Error loading wildfire data:", error);
-      });
-
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/reports/all`)
-      .then(response => response.json())
-      .then(data => {
-        console.log("Reports data loaded:", data);
-        setReports(data); 
-      })
-      .catch(error => {
-        console.error("Error loading reports data:", error);
-      }
-    );
   }, []);
 
   // Check if user exists in database when Auth0 user is loaded
@@ -162,7 +161,47 @@ const memoizedUserData = useMemo(() => userData, [userData]);
     };
     
     checkUserInDatabase();
-  }, [user, isLoading, checkingUser, userExistsInDB]);
+
+      const map = mapRef.current?.getMap?.();
+    if (!map) return;
+    const onLoad = () => fetchAQ();
+    const onMoveEnd = () => fetchAQ();
+    
+    if (map.isStyleLoaded()) onLoad();
+    else map.once('load', onLoad);
+
+    map.on('moveend', onMoveEnd);
+    return () => map.off('moveend', onMoveEnd);
+
+  }, [fetchAQ, user, isLoading, checkingUser, userExistsInDB]);
+
+  useEffect(() => {
+    // Fetch geojson data for wildfires
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/wildfires/nasa`).then(response => response.json())
+      .then(data => {
+        console.log("Wildfire data loaded:", data);
+        // Assuming data is in the format of a GeoJSON FeatureCollection
+        setWildfires(data);
+      })
+      .catch(error => {
+        console.error("Error loading wildfire data:", error);
+      });
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/reports/all`)
+      .then(response => response.json())
+      .then(data => {
+        console.log("Reports data loaded:", data);
+        setReports(data); 
+      })
+      .catch(error => {
+        console.error("Error loading reports data:", error);
+      }
+    );
+  }, []);
+
+
+
+
 
   // Function to handle onboarding completion
   const handleOnboardingSkip = () => {
@@ -405,6 +444,29 @@ const memoizedUserData = useMemo(() => userData, [userData]);
           </Source>
         )} */}
 
+
+          {aqGeoJSON && (
+  <Source id="aq-stations" type="geojson" data={aqGeoJSON}>
+    <Layer
+      id="aq-markers"
+      type="circle"
+      paint={{
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 3, 4, 10, 8, 14, 10],
+        'circle-color': [
+          'step', ['get','aqi'],
+          '#ffff00', 100,   // 51–100 Moderate
+          '#ff7e00', 150,   // 101–150 USG
+          '#ff0000', 200,   // 151–200 Unhealthy
+          '#8f3f97', 300,   // 201–300 Very Unhealthy
+          '#7e0023'         // 300+ Hazardous
+        ],
+        'circle-stroke-color': '#000',
+        'circle-stroke-width': 0.75,
+        'circle-opacity': 0.9
+      }}
+    />
+  </Source>
+)}  
         {mapLoaded && (
           <Source key="wildfires-source" id="wildfires" type="geojson" data={wildfires}>
             <Layer key="wildfires-heatmap-layer" {...heatmapLayer} />

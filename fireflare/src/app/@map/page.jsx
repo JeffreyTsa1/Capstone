@@ -4,6 +4,7 @@ import MapComponent from '@/components/MapComponent';
 import styles from './page.module.css';
 import { motion, AnimatePresence } from 'motion/react';
 import { delay } from 'motion';
+import { useUser } from "@auth0/nextjs-auth0"
 
 const containerVariants = {
     closed: {
@@ -136,6 +137,7 @@ const Page = () => {
         // indicator: e.target.indicator.value, // Get indicator from form 
     });
 
+    const { user } = useUser();
     // Initialize device info and IP on component mount
     useEffect(() => {
         const initializeMetadata = async () => {
@@ -202,7 +204,7 @@ const Page = () => {
         };
         
         const reportData = {
-            userId: "user123", // Replace with actual user ID
+            userId: user?.sub, // Replace with actual user ID
             location: reportMarker, // Use the marker location
             radiusMeters: reportMarker.radiusMeters, // Default radius
             type: e.target.indicator.value, // Get indicator from form

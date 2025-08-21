@@ -1,8 +1,8 @@
 .popupNav {
     z-index: 5;
     position: fixed;
-    bottom: 20px;
-    left: 20px;
+    bottom: 25px;
+    left: 25px;
 }
 
 .popupNav button {
@@ -11,7 +11,6 @@
 
  .addressSearchInput {
         width: 80%;
-    border-radius: 5px;
     font-size: 16px;
     color: #000;
     background-color: #EAEAEA;

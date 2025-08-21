@@ -13,6 +13,7 @@ import Onboarding from "./Onboarding";
 import { AnimatePresence, motion } from "motion/react";
 import ModeratorOverlay from "./ModeratorOverlay";
 import UserOverlay from "./UserOverlay";
+import ReportPopup from "./ReportPopup";
 
 // import { useUser } from "@auth0/nextjs-auth0";
 
@@ -112,6 +113,19 @@ const memoizedUserData = useMemo(() => userData, [userData]);
     }
   }, []);
 
+  const fetchReports = useCallback(async () => {
+
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/reports/all`)
+      .then(response => response.json())
+      .then(data => {
+        console.log("Reports data loaded:", data);
+        setReports(data); 
+      })
+      .catch(error => {
+        console.error("Error loading reports data:", error);
+      }
+    );
+  }, []);
   // Check if user exists in database when Auth0 user is loaded
   useEffect(() => {
     const checkUserInDatabase = async () => {
@@ -162,16 +176,19 @@ const memoizedUserData = useMemo(() => userData, [userData]);
     
     checkUserInDatabase();
 
-      const map = mapRef.current?.getMap?.();
+    // Load air quality data only once when map is loaded
+    const map = mapRef.current?.getMap?.();
     if (!map) return;
-    const onLoad = () => fetchAQ();
-    const onMoveEnd = () => fetchAQ();
+    
+    const onLoad = () => {
+      // Only fetch AQ data once on initial load
+      fetchAQ();
+    };
     
     if (map.isStyleLoaded()) onLoad();
     else map.once('load', onLoad);
 
-    map.on('moveend', onMoveEnd);
-    return () => map.off('moveend', onMoveEnd);
+    // No longer attach to moveend event to prevent multiple API calls
 
   }, [fetchAQ, user, isLoading, checkingUser, userExistsInDB]);
 
@@ -187,16 +204,9 @@ const memoizedUserData = useMemo(() => userData, [userData]);
         console.error("Error loading wildfire data:", error);
       });
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/reports/all`)
-      .then(response => response.json())
-      .then(data => {
-        console.log("Reports data loaded:", data);
-        setReports(data); 
-      })
-      .catch(error => {
-        console.error("Error loading reports data:", error);
-      }
-    );
+    // Fetch all reports
+    fetchReports();
+
   }, []);
 
 
@@ -249,6 +259,12 @@ const memoizedUserData = useMemo(() => userData, [userData]);
   const data = useMemo(() => {
     return wildfires
   }, [wildfires]);
+  
+  // Function to manually refresh AQ data
+  const refreshAirQualityData = useCallback(() => {
+    console.log("Manually refreshing air quality data");
+    fetchAQ();
+  }, [fetchAQ]);
 
   // Create circle GeoJSON for radius visualization
   const createCircle = useCallback((center, radiusInMeters) => {
@@ -379,6 +395,25 @@ const memoizedUserData = useMemo(() => userData, [userData]);
       {!mapLoaded && (
         <div className="map-loading">
           Loading map...
+        </div>
+      )}
+      
+      {/* Air Quality Refresh Button */}
+      {mapLoaded && (
+        <div className="map-control air-quality-refresh">
+          <button 
+            onClick={refreshAirQualityData}
+            className="refreshButton"
+            title="Refresh Air Quality Data"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M23 4v6h-6"></path>
+              <path d="M1 20v-6h6"></path>
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10"></path>
+              <path d="M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
+            </svg>
+            <span style={{ marginLeft: '4px' }}>Refresh AQ Data</span>
+          </button>
         </div>
       )}
 
@@ -516,11 +551,13 @@ const memoizedUserData = useMemo(() => userData, [userData]);
             latitude={report.location.latitude}
             color="red"
             onClick={() => {setCurrentReport(report)
-              console.log(currentReport)
-
+              centerMap(report.location.longitude, report.location.latitude-0.08, 9);
             }}
           />
         ))}
+
+
+
 
         {
           moderator && currentReport && <Popup
@@ -532,35 +569,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
             anchor="top"
             className="reportPopup"
           >
-            <div>
-              <h3>Report Details</h3>
-              <p>{currentReport.description}</p>
-              <p><strong>Reported By:</strong> {currentReport.author}</p>
-              <p><strong>Reported At:</strong> {new Date(currentReport.reportedAt).toLocaleString()}</p>
-              <p><strong>Synced At:</strong> {new Date(currentReport.syncedAt).toLocaleString()}</p>
-              <div className="splitRow">
-                <div>
-                  <label>Longitude</label>
-                  <h5>{currentReport.location.longitude.toFixed(4)}</h5>
-                </div>
-                <div>
-                  <label>Latitude</label>
-                  <h5>{currentReport.location.latitude.toFixed(4)}</h5>
-                </div> 
-              </div>
-
-              <div className="reportActions">
-                <button className="approveButton">
-                  Approve
-                </button>
-                <button className="rejectButton">
-                  Reject
-                </button>
-                <button className="escalateButton">
-                  Escalate
-                </button>
-              </div>
-              </div>
+            <ReportPopup currentReport={currentReport} fetchReports={fetchReports} />
               </Popup>
         }
 

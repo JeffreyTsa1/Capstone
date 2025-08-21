@@ -127,8 +127,8 @@
 }
 
 .reportContainer {
-    bottom: 4vh;
-    right: 4vw;
+    bottom: 25px;
+    right: 25px;
     border-radius: 10px;
     position: fixed;
     background-color: black;

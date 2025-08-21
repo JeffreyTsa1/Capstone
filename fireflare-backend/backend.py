@@ -1,3 +1,4 @@
+from anyio import current_time
 from flask import Flask, request, jsonify, Response
 from flask_restful import Resource, Api, reqparse
 
@@ -91,7 +92,9 @@ sampleReportSchema = {
   "reportedAt": "2025-07-17T20:35:00Z",
   "syncedAt": "2025-07-17T21:00:00Z",
   "editedAt": "2025-07-17T21:00:00Z",
-  "isDeleted": False
+  "approvedAt": "2025-07-17",
+  "isDeleted": False,
+  "isVerified": False,  # Assuming a field to indicate if the report is valid
 }
 
 
@@ -415,22 +418,29 @@ def getReportById(report_id):
 
 @app.route('/reports/create', methods=['POST'])
 def createReport(userId=None, location=None, radiusMeters=250, type="smoke", severity="moderate", description=None, photos=None, reportedAt=None, metadata=None):
+    print("################################ Creating Report ################################")
 
+    current_time = datetime.datetime.now()
     data = request.get_json()
     if not data or 'userId' not in data:
         return jsonify({"error": "No data provided"}), 400
     else:
         userId = data.get("userId")
         location = data.get("location")
-        radiusMeters = data.get("radiusMeters", 250)
+        radiusMeters = data.get("radiusMeters")
         type = data.get("type", "smoke")
         severity = data.get("severity", "moderate")
         description = data.get("description")
         reportedAt = data.get("reportedAt", datetime.datetime.now().isoformat())
         metadata = data.get("metadata", {})
         
+        userInfo = None
+        userInfo = userCollection.find_one({"userID": userId})
+        if userInfo is None:
+            userInfo = moderatorCollection.find_one({"userID": userId})
+        print("User Info:", userInfo)
         newReport = {
-        "author": userId,
+        "author": userInfo.get("firstName") + " " + userInfo.get("lastName"),
         "location": {
             "latitude": location.get("latitude", 0),
             "longitude": location.get("longitude", 0),
@@ -448,12 +458,16 @@ def createReport(userId=None, location=None, radiusMeters=250, type="smoke", sev
             "osVersion": "iOS 18.0.2"
             }
         },
-        "moderatorDescription":{},
-        "reportedAt": "2025-07-17T20:35:00Z",
-        "syncedAt": "2025-07-17T21:00:00Z",
-        "editedAt": "2025-07-17T21:00:00Z",
-        "isDeleted": False
+        "moderatorDescription":[],
+        "metadata": metadata,
+        "reportedAt": reportedAt,
+        "syncedAt": current_time.isoformat(),
+        "editedAt": current_time.isoformat(),
+        "approvedAt": None,
+        "isDeleted": False,
+        "isVerified": False  # Assuming a field to indicate if the report is valid
         }
+
         result = reportCollection.insert_one(newReport)
         
 
@@ -463,26 +477,42 @@ def createReport(userId=None, location=None, radiusMeters=250, type="smoke", sev
 @app.route('/reports/approve', methods=['POST'])
 def approveReport():
     data = request.get_json()
-    if not data or "userId" not in data:
-        return jsonify({"error": "Invalid request"}), 400
-    
-    userId = data["userId"]
+    # if not data or "userID" not in data or "reportID" not in data:
+    #     print("Invalid request data:", data)
+    #     return jsonify({"error": "Invalid request"}), 402
+
+    userId = data["userID"]
     reportID = data.get("reportID")
+    print("reportID:", reportID)
     moderatorObject = moderatorCollection.find_one({"userID": userId})
     if not moderatorObject:
-        return jsonify({"error": "Invalid user ID"}), 400
+        return jsonify({"error": "Couldn't find userID in the moderator table"}), 400
     # Update the report's status to approved
+    report_object_id = ObjectId(reportID)
+    currentReport = reportCollection.find_one({"_id": report_object_id})
+    if not currentReport:
+        print("Current Report:", currentReport)
+        return jsonify({"error": "Report not found"}), 404
+    
+    currModeratorDescription = currentReport.get("moderatorDescription")
+    approvedAt = None
+    if currentReport["approvedAt"] != None:
+        approvedAt = currentReport["approvedAt"]
 
-    update_fields = {
-        "status": "approved",
+
+    moderatorDescriptionObj = {
+        "approvedAt": approvedAt if approvedAt else datetime.datetime.now().isoformat(),
+        "moderatorDescription": data.get("moderatorDescription", ""),
         "moderatorName": moderatorObject.get("moderatorName", "Unknown"),
         "moderatorBackground": moderatorObject.get("moderatorBackground", ""),
         "moderatorContact": moderatorObject.get("moderatorContact", {}),
-        "lastModeratedAt": datetime.datetime.now().isoformat()
+        "lastModeratedAt": datetime.datetime.now().isoformat(),
+        "fireContained": False   
     }
-    result = reportCollection.update_one({"userID": userId, "reportID": reportID}, {"$set": update_fields})
+
+    result = reportCollection.update_one({"_id": report_object_id}, {"$set": { "isVerified": True, "lastModeratedAt": datetime.datetime.now().isoformat(), "moderatorDescription": currModeratorDescription + [moderatorDescriptionObj]}})
     if result.modified_count > 0:
-        return jsonify({"message": "Moderator approved report"+ reportID +" successfully"}), 200
+        return jsonify({"message": "Moderator approved report "+ str(report_object_id) +" successfully"}), 200
     elif result.matched_count == 0:
         return jsonify({"error": "No results updated, userId does exist, but no changes made"}), 200
     else:
@@ -501,16 +531,24 @@ def rejectReport():
     if not moderatorObject:
         return jsonify({"error": "Invalid user ID"}), 400
     
+    reportObject = reportCollection.find_one({"userID": userId, "reportID": reportID})
+    if not reportObject:
+        return jsonify({"error": "Report not found"}), 404
+    
     # Update the report's status to rejected
-    update_fields = {
-        "status": "rejected",
+
+    
+    moderatorDescriptionObj = {
+        "approvedAt": None,
+        "moderatorDescription": data.get("moderatorDescription", ""),
         "moderatorName": moderatorObject.get("moderatorName", "Unknown"),
         "moderatorBackground": moderatorObject.get("moderatorBackground", ""),
         "moderatorContact": moderatorObject.get("moderatorContact", {}),
-        "lastModeratedAt": datetime.datetime.now().isoformat()
+        "lastModeratedAt": datetime.datetime.now().isoformat(),
+        "fireContained": False   
     }
     
-    result = reportCollection.update_one({"userID": userId, "reportID": reportID}, {"$set": update_fields})
+    result = reportCollection.update_one({"userID": userId, "reportID": reportID}, {"$set": { "isVerified": False, "lastModeratedAt": datetime.datetime.now().isoformat(), "moderatorDescription": reportObject.get("moderatorDescription", []) + [moderatorDescriptionObj]}})
     
     if result.modified_count > 0:
         return jsonify({"message": "Moderator rejected report "+ reportID +" successfully"}), 200
@@ -518,6 +556,79 @@ def rejectReport():
         return jsonify({"error": "No results updated, userId does exist, but no changes made"}), 200
     else:
         return jsonify({"error": "Failed to reject moderator"}), 500
+
+@app.route('/reports/update', methods=['PATCH'])
+def updateReport():
+    print("Updating Report")
+    data = request.get_json()
+    if not data or 'reportID' not in data:
+        return jsonify({"error": "No report ID provided"}), 400
+    if 'userID' not in data:
+        return jsonify({"error": "No user ID provided"}), 400
+    userId = data['userID']
+    moderatorObject = moderatorCollection.find_one({"userID": userId})
+    if not moderatorObject:
+        return jsonify({"error": "You are not a moderator"}), 400
+
+    reportObject = reportCollection.find_one({"userID": userId, "reportID": data.get('reportID')})
+    if not reportObject:
+        return jsonify({"error": "Report not found"}), 404
+
+    reportID = data['reportID']
+    update_fields = {}
+    
+    # Check if the report exists
+    reportObject = reportCollection.find_one({"reportID": reportID})
+    if not reportObject:
+        return jsonify({"error": "Report not found"}), 404
+    
+    # Update fields based on provided data
+    for key in data:
+        if key in ['location', 'radiusMeters', 'type', 'severity', 'description', 'metadata']:
+            update_fields[key] = data[key]
+        else:
+            return jsonify({"error": f"Invalid field: {key}"}), 400
+    
+    update_fields['editedAt'] = datetime.datetime.now().isoformat()
+    
+    # Update the report in the database
+    result = reportCollection.update_one({"reportID": reportID}, {"$set": update_fields})
+    
+    if result.modified_count > 0:
+        return jsonify({"message": "Report updated successfully"}), 200
+    elif result.matched_count == 0:
+        return jsonify({"error": "No results updated, reportId does exist, but no changes made"}), 200
+    else:
+        return jsonify({"error": "Failed to update report"}), 500
+
+
+
+@app.route('/reports/escalate', methods=['POST'])
+def escalateReport():
+    data = request.get_json()
+    if not data or "userId" not in data:
+        return jsonify({"error": "Invalid request"}), 400
+    
+    userId = data["userId"]
+    reportID = data.get("reportID")
+    moderatorObject = moderatorCollection.find_one({"userID": userId})
+    if not moderatorObject:
+        return jsonify({"error": "Invalid user ID"}), 400
+    
+    # Update the report's status to escalated
+    update_fields = {
+        "status": "escalated",
+        "lastModeratedAt": datetime.datetime.now().isoformat()
+    }
+    
+    result = reportCollection.update_one({"userID": userId, "reportID": reportID}, {"$set": update_fields})
+    
+    if result.modified_count > 0:
+        return jsonify({"message": "Moderator escalated report "+ reportID +" successfully"}), 200
+    elif result.matched_count == 0:
+        return jsonify({"error": "No results updated, userId does exist, but no changes made"}), 200
+    else:
+        return jsonify({"error": "Failed to escalate moderator"}), 500
 
 
 
@@ -606,7 +717,7 @@ def getNasaWildfires():
                 "geojsonData": geojson_data,
                 "source": "NASA_VIIRS_SNPP_NRT",
                 "bbox": [-140, 24, -50, 72],
-                "days": 2,
+                "days": 4,
                 "fetchedAt": current_time.isoformat()
             }
             

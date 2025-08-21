@@ -223,7 +223,7 @@ const ReportPopup = ({currentReport, onClose}) => {
       borderRadius: "8px",
       boxShadow: "0 4px 20px rgba(0,0,0,0.15)"
     }}>
-      {/* Close button */}
+      {/* Close button
       <div 
         onClick={closeReport}
         style={{
@@ -245,7 +245,7 @@ const ReportPopup = ({currentReport, onClose}) => {
         }}
       >
         ✕
-      </div>
+      </div> */}
       {/* Status Badge */}
       <div style={{ 
         background: getStatusColor(),

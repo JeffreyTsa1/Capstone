@@ -92,11 +92,23 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-width: 800px;
+    position: fixed;
+    z-index: 50;
+    top: 0;
+    left: 0;
+    /* max-width: 800px; */
     width: 100vw;
     height: auto;
-    padding: 20px;
+    max-height: 650px; 
+    border-radius: 20px;
+}
 
+.settingsPageContent {
+    padding: 40px 60px;
+    background: var(--background);
+    color: var(--foreground);
+    width: 100%;
+    max-width: 800px;
 }
 
 .settingsPageWrapper h1 {
@@ -108,6 +120,13 @@
 
 .settingsPageWrapper input, .settingsPageWrapper label {
     font-family: 'proxima-nova', sans-serif;
+}
+
+.saveSettingsButton {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-top: 20px 0px;
 }
 
 .bigInput {

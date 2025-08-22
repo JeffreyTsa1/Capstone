@@ -4,6 +4,7 @@ import styles from './page.module.css'; // Adjust the path as necessary
 import EditInput from './EditInput'; // Import the EditInput component
 import AddressSearch from '@/components/AddressSearch';
 import { useUser } from "@auth0/nextjs-auth0"
+import { motion } from 'motion/react';
 const page = () => {
   const [userDataDB, setUserDataDB] = useState(null);
 
@@ -19,6 +20,13 @@ const page = () => {
     alert("Location set to: " + address.properties.full_address);
   };
   const { user, isLoading } = useUser();
+
+  const saveSettings = async () => {
+    // Save the settings to your backend or local storage
+  
+  }
+
+
   useEffect(() => {
     const checkUserInDatabase = async () => {
       // Only check if we have a user from Auth0 and haven't checked yet
@@ -88,7 +96,7 @@ const page = () => {
               <div
                 className={styles.saveSettingsButton}
                 >
-                <button type="submit">Save Settings</button>
+                <motion.button whileHover={{ scale: 1.1 }} type="submit" onClick={() => saveSettings()}>Save Settings</motion.button>
 
               </div>
             </form>

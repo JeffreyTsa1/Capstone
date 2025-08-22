@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react'; // Import useState to manage local 
 import styles from './page.module.css'; // Adjust the path as necessary
 import EditInput from './EditInput'; // Import the EditInput component
 import AddressSearch from '@/components/AddressSearch';
-
+import { useUser } from "@auth0/nextjs-auth0"
+import { motion } from 'motion/react';
 const page = () => {
   const [userDataDB, setUserDataDB] = useState(null);
 
@@ -18,6 +19,13 @@ const page = () => {
     setSelectedAddress(address);
     alert("Location set to: " + address.properties.full_address);
   };
+  const { user, isLoading } = useUser();
+
+  const saveSettings = async () => {
+    // Save the settings to your backend or local storage
+  
+  }
+
 
   useEffect(() => {
     const checkUserInDatabase = async () => {
@@ -55,7 +63,7 @@ const page = () => {
   // const userData = dataStore
   return (
     <div className={styles.settingsPageWrapper}>
-      <div>
+      <div className={styles.settingsPageContent}>
         
       <h1>
           Settings
@@ -85,6 +93,12 @@ const page = () => {
                   backgroundColor='#333'
                 />
 
+              <div
+                className={styles.saveSettingsButton}
+                >
+                <motion.button whileHover={{ scale: 1.1 }} type="submit" onClick={() => saveSettings()}>Save Settings</motion.button>
+
+              </div>
             </form>
         </div>
     </div>

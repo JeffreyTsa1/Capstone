@@ -13,7 +13,7 @@ import Onboarding from "./Onboarding";
 import { AnimatePresence, motion } from "motion/react";
 import ModeratorOverlay from "./ModeratorOverlay";
 import UserOverlay from "./UserOverlay";
-import ReportPopup from "./ReportPopup";
+import ReportPopup from "./popups/ReportPopup";
 
 // import { useUser } from "@auth0/nextjs-auth0";
 
@@ -366,7 +366,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
                 </>
               }
               {
-                user && !isReporting && (
+                user && !showOnboarding &&  !isReporting && (
                   <UserOverlay
                     userMenuOpen={userMenuOpen}
                     setUserMenuOpen={setUserMenuOpen}
@@ -551,7 +551,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
             latitude={report.location.latitude}
             color="red"
             onClick={() => {setCurrentReport(report)
-              centerMap(report.location.longitude, report.location.latitude-0.08, 9);
+              centerMap(report.location.longitude, report.location.latitude-0.21, 9);
             }}
           />
         ))}

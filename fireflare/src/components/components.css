@@ -10,7 +10,7 @@
 }
 
  .addressSearchInput {
-        width: 80%;
+        width: 100%;
     font-size: 16px;
     color: #000;
     background-color: #EAEAEA;
@@ -145,7 +145,7 @@
     letter-spacing: -2%;
     /* color: #000; */
     font-weight: 300;
-    padding: 10px 0px;
+    padding: 0px;
     width: 260px;
     margin: 0 auto;
     text-align: center;
@@ -258,15 +258,16 @@
 }
 
 .addressSearchWrapper {
+    padding: 20px 0px;
     width:100%;
 }
 
 .rowSplitAddress {
-    display: flex;
+    position: relative;
+    z-index: 8 !important;
     align-items: center;
     flex-direction: row;
     justify-content: space-between;
-    margin-bottom: 50px;
 }
 
 
@@ -337,16 +338,18 @@
 
 .onboardingSearchButton {
     z-index: 5;
-    padding: 10px 15px;
-    /* position: absolute; */
-    /* right: 90px; */
-    background-color: #0088FF;
-    border-radius: 5px;
-    margin-right: -65px;
     color: white;
+    cursor: pointer;
+    background-color: #0088FF;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    position: absolute;
     font-weight: 800;
     border: none;
-    cursor: pointer
+    position: absolute;
+    right: 6.5px;
+    top: 6.5px;
 }
 
 .onboardingWrapper form {
@@ -355,8 +358,10 @@
 
 
 .onboardingResults {
+    padding-top:30px;
     position: relative;
     opacity: 0;
+    margin-top: -30px;
     /* margin-top: -400px !important; */
 }
 
@@ -422,7 +427,7 @@
     font-family: 'Sofia-pro', sans-serif;
     letter-spacing: 0.1px;
     color: #fff;
-    padding: 20px 0px;
+    padding: 10px 0px;
     margin-bottom: 10px;
     font-weight: 500;
     ;
@@ -430,8 +435,9 @@
 
 .onboardingWrapper p {
     font-family: 'Greycliff CF', sans-serif;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 300;
+    line-height: 1.6rem;;
     color: #fff;
 
 }
@@ -450,7 +456,7 @@
 
 .onboardingContent h3 {
     font-weight: 800;
-    font-size: 1.5rem;
+    font-size: 2.5rem;
 }
 
 
@@ -541,7 +547,6 @@
 
 
 
-
 .reportPopup {
     position: absolute;
     width: 90vw;
@@ -563,13 +568,9 @@
         min-height: unset;
     }
 
-    .onboardingSearchButton {
-        position: relative;
-        margin-right: -5px;
-    }
-
     .onboardingContent h3 {
-        font-size: 3rem;
+            padding: 20px 0px;
+        font-size: 2.5rem;
     }
 
 

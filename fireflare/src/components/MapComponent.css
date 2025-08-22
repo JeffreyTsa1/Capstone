@@ -232,7 +232,7 @@
 
 /* Popup styles */
 .mapboxgl-popup-content {
-  padding: 15px;
+  padding: 0px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -255,6 +255,17 @@
   font-size: 0.9rem;
   color: #666;
   margin-bottom: 10px;
+}
+
+.reportPopupContainer {
+  padding: 15px;
+  max-width: 400px;
+  max-height: 460px;
+  overflow: auto;
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
 .reportPopup {
@@ -301,9 +312,11 @@
 .reportPopup .mapboxgl-popup-content {
   background: white;
   border-radius: 12px;
-  padding: 20px;
+  /* padding: 20px; */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   max-width: 350px;
+  max-height: 500px;
+  /* overflow: scroll; */
   width: 100%;
   min-width: 300px;
 }

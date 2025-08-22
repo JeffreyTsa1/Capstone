@@ -48,8 +48,8 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport }) => {
                     listStyle: 'none',
                     margin: 0,
                     padding: 0,
-                    maxHeight: 315,
-                    overflowY: 'auto',
+                    maxHeight: 460,
+                    // overflowY: 'auto',
                 }}>
                     {reports && reports.map(report => (
                         <motion.li
@@ -57,7 +57,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport }) => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={() => {centerMap(report.location.longitude, report.location.latitude, 12)
+                            onClick={() => {centerMap(report.location.longitude, report.location.latitude-0.03, 12)
                             setCurrentReport(report)
                         }}
                             style={{

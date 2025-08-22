@@ -214,14 +214,7 @@ const ReportPopup = ({currentReport, onClose}) => {
 
   return (
     <div className="reportPopupContainer" style={{ 
-      padding: "15px",
-      maxWidth: "400px",
-      maxHeight: "90vh",
-      overflow: "auto",
-      position: "relative",
-      backgroundColor: "#ffffff",
-      borderRadius: "8px",
-      boxShadow: "0 4px 20px rgba(0,0,0,0.15)"
+
     }}>
       {/* Close button
       <div 
@@ -271,7 +264,7 @@ const ReportPopup = ({currentReport, onClose}) => {
         }}>
           <h3 style={{ margin: "0 0 10px 0", color: "#2c3e50" }}>Moderator Review</h3>
           
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr", gap: "10px" }}>
             <div>
               <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Moderator</label>
               <p style={{ margin: "0 0 8px 0" }}>{currentReport.moderatorDescription[0].moderatorName}</p>
@@ -282,18 +275,20 @@ const ReportPopup = ({currentReport, onClose}) => {
               <p style={{ margin: "0 0 8px 0" }}>{formatDate(currentReport.moderatorDescription[0].lastModeratedAt)}</p>
             </div>
             
-            {currentReport.moderatorDescription[0].approvedAt && (
-              <div>
-                <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Approved On</label>
-                <p style={{ margin: "0 0 8px 0" }}>{formatDate(currentReport.moderatorDescription[0].approvedAt)}</p>
-              </div>
-            )}
+
             
             <div>
               <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Fire Contained</label>
               <p style={{ margin: "0 0 8px 0" }}>{currentReport.moderatorDescription[0].fireContained ? "Yes" : "No"}</p>
             </div>
+                        {currentReport.moderatorDescription[0].approvedAt && (
+              <div>
+                <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Approved On</label>
+                <p style={{ margin: "0 0 8px 0" }}>{formatDate(currentReport.moderatorDescription[0].approvedAt)}</p>
+              </div>
+            )}
           </div>
+          
           
           <div style={{ marginTop: "10px" }}>
             <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Background</label>
@@ -309,7 +304,7 @@ const ReportPopup = ({currentReport, onClose}) => {
               borderRadius: "4px",
               fontSize: "13px",
               border: "1px solid #e0e0e0"
-            }}>{currentReport.moderatorDescription[0].moderatorDescription || "No notes provided"}</p>
+            }}>{currentReport.moderatorDescription[0].description || "No notes provided"}</p>
           </div>
         </div>
       )}

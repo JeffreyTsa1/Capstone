@@ -60,7 +60,15 @@ backgroundColor = "white",
   };
 
   return (
-    <div className="addressSearchWrapper">
+    <motion.div className="addressSearchWrapper"
+      style={{
+        height: results.length > 0 ? "auto" : "100px",
+      }}
+      transition={{
+        duration: 0.01,
+        ease: "easeInOut",
+      }}  
+      >
         <label>Address</label>
       <div className="rowSplitAddress">
         <input 
@@ -86,22 +94,39 @@ backgroundColor = "white",
       
       <motion.div
         className="onboardingResults"
-        initial={{ opacity: 0, marginTop: "0px", height: "50px" }}
+        initial={{ opacity: 0, height: "50px" }}
+        style={{ 
+          position: "relative", 
+          overflow: "hidden" 
+        }}
         animate={{
+          height: results.length > 0 ? "auto" : "0px",
           opacity: results.length > 0 ? "1" : "0",
-          height: results.length > 0 ? "auto" : "50px",
         }}
         transition={{
-          duration: 0.1,
+          height: { 
+            type: "spring", 
+            stiffness: 300, 
+            damping: 25,
+            delay: 0,
+            duration: 0.4
+          },
+          opacity: { 
+            duration: 0.2, 
+            delay: 0.1
+          }
         }}
       >
         <motion.ul
+          initial={{ opacity: 0 }}
           animate={{
-            // opacity: results.length > 0 ? "1" : "0",
+            opacity: results.length > 0 ? "1" : "0",
           }}
           transition={{
-            duration: 0.2,
-            delay: 0.4
+            opacity: {
+              duration: 0.8,
+              delay: 0.5
+            }
           }}
         >
           {results && results.map((result, index) => {
@@ -117,7 +142,7 @@ backgroundColor = "white",
           })}
         </motion.ul>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 

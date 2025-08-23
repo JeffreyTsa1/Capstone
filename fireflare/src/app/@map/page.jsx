@@ -181,7 +181,7 @@ const Page = () => {
         // Create comprehensive metadata
         const enhancedMetadata = {
             // User info
-            userId: "user123", // Replace with actual user ID from auth
+            userId: user?.sub, // Replace with actual user ID from auth
             sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             
             // Device info

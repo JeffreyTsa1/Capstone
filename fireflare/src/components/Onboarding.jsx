@@ -127,7 +127,7 @@ const Onboarding = ({setShowOnboarding, user}) => {
                     />
                     <input 
                         type="text"
-                        placeholder="First Name"
+                        placeholder="Last Name"
                         onChange={(e) => setLastName(e.target.value)}
                         className='inputTextBox bigInput'
                     />

@@ -1,5 +1,5 @@
 "use client";
-
+import { appStore } from "../../store/Store";
 import mapboxgl from "mapbox-gl";
 import MapGL, { Layer, Marker, NavigationControl, GeolocateControl, Source, Popup } from "react-map-gl/mapbox";
 // import { Map, Marker, NavigationControl, GeolocateControl } from "react-map-gl";
@@ -18,6 +18,7 @@ import ReportPopup from "./popups/ReportPopup";
 // import { useUser } from "@auth0/nextjs-auth0";
 
 const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
+  const setUser = appStore((state) => state.setUser);
   const { user, isLoading, error } = useUser();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userExistsInDB, setUserExistsInDB] = useState(null);
@@ -153,6 +154,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
             if (userData.type === 'moderator') {
               setModerator(true);
             }
+            setUser(userData.user);
             setUserData(userData.user);
             setShowOnboarding(false);
             return;
@@ -412,7 +414,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
               <path d="M3.51 9a9 9 0 0114.85-3.36L23 10"></path>
               <path d="M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
             </svg>
-            <span style={{ marginLeft: '4px' }}>Refresh AQ Data</span>
+            {/* <span style={{ marginLeft: '4px' }}>Refresh AQ Data</span> */}
           </button>
         </div>
       )}

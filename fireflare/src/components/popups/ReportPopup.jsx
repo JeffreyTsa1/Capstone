@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '@auth0/nextjs-auth0';
-
+import './reportPopup.css';
 const moderatorWindowStrings = {
     "approve": {"Title": "Approve Report",
         "description": "Please provide a description for the approval.",

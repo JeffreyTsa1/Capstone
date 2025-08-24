@@ -1,0 +1,115 @@
+.wildfire-legend {
+  position: absolute;
+  top: 320px;
+  right: 50px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: white;
+  padding: 15px;
+  max-width: 250px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  font-family: 'proxima-nova', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.wildfire-legend:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.wildfire-legend .legend-header {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.wildfire-legend .legend-header h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.wildfire-legend .legend-subtitle {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  display: block;
+}
+
+.wildfire-legend .legend-gradient {
+  margin: 12px 0;
+}
+
+.wildfire-legend .gradient-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(
+    to right,
+    rgba(255, 237, 204, 0.7),
+    rgba(255, 89, 0, 0.8),
+    rgba(255, 132, 0, 0.85),
+    rgba(255, 153, 0, 0.85),
+    rgba(252, 188, 12, 1),
+    rgba(255, 218, 115, 1)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.wildfire-legend .gradient-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 0.8rem;
+}
+
+.wildfire-legend .legend-info {
+  margin-top: 12px;
+}
+
+.wildfire-legend .legend-info p {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.wildfire-legend .legend-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  margin-top: 15px;
+}
+
+.wildfire-legend .legend-footer a {
+  color: #ff9d42;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.wildfire-legend .legend-footer a:hover {
+  color: #ffbe7d;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .wildfire-legend {
+    bottom: 60px;
+    left: 10px;
+    max-width: 220px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wildfire-legend {
+    max-width: calc(100vw - 40px);
+    left: 5px;
+    bottom: 150px;
+  }
+  
+  .wildfire-legend .legend-info p {
+    display: none;
+  }
+}

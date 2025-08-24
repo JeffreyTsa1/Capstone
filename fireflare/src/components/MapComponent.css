@@ -45,6 +45,23 @@
   height: 100vh;
 }
 
+@keyframes pulse-warning {
+  0% { color: #fa7878; opacity: 1; }
+  50% { color: #ac0000; opacity: 1; }
+  100% { color: #fa7878; opacity: 1; }
+}
+
+.markerWarning {
+  font-family: 'nexa';
+  color: #fa7878;
+  margin: 0;
+  font-size: 0.95rem;
+  text-align: center;
+  font-weight: 700;
+  animation: pulse-warning 1.5s infinite;
+  text-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+}
+
 .mapContainer {
   width: 100%;
   height: 100%;
@@ -143,10 +160,9 @@
 
 .userOverlayMenu {
   position: absolute;
-  height: 100%;
   left: 0;
   width: 100%;
-  height: 150px;
+  height: 250px; /* Increased height to accommodate the legend options */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -388,4 +404,98 @@
   background: #ff8c00;
   /* Orange */
   color: white;
+}
+
+.userOverlayMenu ul li.legend-option {
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.legend-header {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  display: block;
+  text-align: center;
+}
+
+.toggleWrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  margin: 5px 0px;
+}
+.legend-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend-toggles .option {
+  display: flex;
+  align-items: center;
+  padding: 5px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  margin-bottom: 3px;
+  position: relative;
+}
+
+.legend-toggles .option:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.legend-toggles .option.option-active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.legend-toggles .option-label {
+  margin-left: 10px;
+  font-size: 0.85rem;
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.legend-toggles .option.option-active .option-label {
+  font-weight: 700;
+}
+
+/* New Toggle Indicator Styling */
+.toggle-indicator {
+  width: 32px;
+  height: 16px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-indicator.active {
+  background-color: var(--accent, #0070f3);
+  box-shadow: 0 0 5px rgba(0, 112, 243, 0.5);
+}
+
+.toggle-dot {
+  position: absolute;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-indicator.active .toggle-dot {
+  transform: translateX(16px);
 }

@@ -296,7 +296,7 @@
     color: #fff !important;
 }
 
-/* 
+
 .submitButton {
     font-size: 0.9rem;
     font-family: 'Greycliff CF', sans-serif;
@@ -310,7 +310,7 @@
     background: #FFD400;
     transition: ease-out 0.12s;
     cursor: pointer;
-} */
+}
 
 .submitButton:hover {
     background: #FFAE00;
@@ -431,14 +431,18 @@
     padding: 5px 0px;
 }
 
+.splitRow p {
+    font-size: 1.4rem ;
+    font-family: 'proxima-nova', sans-serif;
+    font-weight: 400;
+}
+
 .moderatorOverlay   .splitRow label {
     font-weight: 600;
     font-size: 0.9rem;
 }
 
 .moderatorOverlay .splitRow p {
-    font-family: 'proxima-nova', sans-serif;
-    font-weight: 300;
     margin: 0px;
 }
 

@@ -197,7 +197,12 @@ def createUser():
         trustScore = data.get("trustScore", 0)
         createdAt = datetime.datetime.now().isoformat()
         updatedAt = createdAt
-
+        newAddresses = [{
+            "address": address,
+            "label": "Home",  # Optional label for the address,
+            "coordinates": location_coords,
+            "addedAt": createdAt
+        }]
         newUser = {
             "userID": userId,  # Store as userID in database
             "email": email,
@@ -206,7 +211,8 @@ def createUser():
             "phone": phone,
             "location": location,
             "verified": verified,
-            "address": address,
+            "addresses": newAddresses,
+            "address": address,  # Assuming address is a string
             "trustScore": trustScore,
             "createdAt": createdAt,
             "updatedAt": updatedAt
@@ -237,19 +243,27 @@ def updateUser():
     userId = data['userID']
     print("finished printing userObject")
     userObject = userCollection.find_one({"userID": userId})
-    print(userObject)
+    userType = "user"
     if not userObject:
-        return jsonify({"error": "Invalid user ID"}), 400
+        userObject = moderatorCollection.find_one({"userID": userId})
+        if not userObject:
+            return jsonify({"error": "Invalid user ID"}), 400
+        userType = "moderator"
 
     update_fields = {}
-    for key in data:
-        if key not in ['email', 'firstName', 'lastName', 'location', 'address']:
+    data_minus_userID = {k: v for k, v in data.items() if k != 'userID'}
+    for key in data_minus_userID:
+        if key not in ['email', 'firstName', 'lastName', 'location','addresses', 'address']:
             return jsonify({"error": f"Invalid field: {key}"}), 400
-        update_fields[key] = data[key]
+        update_fields[key] = data_minus_userID[key]
     update_fields['updatedAt'] = datetime.datetime.now().isoformat()
+    result = None
     # Update the user in the database
-    result = userCollection.update_one({"userID": userId}, {"$set": update_fields})
-    
+    if userType == "moderator":
+        result = moderatorCollection.update_one({"userID": userId}, {"$set": update_fields})
+    else:
+        result = userCollection.update_one({"userID": userId}, {"$set": update_fields})
+
     if result.modified_count > 0:
         return jsonify({"message": "User updated successfully"}), 200
     elif result.matched_count == 0:

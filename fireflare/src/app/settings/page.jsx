@@ -5,18 +5,52 @@ import EditInput from './EditInput'; // Import the EditInput component
 import AddressSearch from '@/components/AddressSearch';
 import { motion, AnimatePresence } from 'motion/react';
 import { appStore } from '../../../store/Store'; // Import your store for user data management
+import { updateUser } from '@/lib/api'; // Import API helper
+import { useRouter } from 'next/navigation';
 const page = () => {
 
+  const router = useRouter();
   const userData = appStore((state) => state.userData);
-  const setUser = appStore((state) => state.setUser);
+  const setUserData = appStore((state) => state.setUser);
   const [userDataDB, setUserDataDB] = useState(null);
 
-
-  // What happens when the user isn't onboarded? 
+  // Initialize form state with empty values first
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [addresses, setAddresses] = useState([]); // Array to store multiple addresses
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  // Effect to populate form data when userData changes
+  useEffect(() => {
+    if (userData) {
+      // Update form fields with userData
+      setEmail(userData.email || "");
+      setFirstName(userData.firstName || "");
+      setLastName(userData.lastName || "");
+      
+      // If addresses are available in userData, use them
+      if (userData.addresses && Array.isArray(userData.addresses)) {
+        setAddresses(userData.addresses);
+      }
+      else if (userData.address) {
+        // If only a single address exists, convert it to the new format
+        setAddresses([{
+          label: "Home",
+          address: userData.address,
+          properties: {
+            full_address: userData.address,
+            coordinates: {
+              latitude: userData.location ? userData.location[0] : null,
+              longitude: userData.location ? userData.location[1] : null
+            }
+          },
+          isPrimary: true
+        }]);
+      }
+
+    }
+    setShowSettingsMenu(true);
+  }, [userData]);
   const [tempAddress, setTempAddress] = useState(null); // Temporary address before saving with label
   const [addressLabel, setAddressLabel] = useState(""); // Label for the current address
   const [showAddressForm, setShowAddressForm] = useState(false); // Control visibility of address form
@@ -91,112 +125,155 @@ const page = () => {
   };
   
 
-  const saveSettings = async () => {
-    // Save the settings to your backend or local storage
-    if (!user) {
+  const saveSettings = async (e) => {
+    // If there's an event, prevent default behavior
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+    
+    // Save the settings to backend or local storage
+    if (!userData) {
       alert("Please log in to save your settings");
       return;
     }
     
-    // Prepare data to save
-    const userData = {
-      userId: user.sub,
-      email,
-      firstName,
-      lastName,
-      addresses // Include the addresses array
-    };
-    
-    console.log("Saving settings:", userData);
+    // Prepare data to save with user ID from userData
+    console.log("Current userData:", userData);
     
     // Example of how you might save to your backend
     try {
-      // Uncomment this when your API is ready
-      /*
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/update`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData)
+      // Create object with all the data to update
+      const newUserData = {
+        userID: userData.userID,
+        email,
+        firstName,
+        lastName,
+        addresses // Include the addresses array
+      };
+      
+      // Only include fields that have changed
+      const updateData = {};
+      for (let key in newUserData) {
+        if (newUserData[key] !== userData?.[key]) {
+          updateData[key] = newUserData[key];
+        }
+      }
+      
+      console.log("Data to update:", updateData);
+      
+      // Only proceed if there are changes to save
+      if (Object.keys(updateData).length === 0) {
+        alert("No changes detected!");
+        return;
+      }
+      
+      // Use the API helper to update the user
+      const result = await updateUser({
+        userID: userData.userID,
+        ...updateData
       });
       
-      if (response.ok) {
+      if (result.success) {
         alert("Settings saved successfully!");
+        
+        // Update local state in the store
+        const updatedUserData = {
+          ...userData,
+          ...updateData
+        };
+        setUserData(updatedUserData);
       } else {
-        alert("Failed to save settings. Please try again.");
+        alert(result.error || "Failed to save settings. Please try again.");
       }
-      */
-      
-      // For now, just show a success message
-      alert("Settings would be saved here! (API not connected)");
-      
     } catch (error) {
       console.error("Error saving settings:", error);
       alert("An error occurred while saving your settings.");
     }
   }
+  const navigateBack = () => {
+    setShowSettingsMenu(false);
+    setTimeout(() => {  
+      router.back();
+    }, 1000); // Delay of 5 seconds
 
+  }
+  
+const panelVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+  exit:   { opacity: 0, y: 20 },
+};
 
+const overlayVariants = {
+  hidden:  { opacity: 0 },
+  visible: { opacity: 0.5 },
+  exit:    { opacity: 0 },
+};
+  // This useEffect is not needed anymore since we're using the userData from the app store
+  // and we're handling the initialization in the other useEffect
+  // We'll keep a commented version for reference
+  /*
   useEffect(() => {
-    const checkUserInDatabase = async () => {
-      // Only check if we have a user from Auth0 and haven't checked yet
-      if (!user || isLoading || checkingUser || userExistsInDB !== null) return;
+    const checkUserData = async () => {
+      if (!userData || !userData.userID) return;
       
-      setCheckingUser(true);
-      console.log("Checking if user exists in database:", user.sub);
-      
-      try {
-        // First check if user exists in Users collection
-        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/check/${user.sub}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (userResponse.status === 200) {
-          const userData = await userResponse.json();
-          console.log("User data from Users collection:", userData);
-        }
-        
-        
-      } catch (error) {
-        console.error("Error checking user in database:", error);
-        setUserExistsInDB(false);
-      } finally {
-        setCheckingUser(false);
-      }
-    }
-    checkUserInDatabase();
-  }, []);
+      console.log("Settings page loaded with user data:", userData);
+      // Additional initialization logic could go here if needed
+    };
+    
+    checkUserData();
+  }, [userData]);
+  */
 
   // const userData = dataStore
   return (
     <div className={styles.settingsPageWrapper}>
-      <div className={styles.settingsPageContent}>
-        
+      <AnimatePresence
+        mode="wait"
+        onExitComplete={() => {
+          router.back();
+        }}
+      >
+       {showSettingsMenu &&( <>
+      <motion.div className={styles.settingsBlackOverlay} initial="hidden" animate="visible" exit="exit"
+        transition={{ duration: 0.2 }}
+        variants={overlayVariants}
+        >
+          .
+        </motion.div>
+
+      <motion.div className={styles.settingsPageContent}
+              initial="hidden"
+        animate="visible"
+        exit="exit"
+        variants={panelVariants}
+        transition={{ duration: 0.3, delay: 0.2, ease: "easeOut" }}
+      >
+        <div className={styles.closeButtonContainer}>
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className={styles.closeButton} onClick={() => {
+            setShowSettingsMenu(false);
+            }}>
+            ✕
+          </motion.button>
+        </div>
       <h1>
           Settings
       </h1>
       <p>
-
           This is your settings page. You can adjust your preferences here.
 
       </p>
 
         <div className={styles.settingsForm}>
-            <h2>General Settings</h2>
-            <p>Adjust your general preferences here.</p>
-            <form>
+            <form onSubmit={(e) => e.preventDefault()}>
+                <br />
                 <label>
                     <input type="checkbox" name="notifications" />
                     Enable Notifications
                 </label>
-                <br />
-                <EditInput category={"Email"} inputValue={userData?.email} />
-                <EditInput category={"First Name"} inputValue={userData?.firstName} />
-                <EditInput category={"Last Name"} inputValue={userData?.lastName} />
+                <EditInput category={"Email"} inputValue={email} setInputValue={setEmail} />
+                <EditInput category={"First Name"} inputValue={firstName} setInputValue={setFirstName} />
+                <EditInput category={"Last Name"} inputValue={lastName} setInputValue={setLastName} />
                 <div className={styles.addressesSection}>
                   <h3>Your Addresses</h3>
                   
@@ -205,10 +282,10 @@ const page = () => {
                     {addresses.length === 0 ? (
                       <p className={styles.noAddressesMessage}>No addresses saved yet. Add your first address below.</p>
                     ) : (
-                      <ul className={styles.addressList}>
+                      <ul className={styles.addressList} style={{ marginTop: "10px"}}>
                         {addresses.map((address, index) => (
                           <motion.li 
-                            key={address.id} 
+                            key={address.id + address.label} 
                             className={styles.addressItem}
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
@@ -276,7 +353,7 @@ const page = () => {
                         <AddressSearch 
                           onAddressSelect={handleAddressSelect}
                           placeholder="Search for your address"
-                          initialValue={tempAddress?.properties?.full_address || ""}
+                          initialValue={(tempAddress && tempAddress.properties && tempAddress.properties.full_address) ? tempAddress.properties.full_address : ""}
                           textColor='black'
                           backgroundColor='#EAEAEA'
                         />
@@ -338,18 +415,18 @@ const page = () => {
                 <div className={styles.saveSettingsButton}>
                   <motion.button 
                     whileHover={{ scale: 1.1 }} 
-                    type="submit" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      saveSettings();
-                    }}
+                    type="button" 
+                    onClick={() => saveSettings()}
                   >
                     Save Settings
                   </motion.button>
                 </div>
             </form>
         </div>
-    </div>
+      </motion.div>
+        </>
+)}
+      </AnimatePresence>
       </div>
 
   )

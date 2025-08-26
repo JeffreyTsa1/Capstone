@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "motion/react";
 import ModeratorOverlay from "./ModeratorOverlay";
 import UserOverlay from "./UserOverlay";
 import ReportPopup from "./popups/ReportPopup";
+import { checkUserInDatabase } from "../lib/api";
 
 // import { useUser } from "@auth0/nextjs-auth0";
 
@@ -129,45 +130,30 @@ const memoizedUserData = useMemo(() => userData, [userData]);
   }, []);
   // Check if user exists in database when Auth0 user is loaded
   useEffect(() => {
-    const checkUserInDatabase = async () => {
+    const verifyUser = async () => {
       // Only check if we have a user from Auth0 and haven't checked yet
       if (!user || isLoading || checkingUser || userExistsInDB !== null) return;
       
       setCheckingUser(true);
-      console.log("Checking if user exists in database:", user.sub);
       
       try {
-        // First check if user exists in Users collection
-        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/check/${user.sub}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        // Use the refactored helper function
+        const result = await checkUserInDatabase(user.sub);
         
-        if (userResponse.status === 200) {
-          const userData = await userResponse.json();
-          console.log("User data from Users collection:", userData);
-          
-          if (userData.exists) {
-            setUserExistsInDB(true);
-            if (userData.type === 'moderator') {
-              setModerator(true);
-            }
-            setUser(userData.user);
-            setUserData(userData.user);
-            setShowOnboarding(false);
-            return;
-          }
+        if (result.exists) {
+          setUserExistsInDB(true);
+          setModerator(result.isModerator || false);
+          setUser(result.user);
+          setUserData(result.user);
+          setShowOnboarding(false);
+        } else {
+          // User doesn't exist in database - show onboarding
+          setUserExistsInDB(false);
+          setShowOnboarding(true);
+          console.log("User not found in database, showing onboarding");
         }
-        
-        // User doesn't exist in either collection - show onboarding
-        setUserExistsInDB(false);
-        setShowOnboarding(true);
-        console.log("User not found in database, showing onboarding");
-        
       } catch (error) {
-        console.error("Error checking user in database:", error);
+        console.error("Error during user verification:", error);
         // On error, assume user doesn't exist and show onboarding
         setUserExistsInDB(false);
         setShowOnboarding(true);
@@ -176,7 +162,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
       }
     };
     
-    checkUserInDatabase();
+    verifyUser();
 
     // Load air quality data only once when map is loaded
     const map = mapRef.current?.getMap?.();

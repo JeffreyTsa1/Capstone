@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import "./components.css";
 import { motion } from "motion/react";
 import AddressSearch from "./AddressSearch";
+import { createUser } from "../lib/api";
 
 const Onboarding = ({setShowOnboarding, user}) => {
     // const router = useRouter();
@@ -26,28 +27,6 @@ const Onboarding = ({setShowOnboarding, user}) => {
     alert("Location set to: " + address.properties.full_address);
   };
 
-  // console.log("User: ", user)
-  
-  // console.log(user.name)
-
-  //   useEffect(() => {
-  //   const handleGlobalKeyDown = (e) => {
-  //     if (e.key === 'Enter') {
-  //       if (!isInputFocused && !selectedAddress) {
-  //         searchForAddress();
-  //       } else if (selectedAddress && formComplete) {
-  //         submitForm();
-  //       }
-  //     }
-  //   };
-
-  //   window.addEventListener('keydown', handleGlobalKeyDown);
-  //   return () => {
-  //     window.removeEventListener('keydown', handleGlobalKeyDown);
-  //   };
-  // }, [isInputFocused, searchQuery, selectedAddress, formComplete]);
-
-
 
 
 
@@ -55,54 +34,52 @@ const Onboarding = ({setShowOnboarding, user}) => {
 
 
     const submitUserInfo = async (e) => {
-        console.log("Submitting user info")
+        console.log("Submitting user info");
+        e.preventDefault();
 
-        console.log("Address: ", selectedAddress.properties.coordinates.latitude)
-      e.preventDefault();
-
-      if (!firstName || !lastName || !phone || !selectedAddress || !user) {
-        alert("Please fill in all required fields.");
-        return;
-      }
-
-      try {
-        const bodyContent = JSON.stringify({ 
-                    auth0Id: user.sub,
-                    email: user.email,
-                    firstName: firstName,
-                    lastName: lastName,
-                    location: [selectedAddress.properties.coordinates.latitude, selectedAddress.properties.coordinates.longitude],
-                    address: selectedAddress.properties.full_address,
-                    phone: phone,
-                    // age: age,
-            });
-            console.log("Submitting User Info");
-            console.log(bodyContent);
-            console.log(`API_URL: ${process.env.NEXT_PUBLIC_API_URL}`);
-        // console.log("Submitting User Info");
-        // console.log({ firstName, lastName, phone, age, selectedAddress, user });
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const res = await fetch(`${apiUrl}/users/create`, {
-            method: "POST",
-            headers: {
-
-                // #6C2058
-                "Content-Type": "application/json",
-            },
-            body: bodyContent,
-            cache: "no-store",
-        });
-
-        if (!res.ok) throw new Error("Failed to onboard user");
-
-        if ( res.status === 201) {
-          console.log("User onboarded successfully");
-          setShowOnboarding(false);
+        if (!firstName || !lastName || !phone || !selectedAddress || !user) {
+          alert("Please fill in all required fields.");
+          return;
         }
-      } catch (err) {
-        console.error("Error submitting user info:", err);
-        alert("There was an error submitting your info. Please try again.");
-      }
+
+        // Prepare user data
+        const userData = {
+          auth0Id: user.sub,
+          userID: user.sub,
+          email: user.email,
+          firstName: firstName,
+          lastName: lastName,
+          location: [selectedAddress.properties.coordinates.latitude, selectedAddress.properties.coordinates.longitude],
+          address: selectedAddress.properties.full_address,
+          phone: phone,
+          // Add the address with label for the new multi-address format
+          addresses: [
+            {
+              label: "Home",
+              address: selectedAddress.properties.full_address,
+              isPrimary: true,
+              location: {
+                type: "Point",
+                coordinates: [selectedAddress.properties.coordinates.latitude, selectedAddress.properties.coordinates.longitude]
+              }
+            }
+          ]
+        };
+
+        try {
+          // Use our refactored API helper
+          const result = await createUser(userData);
+          
+          if (result.success) {
+            console.log("User onboarded successfully");
+            setShowOnboarding(false);
+          } else {
+            throw new Error(result.error || "Failed to onboard user");
+          }
+        } catch (err) {
+          console.error("Error submitting user info:", err);
+          alert("There was an error submitting your info. Please try again.");
+        }
     }
 
     

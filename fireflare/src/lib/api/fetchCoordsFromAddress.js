@@ -18,7 +18,6 @@ export async function fetchCoordsFromAddress(query) {
     query +
     "&access_token=" +
     token;
-  //   alert(query);
   //   const hardurl =
   // "https://api.mapbox.com/search/geocode/v6/forward?q=63%20w%202nd%20ave%0A&access_token=pk.eyJ1IjoianRzYTEiLCJhIjoiY2xzZnY2a3FqMXA3eTJrcGQ0Zm9lMzcxeiJ9.q2YaYHpNxS49n3dEdVlehg";
   // console.log("Url: " + url)

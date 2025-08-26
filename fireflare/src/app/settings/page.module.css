@@ -42,12 +42,25 @@
 
 .editInputWrapper input:focus {
     outline-style: solid;
-    outline-color: #5384ac;
-    outline-width: 2px;
+    outline-color: #ff9876;
+    outline-width: 3px;
     /* outline: #FFDD00 !important; */
     /* outline: none !important; */
     caret-color: #223600;
 }
+
+
+.editInputWrapper input:-webkit-autofill,
+    .editInputWrapper input:-webkit-autofill:hover,
+    .editInputWrapper input:-webkit-autofill:focus,
+    .editInputWrapper input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px white inset !important; /* Changes background */
+      -webkit-text-fill-color: black !important; /* Changes text color */
+      background: white;
+      color: black;
+        /* border: 2px solid #0071cd; */
+    }
+
 
 
 .inputTextBox {
@@ -106,6 +119,17 @@
     border-radius: 20px;
 }
 
+.settingsBlackOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black */
+    z-index: 20; /* Ensure it's behind the settings content */
+    backdrop-filter: blur(5px); /* Optional: adds a blur effect to the background */
+    -webkit-backdrop-filter: blur(5px); /* For Safari */
+}
 .settingsPageContent {
     overflow-y: auto;
     scroll-behavior: smooth; /* Enable smooth scrolling */
@@ -117,15 +141,22 @@
     background: color-mix(in srgb, var(--background) 69%, transparent);
     color: var(--foreground);
     width: 100%;
+    z-index: 50;
     max-height: 650px;
     max-width: 800px;
     display: flex;
     flex-direction: column;
+    font-family: 'nexa-text', sans-serif;
+}
+
+.settingsPageContent h1 {
+    margin-bottom: 20px;
+}
+.settingsPageContent p {
 }
 
 .settingsPageWrapper h1 {
     font-size: 3rem;;
-    font-family: 'nexa-text', sans-serif;
 }
 
 
@@ -310,4 +341,24 @@
     font-style: italic;
     text-align: center;
     padding: 20px;
+}
+
+.closeButtonContainer {
+    /* position: absolute; */
+    display: flex;
+    justify-content: flex-end;
+    top: 20px;
+    right: 20px;
+}   
+
+.closeButton {
+    border: none;
+    background-color: var(--foreground);
+    font-size: 1.5rem;
+    padding: 8px 13px;
+    font-weight: 800;
+    color: var(--background);
+    border-radius: 50px;
+    cursor: pointer;
+    margin: 0;
 }

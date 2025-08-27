@@ -14,6 +14,9 @@ import { AnimatePresence, motion } from "motion/react";
 import ModeratorOverlay from "./ModeratorOverlay";
 import UserOverlay from "./UserOverlay";
 import ReportPopup from "./popups/ReportPopup";
+import AQILegend from "./AQILegend";
+import WildfireLegend from "./WildfireLegend";
+import AQIPopup from "./popups/AQIPopup";
 import { checkUserInDatabase } from "../lib/api";
 
 // import { useUser } from "@auth0/nextjs-auth0";
@@ -41,9 +44,15 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
   const [wildfires, setWildfires] = useState(null);
   const [radiusMeters, setRadiusMeters] = useState(1000); // Default radius in meters
   
-    // 1) state to hold AQ geojson
+  // 1) state to hold AQ geojson
   const [aqGeoJSON, setAqGeoJSON] = useState({ type: 'FeatureCollection', features: [] });
-
+  const [showAQILegend, setShowAQILegend] = useState(true);
+  const [showWildfireLegend, setShowWildfireLegend] = useState(true);
+  const [showWildfireLayer, setShowWildfireLayer] = useState(true); 
+  const [showAQILayer, setShowAQILayer] = useState(true);
+  
+  // State for AQI popup
+  const [selectedAQI, setSelectedAQI] = useState(null);
 
   // Default location (San Francisco)
   const defaultLongitude = -122.4194;
@@ -69,7 +78,7 @@ const getBbox = useCallback(() => {
   return [minX, minY, maxX, maxY];
 }, []);
 
-// 3) fetch function (debounced)
+  // 3) fetch function (debounced)
 const fetchAQ = useCallback(async () => {
   const bbox = getBbox();
   if (!bbox) return;
@@ -81,7 +90,18 @@ const fetchAQ = useCallback(async () => {
   setAqGeoJSON(fc);
 }, [getBbox]);
 
-// 4) kick off on load, and on moveend
+// Handle clicking on AQ markers
+const handleMapClick = useCallback((event) => {
+  if (!isReporting) {
+    const map = mapRef.current.getMap();
+    const features = map.queryRenderedFeatures(event.point, { layers: ['aq-markers'] });
+    
+    if (features.length) {
+      const clickedFeature = features[0];
+      setSelectedAQI(clickedFeature);
+    }
+  }
+}, [isReporting]);// 4) kick off on load, and on moveend
 
 const memoizedSetUserMenuOpen = useCallback(setUserMenuOpen, []);
 const memoizedUserData = useMemo(() => userData, [userData]);
@@ -332,7 +352,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
                           <h5>{marker ? marker.latitude.toFixed(4) : '--'}</h5>
                         </div>
                       </div>
-                      {!marker && <p style={{ fontFamily: 'nexa', color: '#fa7878ff', margin: 0, fontSize: '0.95rem', textAlign: 'center' }}>Please place a marker.</p>}
+                      {!marker && <p className="markerWarning">Please place a marker.</p>}
                     </div>
                     <div style={{ marginTop: 10, textAlign: 'center' }}>
                       <label><span style={{fontFamily: 'nexa',fontWeight:600}}>Radius:</span> <span style={{ fontFamily: 'nexa-text',fontSize: '1.25rem' }}>{radiusMeters} m</span></label>
@@ -360,6 +380,14 @@ const memoizedUserData = useMemo(() => userData, [userData]);
                     setUserMenuOpen={setUserMenuOpen}
                     moderator={moderator}
                     userData={memoizedUserData}
+                    showAQI={showAQILegend}
+                    setShowAQI={setShowAQILegend}
+                    showWildfire={showWildfireLegend}
+                    setShowWildfire={setShowWildfireLegend}
+                    setShowAQILayer={setShowAQILayer}
+                    showAQILayer={showAQILayer}
+                    showWildfireLayer={showWildfireLayer}
+                    setShowWildfireLayer={setShowWildfireLayer}
                   />
                 )
               }
@@ -403,6 +431,19 @@ const memoizedUserData = useMemo(() => userData, [userData]);
             {/* <span style={{ marginLeft: '4px' }}>Refresh AQ Data</span> */}
           </button>
         </div>
+      )}
+      
+      {/* Legend Components */}
+      {mapLoaded && (
+        <>
+          <AnimatePresence>
+            {showAQILegend && <AQILegend visible={showAQILegend} />}
+          </AnimatePresence>
+          
+          <AnimatePresence>
+            {showWildfireLegend && <WildfireLegend visible={showWildfireLegend} />}
+          </AnimatePresence>
+        </>
       )}
 
       {/* Onboarding Modal */}
@@ -448,7 +489,11 @@ const memoizedUserData = useMemo(() => userData, [userData]);
         // mapStyle="mapbox://styles/mapbox/standard"
         mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
         pitch={10}
-        onClick={handleMarkerDrop}
+        onClick={(e) => {
+          // Handle both marker drops and feature clicks
+          handleMapClick(e);
+          handleMarkerDrop(e);
+        }}
         onLoad={handleMapLoad}
         initialViewState={initialViewState}
         maxZoom={20}
@@ -468,29 +513,108 @@ const memoizedUserData = useMemo(() => userData, [userData]);
         )} */}
 
 
-          {aqGeoJSON && (
-  <Source id="aq-stations" type="geojson" data={aqGeoJSON}>
+          {aqGeoJSON && showAQILayer && (
+  <Source 
+    id="aq-stations" 
+    type="geojson" 
+    data={aqGeoJSON}
+  >
+    {/* Heat map layer for better area visualization */}
+    <Layer
+      id="aq-heatmap"
+      type="heatmap"
+      paint={{
+        // Modified weight scale to prioritize higher AQI values
+        'heatmap-weight': [
+          'interpolate', ['linear'], ['get', 'aqi'],
+          0, 0.1,     // Very low AQI - minimal contribution
+          50, 0.2,    // Good - reduced contribution
+          100, 0.4,   // Moderate - moderate contribution
+          150, 1.0,   // Unhealthy for sensitive groups
+          200, 1.7,   // Unhealthy - significant contribution
+          300, 2.5,   // Very unhealthy - high contribution  
+          500, 3.0    // Hazardous - maximum contribution
+        ],
+        // Larger radius as we zoom out
+        'heatmap-radius': [
+          'interpolate', ['linear'], ['zoom'],
+          5, 20,
+          8, 15,
+          12, 10
+        ],
+        // Color ramp for heatmap based on AQI standards
+        'heatmap-color': [
+          'interpolate', ['linear'], ['heatmap-density'],
+          0, 'rgba(0,228,0,0)',       // Green (transparent)
+          0.1, 'rgba(255,255,0,0.6)', // Yellow (Moderate)
+          0.3, 'rgba(255,126,0,0.7)', // Orange (Unhealthy for Sensitive Groups)
+          0.5, 'rgba(255,0,0,0.8)',   // Red (Unhealthy)
+          0.7, 'rgba(143,63,151,0.8)', // Purple (Very Unhealthy)
+          1.0, 'rgba(126,0,35,0.8)',  // Maroon (Hazardous)
+        ],
+        // Slightly reduced intensity at lower zoom levels to minimize density effect
+        'heatmap-intensity': [
+          'interpolate', ['linear'], ['zoom'],
+          5, 0.8,     // Lower intensity when zoomed out (where density effects are most problematic)
+          8, 0.9,     // Medium zoom
+          10, 1.0     // Closer zoom (where individual points are more relevant)
+        ],
+        // Opacity based on zoom level
+        'heatmap-opacity': [
+          'interpolate', ['linear'], ['zoom'],
+          7, 0.9,
+          14, 0.6
+        ]
+      }}
+    />
+    
+    {/* Circle layer for specific station data points */}
     <Layer
       id="aq-markers"
       type="circle"
+      minzoom={8} // Only show individual markers when zoomed in
       paint={{
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 3, 4, 10, 8, 14, 10],
+        'circle-radius': [
+          'interpolate', ['linear'], ['zoom'],
+          4, 6,
+          8, 10,
+          12, 20,
+          16, 18
+        ],
         'circle-color': [
           'step', ['get','aqi'],
-          '#ffff00', 100,   // 51–100 Moderate
-          '#ff7e00', 150,   // 101–150 USG
-          '#ff0000', 200,   // 151–200 Unhealthy
-          '#8f3f97', 300,   // 201–300 Very Unhealthy
-          '#7e0023'         // 300+ Hazardous
+          '#00e400', 50,    // 0-50 Good (Green)
+          '#ffff00', 100,   // 51–100 Moderate (Yellow)
+          '#ff7e00', 150,   // 101–150 Unhealthy for Sensitive Groups (Orange)
+          '#ff0000', 200,   // 151–200 Unhealthy (Red)
+          '#8f3f97', 300,   // 201–300 Very Unhealthy (Purple)
+          '#7e0023'         // 300+ Hazardous (Maroon)
         ],
-        'circle-stroke-color': '#000',
-        'circle-stroke-width': 0.75,
-        'circle-opacity': 0.9
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 1.5,
+        'circle-opacity': 0.85
+      }}
+    />
+    
+    {/* AQI value labels for higher zoom levels */}
+    <Layer
+      id="aq-labels"
+      type="symbol"
+      minzoom={8} // Show labels at slightly lower zoom level
+      layout={{
+        'text-field': ['to-string', ['get', 'aqi']],
+        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+        'text-size': 20
+      }}
+      paint={{
+        'text-color': '#ffffff',
+        'text-halo-color': '#000000',
+        'text-halo-width': 1
       }}
     />
   </Source>
 )}  
-        {mapLoaded && (
+        {mapLoaded && showWildfireLayer && (
           <Source key="wildfires-source" id="wildfires" type="geojson" data={wildfires}>
             <Layer key="wildfires-heatmap-layer" {...heatmapLayer} />
           </Source>
@@ -558,8 +682,23 @@ const memoizedUserData = useMemo(() => userData, [userData]);
             className="reportPopup"
           >
             <ReportPopup currentReport={currentReport} fetchReports={fetchReports} />
-              </Popup>
+          </Popup>
         }
+        
+        {/* AQI Popup */}
+        {selectedAQI && (
+          <Popup
+            longitude={selectedAQI.geometry.coordinates[0]}
+            latitude={selectedAQI.geometry.coordinates[1]}
+            closeButton={true}
+            closeOnClick={false}
+            onClose={() => setSelectedAQI(null)}
+            anchor="bottom"
+            className="aqi-popup"
+          >
+            <AQIPopup data={selectedAQI} />
+          </Popup>
+        )}
 
 
 

@@ -1,0 +1,113 @@
+.aqi-popup-container {
+  font-family: 'proxima-nova', sans-serif;
+  width: 300px;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.aqi-popup-header {
+  padding: 15px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.aqi-popup-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.aqi-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  min-width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 5px;
+}
+
+.aqi-popup-content {
+  padding: 15px;
+  background: white;
+}
+
+.aqi-info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.aqi-info-row:last-of-type {
+  border-bottom: none;
+}
+
+.aqi-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.aqi-data {
+  text-align: right;
+  font-weight: 500;
+}
+
+.aqi-recommendation {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.aqi-recommendation h4 {
+  margin: 0 0 5px 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.aqi-recommendation p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #555;
+}
+
+/* Mapbox popup customization */
+.aqi-popup .mapboxgl-popup-close-button {
+  font-size: 20px;
+  padding: 0 6px;
+  color: white;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  margin: 5px;
+  line-height: 1;
+}
+
+.aqi-popup .mapboxgl-popup-content {
+  padding: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .aqi-popup-container {
+    width: 280px;
+  }
+  
+  .aqi-popup-header {
+    padding: 12px;
+  }
+  
+  .aqi-value {
+    font-size: 1.6rem;
+    min-width: 45px;
+    height: 45px;
+  }
+}

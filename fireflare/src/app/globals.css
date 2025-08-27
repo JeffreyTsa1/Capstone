@@ -1,7 +1,7 @@
 :root {
   --background: rgb(255, 255, 255);
   --foreground: rgb(23, 23, 23);
-  --accent: rgb(93, 15, 104);
+  --accent: rgb(56 0 144);
 }
 
 @media (prefers-color-scheme: dark) {

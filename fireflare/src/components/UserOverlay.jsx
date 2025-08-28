@@ -32,7 +32,9 @@ const UserOverlay = memo(({
   showAQILayer,
   setShowAQILayer,
   showWildfireLayer,
-  setShowWildfireLayer
+  setShowWildfireLayer,
+  showReportsOverlay,
+  setShowReportsOverlay
 }) => {
   return (
     <motion.div
@@ -54,8 +56,24 @@ const UserOverlay = memo(({
             exit={{ opacity: 0, y: -10 }}
           >
             <ul>
-              <li>
-                <Link onClick={(e) => e.stopPropagation()} href="/reports">Reports</Link>
+              <li className="legend-option">
+                <div className="legend-toggles">
+                  <span className="legend-header">Reports</span>
+                  <div className="toggleWrapper">
+                    <div 
+                      className={`option ${showReportsOverlay ? 'option-active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowReportsOverlay(!showReportsOverlay);
+                      }}
+                    >
+                      <div className={`toggle-indicator ${showReportsOverlay ? 'active' : ''}`}>
+                        <span className="toggle-dot"></span>
+                      </div>
+                      <span className="option-label">Show Reports</span>
+                    </div>
+                  </div>
+                </div>
               </li>
               <li>
                 <Link onClick={(e) => e.stopPropagation()} href="/settings">Settings</Link>

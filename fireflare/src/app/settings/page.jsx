@@ -294,7 +294,7 @@ const overlayVariants = {
                           >
                             <div className={styles.addressInfo}>
                               <strong>{address.label}</strong>
-                              {/* <p>{address.properties.full_address}</p> */}
+                              <p>{address.address}</p>
                             </div>
                             <div className={styles.addressActions}>
                               <button 

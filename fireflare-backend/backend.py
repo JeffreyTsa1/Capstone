@@ -11,6 +11,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from bson import json_util, ObjectId
+from collections import deque
 import os
 import datetime
 
@@ -23,9 +24,6 @@ import smtplib
 import ssl
 import requests
 
-
-
-
 sampleUserSchema = {
     "userID": "user_9f8d7e6a5b4c3d2e1f0a",
     "email": "user@example.com",
@@ -36,7 +34,7 @@ sampleUserSchema = {
       "coordinates": [-123.1207, 49.2827]
     },
     "verified": True,
-    "address": "123 Main St, Vancouver, BC, Canada",
+    "addresses": ["123 Main St, Vancouver, BC, Canada"],
     "trustScore": 75,
     "createdAt": "2025-07-17T20:35:00Z",
     "updatedAt": "2025-07-17T21:00:00Z"
@@ -112,6 +110,59 @@ reportCollection = db.Reports
 userCollection = db.Users
 moderatorCollection = db.Moderators
 nasaWildfiresCollection = db.NasaWildfires
+notificationsCollection = db.Notifications
+addressesCollection = db.Addresses
+
+# Global list of connected SSE clients
+notification_clients = []
+
+def broadcast_notification_to_clients(user_ids: list, message: dict):
+    formatted = f"data: {json.dumps(message)}\n\n"
+    for client in notification_clients:
+        if client.get("userID") in user_ids:
+            client["queue"].append(formatted)
+
+
+@app.route('/notifications/stream', methods=['GET'])
+def notification_stream():
+    user_id = request.args.get('userID')
+    if not user_id:
+        return jsonify({"error": "Missing userID in query params"}), 400
+
+    q = deque()
+    client = {"queue": q, "userID": user_id}
+    notification_clients.append(client)
+
+    def event_stream():
+        try:
+            while True:
+                while q:
+                    yield q.popleft()
+                time.sleep(1)
+                yield ": keep-alive\n\n"
+        finally:
+            notification_clients.remove(client)
+
+    return Response(event_stream(), mimetype='text/event-stream')
+
+
+
+@app.route('/notifications/unseen/<user_id>', methods=['GET'])
+def get_unseen_notifications(user_id):
+    unseen = list(db.Notifications.find({"userID": user_id, "seen": False}))
+    for n in unseen:
+        n["_id"] = str(n["_id"])
+    return jsonify({"notifications": unseen}), 200
+
+@app.route('/notifications/mark-seen', methods=['PATCH'])
+def mark_notifications_seen():
+    data = request.get_json()
+    user_id = data.get("userID")
+    if not user_id:
+        return jsonify({"error": "Missing userID"}), 400
+    db.Notifications.update_many({"userID": user_id, "seen": False}, {"$set": {"seen": True}})
+    return jsonify({"message": "Marked as seen"}), 200
+
 # cachedWildfireData = db.wildfireCache
 
 # requestCollection = db.PayoutRequests
@@ -164,9 +215,58 @@ def checkUser(user_id):
     return jsonify({"exists": False}), 200
 
 
+@app.route('/update/address/to/addresses', methods=['GET'])
+def updateUserAddresses():
+    allUsers = userCollection.find({})
+    if not allUsers:
+        return jsonify({"error": "No users found"}), 400
+    else:
+        for user in allUsers:
+            if "addresses" not in user:
+                if "address" in user and user["address"]:
+                    newObj = [
+                        {
+                            "address": user["address"],
+                            "label": "Home",
+                            "coordinates": user.get("location", {}).get("coordinates", [0, 0]),
+                            "addedAt": datetime.datetime.now().isoformat()
+                        }
+                    ]
+                    userCollection.update_one({"_id": user["_id"]}, {"$set": {"addresses": newObj}})
+                else:
+                    return jsonify({"error": f"User {user['userID']} missing address field"}), 400
+
+    return jsonify({"message": "User addresses updated successfully"}), 200
 
 
+@app.route('/addresses/migrate/all', methods=['GET'])
+def migrateAllAddresses():
+    allUsers = userCollection.find({})
+    if not allUsers:
+        return jsonify({"error": "No users found"}), 400
+    else:
+        for user in allUsers:
 
+
+            print("uupdating user:", user.get("addresses"))
+            print("uupdating user:", user.get("address"))
+            # print("Migrating addresses for user:", user)
+            userAddresses = user.get("addresses", [])
+            print("User Addresses:", userAddresses)
+            for address in userAddresses:
+                if "coordinates" not in address or not address["coordinates"]:
+                    address["coordinates"] = user.get("location", {}).get("coordinates", [0, 0])
+                    newAddressObj = {
+                        "userID": user.get("userID", ""),
+                        "address": address.get("address", ""),
+                        "label": address.get("label", "Home"),
+                        "coordinates": address.get("coordinates", [0, 0]),
+                        "addedAt": address.get("addedAt", datetime.datetime.now().isoformat())
+                    }
+                    print("New Address Object:", newAddressObj)
+                    addressesCollection.insert_one(newAddressObj)
+
+    return jsonify({"message": "Addresses migrated successfully"}), 200
 
 
 @app.route('/users/create', methods=['POST'])
@@ -212,7 +312,6 @@ def createUser():
             "location": location,
             "verified": verified,
             "addresses": newAddresses,
-            "address": address,  # Assuming address is a string
             "trustScore": trustScore,
             "createdAt": createdAt,
             "updatedAt": updatedAt
@@ -888,7 +987,7 @@ def health_check():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=True)
 
 
 

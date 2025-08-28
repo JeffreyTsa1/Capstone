@@ -14,7 +14,7 @@ from bson import json_util, ObjectId
 from collections import deque
 import os
 import datetime
-
+import time
 import json
 import pandas as pd
 import numpy as np
@@ -112,7 +112,7 @@ moderatorCollection = db.Moderators
 nasaWildfiresCollection = db.NasaWildfires
 notificationsCollection = db.Notifications
 addressesCollection = db.Addresses
-
+crisisCollection = db.Crises
 # Global list of connected SSE clients
 notification_clients = []
 
@@ -121,6 +121,8 @@ def broadcast_notification_to_clients(user_ids: list, message: dict):
     for client in notification_clients:
         if client.get("userID") in user_ids:
             client["queue"].append(formatted)
+    print("📣 Broadcasting to:", user_ids)
+    print("📡 Connected clients:", [c.get("userID") for c in notification_clients])
 
 
 @app.route('/notifications/stream', methods=['GET'])
@@ -176,6 +178,36 @@ def mark_notifications_seen():
 
 #    const userResponse = await fetch(`http://127.0.0.1:8080/users/check/${user.sub}`, {
       
+
+@app.route('/notifications/test', methods=['GET'])
+def test_notification_all_users():
+    print("Testing Notification Broadcast")
+    allUsers = userCollection.find({}, {"userID": 1, "_id": 0})
+    user_ids = [user["userID"] for user in allUsers if "userID" in user]
+    user_ids = user_ids + [c.get("userID") for c in notification_clients]
+    timestamp = datetime.datetime.utcnow().isoformat()
+    message = {
+        "title": "Test Notification",
+        "body": "This is a test notification from Fireflare.",
+        "timestamp": timestamp
+    }
+
+    # Save unseen notification for each user
+    for uid in user_ids:
+        db.Notifications.insert_one({
+            "userID": uid,
+            "message": message["body"],
+            "title": message["title"],
+            "timestamp": timestamp,
+            "seen": False,
+            "type": "test"
+        })
+
+    # Send to connected clients in real-time
+    broadcast_notification_to_clients(user_ids, message)
+    return jsonify({"message": "Notification sent to clients"}), 200
+
+
 @app.route('/users/check/<user_id>', methods=['GET'])
 def checkUser(user_id):
     print("Checking User")
@@ -254,19 +286,21 @@ def migrateAllAddresses():
             userAddresses = user.get("addresses", [])
             print("User Addresses:", userAddresses)
             for address in userAddresses:
-                if "coordinates" not in address or not address["coordinates"]:
-                    address["coordinates"] = user.get("location", {}).get("coordinates", [0, 0])
-                    newAddressObj = {
-                        "userID": user.get("userID", ""),
-                        "address": address.get("address", ""),
-                        "label": address.get("label", "Home"),
-                        "coordinates": address.get("coordinates", [0, 0]),
-                        "addedAt": address.get("addedAt", datetime.datetime.now().isoformat())
-                    }
-                    print("New Address Object:", newAddressObj)
-                    addressesCollection.insert_one(newAddressObj)
+                address["coordinates"] = user.get("location", {}).get("coordinates", [0, 0])
+                newAddressObj = {
+                    "userID": user.get("userID", ""),
+                    "address": address.get("address", ""),
+                    "label": address.get("label", "Home"),
+                    "coordinates": address.get("coordinates", [0, 0]),
+                    "addedAt": address.get("addedAt", datetime.datetime.now().isoformat())
+                }
+                print("New Address Object:", newAddressObj)
+                result = addressesCollection.insert_one(newAddressObj)
 
-    return jsonify({"message": "Addresses migrated successfully"}), 200
+                if not result.acknowledged:
+                    return jsonify({"error": f"Failed to insert address for user {user['userID']}"}), 500
+    return jsonify({"message": "All addresses migrated successfully"}), 200
+
 
 
 @app.route('/users/create', methods=['POST'])
@@ -586,6 +620,7 @@ def createReport(userId=None, location=None, radiusMeters=250, type="smoke", sev
         return jsonify({"message": "Report created successfully", "reportId": str(result.inserted_id)}), 201
 
 
+
 @app.route('/reports/approve', methods=['POST'])
 def approveReport():
     data = request.get_json()
@@ -624,6 +659,38 @@ def approveReport():
 
     result = reportCollection.update_one({"_id": report_object_id}, {"$set": { "isVerified": True, "lastModeratedAt": datetime.datetime.now().isoformat(), "moderatorDescription": currModeratorDescription + [moderatorDescriptionObj]}})
     if result.modified_count > 0:
+        
+        nearby_users = userCollection.find({
+            "location": {
+                "$near": {
+                    "$geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            currentReport["location"]["longitude"],
+                            currentReport["location"]["latitude"]
+                        ]
+                    },
+                    "$maxDistance": 10000
+                }
+            }
+        })
+
+        user_ids = []
+        for u in nearby_users:
+            user_ids.append(u["userID"])
+            db.Notifications.insert_one({
+                "userID": u["userID"],
+                "message": "🔥 A new report was approved near your area.",
+                "reportID": str(report_object_id),
+                "seen": False,
+                "createdAt": datetime.datetime.utcnow().isoformat()
+            })
+        broadcast_notification_to_clients(user_ids, {
+            "title": "New Approved Report Nearby",
+            "body": "A new report was approved near your area. Check it out!",
+            "reportID": str(report_object_id),
+            "timestamp": datetime.datetime.now().isoformat()
+        })
         return jsonify({"message": "Moderator approved report "+ str(report_object_id) +" successfully"}), 200
     elif result.matched_count == 0:
         return jsonify({"error": "No results updated, userId does exist, but no changes made"}), 200

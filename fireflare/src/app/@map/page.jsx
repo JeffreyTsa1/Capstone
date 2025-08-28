@@ -129,16 +129,44 @@ const Page = () => {
     const [deviceInfo, setDeviceInfo] = useState(null);
     const [userIP, setUserIP] = useState(null);
     const [userLocation, setUserLocation] = useState(null);
+    const [isEmergency, setIsEmergency] = useState(true); // true for emergency, false for non-emergency
+    
+    
+    const { user } = useUser();
+
+    // // Fetch unseen notifications and mark them as seen on page load
+    // useEffect(() => {
+    //   if (!user?.sub) return;
+
+    //   const fetchUnseenNotifications = async () => {
+    //     try {
+    //       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/unseen/${user.sub}`);
+    //       const json = await res.json();
+    //       if (json.notifications?.length > 0) {
+    //         json.notifications.forEach((n) => {
+    //           alert(n.message); // or replace with your toast system
+    //         });
+
+    //         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/notifications/mark-seen`, {
+    //           method: 'PATCH',
+    //           headers: { 'Content-Type': 'application/json' },
+    //           body: JSON.stringify({ userID: user.sub }),
+    //         });
+    //       }
+    //     } catch (err) {
+    //       console.error("Failed to fetch unseen notifications:", err);
+    //     }
+    //   };
+
+    //   fetchUnseenNotifications();
+    // }, [user?.sub]);
     
     const [metadata, setMetadata] = useState({
-        userId: "user123", // Replace with actual user ID
+        userId: user?.sub, // Replace with actual user ID
         location: reportMarker, // Use the marker location
         radiusMeters: radius, // Default radius
         // indicator: e.target.indicator.value, // Get indicator from form 
     });
-
-    const { user } = useUser();
-
     const handleSetIsReporting = () => {
 
         if (user) {
@@ -153,6 +181,28 @@ const Page = () => {
         }
 
     };
+    useEffect(() => {
+  if (!user?.sub) return;
+
+  const source = new EventSource(`${process.env.NEXT_PUBLIC_API_URL}/notifications/stream?userID=${user.sub}`);
+
+  source.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    console.log("🔔 Realtime notification:", data);
+
+    const title = data.title ?? "Notification";
+    const body = data.body ?? data.message ?? "New activity";
+
+    alert(`${title}: ${body}`); // Replace with toast system if you want
+  };
+
+  source.onerror = (err) => {
+    console.error("SSE connection failed:", err);
+    source.close();
+  };
+
+  return () => source.close();
+}, [user?.sub]);
     // Initialize device info and IP on component mount
     useEffect(() => {
         const initializeMetadata = async () => {
@@ -190,9 +240,24 @@ const Page = () => {
             return;
         }
         e.preventDefault();
-        console.log("Form submitted");
-        console.log(reportMarker);
         
+        if (isEmergency) {
+            const crisisData = {
+                userId: user?.sub,
+                location: reportMarker,
+                radiusMeters: radius,
+                type: e.target.indicator.value,
+                severity: e.target.severity.value,
+                description: e.target.description.value,
+                reportedAt: new Date().toISOString(),
+                metadata: metadata,
+                isEmergency: true,
+                title: "Wildfire Report"
+                // Add any other relevant data for crisis reports
+            };
+            
+        }
+
         // Create comprehensive metadata
         const enhancedMetadata = {
             // User info
@@ -222,11 +287,12 @@ const Page = () => {
             userId: user?.sub, // Replace with actual user ID
             location: reportMarker, // Use the marker location
             radiusMeters: reportMarker.radiusMeters, // Default radius
-            type: e.target.indicator.value, // Get indicator from form
-            severity: e.target.severity.value,
+            type: isEmergency ? e.target.indicator.value : e.target.concern_type?.value || "other", // Get indicator from form
+            severity: isEmergency ? e.target.severity.value : "low",
             description: e.target.description.value,
             reportedAt: new Date().toISOString(), // Use current time
             metadata: enhancedMetadata, // Add the enhanced metadata
+            isEmergency: isEmergency, // Whether this is an emergency report or not
         };
         
         console.log("Enhanced report data:", reportData);
@@ -289,42 +355,97 @@ const Page = () => {
                                 ✕
                             </motion.button>
 
-                            <motion.h2 variants={itemVariants}>Report a Fire</motion.h2>
-                            <motion.p className={styles.reportFormField} variants={itemVariants}>Click anywhere on the map to place a marker. Drag the marker on the map to set the fire location.</motion.p>
-                            <motion.div className={styles.reportFormField} variants={itemVariants}>
-                                    <label className={styles.reportFormFieldLabel} htmlFor="type">What are you currently experiencing?</label>
+                            <motion.h2 variants={itemVariants}>{isEmergency ? "Report a Fire" : "Report a Crisis"}</motion.h2>
+                            
+                            <motion.div 
+                                className={styles.formToggle}
+                                variants={itemVariants}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    marginBottom: '15px',
+                                }}
+                            >
+                                <button 
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsEmergency(!isEmergency);
+                                    }}
+                                    style={{
+                                        backgroundColor: isEmergency ? 'rgb(121, 64, 180)' : 'rgb(255, 207, 34)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '20px',
+                                        padding: '8px 15px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                    }}
+                                >
+                                    Switch to {isEmergency ? 'Non-Emergency' : 'Emergency'} Report
+                                </button>
+                            </motion.div>
+                            
+                            <motion.p className={styles.reportFormField} variants={itemVariants}>Click anywhere on the map to place a marker. Drag the marker on the map to set the location.</motion.p>
+                            {isEmergency ? (
+                                <>
+                                    <motion.div className={styles.reportFormField} variants={itemVariants}>
+                                        <label className={styles.reportFormFieldLabel} htmlFor="type">What are you currently experiencing?</label>
+                                        <div className={styles.radioGroupRow}>
+                                            <div className={styles.radioFieldWrapper}>
+                                                <input type="radio" id="typeChoice1" name="indicator" value="smell_smoke" />
+                                                <label htmlFor="typeChoice1">I smell smoke</label>
+                                            </div>
+                                            <div className={styles.radioFieldWrapper}>
+                                                <input type="radio" id="typeChoice2" name="indicator" value="visible_smoke" />
+                                                <label htmlFor="typeChoice2">I see smoke</label>
+                                            </div>
+                                            <div className={styles.radioFieldWrapper}>
+                                                <input type="radio" id="typeChoice3" name="indicator" value="visible_fire" />
+                                                <label htmlFor="typeChoice3">I see fire</label>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                    <motion.div className={styles.reportFormField} variants={itemVariants}>
+                                        <label className={styles.reportFormFieldLabel} htmlFor="severity">How would you rate the severity?</label>
+                                        <div className={styles.radioGroupRow}>
+                                            <div className={styles.radioFieldWrapper}>
+                                                <input type="radio" id="severity-low" name="severity" value="low" defaultChecked />
+                                                <label htmlFor="severity-low">Low</label>
+                                            </div>
+                                            <div className={styles.radioFieldWrapper}>
+                                                <input type="radio" id="severity-moderate" name="severity" value="moderate" />
+                                                <label htmlFor="severity-moderate">Fair</label>
+                                            </div>
+                                            <div className={styles.radioFieldWrapper}>
+                                                <input type="radio" id="severity-high" name="severity" value="high" />
+                                                <label htmlFor="severity-high">High</label>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                </>
+                            ) : (
+                                <motion.div className={styles.reportFormField} variants={itemVariants}>
+                                    <label className={styles.reportFormFieldLabel} htmlFor="concern_type">Type of Concern</label>
                                     <div className={styles.radioGroupRow}>
                                         <div className={styles.radioFieldWrapper}>
-                                            <input type="radio" id="typeChoice1" name="indicator" value="smell_smoke" />
-                                            <label htmlFor="typeChoice1">I smell smoke</label>
+                                            <input type="radio" id="concernType1" name="concern_type" value="flood_risk" />
+                                            <label htmlFor="concernType1">Flood Risk</label>
                                         </div>
                                         <div className={styles.radioFieldWrapper}>
-                                            <input type="radio" id="typeChoice2" name="indicator" value="visible_smoke" />
-                                            <label htmlFor="typeChoice2">I see smoke</label>
+                                            <input type="radio" id="concernType2" name="concern_type" value="hazardous_area" />
+                                            <label htmlFor="concernType2">Hazard</label>
                                         </div>
                                         <div className={styles.radioFieldWrapper}>
-                                            <input type="radio" id="typeChoice3" name="indicator" value="visible_fire" />
-                                            <label htmlFor="typeChoice3">I see fire</label>
+                                            <input type="radio" id="concernType3" name="concern_type" value="other" defaultChecked />
+                                            <label htmlFor="concernType3">Other</label>
                                         </div>
                                     </div>
-                            </motion.div>
-                            <motion.div className={styles.reportFormField} variants={itemVariants}>
-                                <label className={styles.reportFormFieldLabel} htmlFor="severity">How would you rate the severity?</label>
-                                <div className={styles.radioGroupRow}>
-                                    <div className={styles.radioFieldWrapper}>
-                                        <input type="radio" id="severity-low" name="severity" value="low" defaultChecked />
-                                        <label htmlFor="severity-low">Low</label>
-                                    </div>
-                                    <div className={styles.radioFieldWrapper}>
-                                        <input type="radio" id="severity-moderate" name="severity" value="moderate" />
-                                        <label htmlFor="severity-moderate">Fair</label>
-                                    </div>
-                                    <div className={styles.radioFieldWrapper}>
-                                        <input type="radio" id="severity-high" name="severity" value="high" />
-                                        <label htmlFor="severity-high">High</label>
-                                    </div>
-                                </div>
-                            </motion.div>
+                                </motion.div>
+                            )}
                             {/* <motion.div className={styles.reportFormField} variants={itemVariants}>
                                     <label htmlFor='contactChoice1'>Please select your preferred contact method:</label>
                                     <div className={styles.radioGroupRow}>
@@ -350,8 +471,9 @@ const Page = () => {
                             </motion.div>
                             <motion.div className={styles.buttonGroup} variants={itemVariants}>
                                 <button type="submit" style={{
-                                    backgroundColor: 'rgb(255, 207, 34)',
-                                }} onClick={() => { }}>Submit</button>
+                                    backgroundColor: isEmergency ? 'rgb(255, 207, 34)' : 'rgb(121, 64, 180)',
+                                    color: isEmergency ? 'black' : 'white',
+                                }} onClick={() => { }}>Submit {isEmergency ? 'Emergency' : 'Report'}</button>
                                 <button type="button" style={{
                                     backgroundColor: 'white'
                                 }} onClick={(e) => {
@@ -370,13 +492,13 @@ const Page = () => {
                                 opacity: isReporting ? 0 : 1,
                             }}
                         >
-                            Report Fire
+                            {isEmergency ? "Report Fire" : "Report Issue"}
                         </motion.span>
                     </AnimatePresence>
                 </motion.div>
             </div>
         </>
     )
-}
 
+}
 export default Page;

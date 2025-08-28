@@ -116,6 +116,7 @@ crisisCollection = db.Crises
 # Global list of connected SSE clients
 notification_clients = []
 
+
 def broadcast_notification_to_clients(user_ids: list, message: dict):
     formatted = f"data: {json.dumps(message)}\n\n"
     for client in notification_clients:
@@ -685,6 +686,7 @@ def approveReport():
                 "seen": False,
                 "createdAt": datetime.datetime.utcnow().isoformat()
             })
+
         broadcast_notification_to_clients(user_ids, {
             "title": "New Approved Report Nearby",
             "body": "A new report was approved near your area. Check it out!",

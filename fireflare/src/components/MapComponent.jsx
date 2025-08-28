@@ -76,6 +76,9 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
     getLocalStorageItem('showAQILayer', true)
   );
   
+  // State to control visibility of reports overlay
+  const [showReportsOverlay, setShowReportsOverlay] = useState(true);
+  
   // State for AQI popup
   const [selectedAQI, setSelectedAQI] = useState(null);
 
@@ -440,8 +443,11 @@ const handleMapClick = useCallback((event) => {
                     setShowWildfire={updateShowWildfireLegend}
                     setShowAQILayer={updateShowAQILayer}
                     showAQILayer={showAQILayer}
+                    setShowReportsOverlay={setShowReportsOverlay}
+                    showReportsOverlay={showReportsOverlay}
                     showWildfireLayer={showWildfireLayer}
                     setShowWildfireLayer={updateShowWildfireLayer}
+                    toggleReportsOverlay={() => setShowReportsOverlay(!showReportsOverlay)}
                   />
                 )
               }
@@ -508,13 +514,13 @@ const handleMapClick = useCallback((event) => {
         />
       )}
       {
-        moderator && user && !isReporting && (
+        moderator && user  && showReportsOverlay && !isReporting && (
           <ModeratorOverlay centerMap={centerMap} setCurrentReport={setCurrentReport} unverifiedReports={unverifiedReports} verifiedReports={verifiedReports} />
         )
       }
       
-      {/* User Reports Overlay - Only shown for regular users when not reporting */}
-      {!moderator && user && !isReporting && (
+      {/* User Reports Overlay - Only shown for regular users when toggle is active */}
+      {!moderator && user && !isReporting && showReportsOverlay && (
         <UserReportsOverlay centerMap={centerMap} setCurrentReport={setCurrentReport} verifiedReports={verifiedReports} />
       )}
       {/* Loading indicator for user check */}

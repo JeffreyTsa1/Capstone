@@ -473,7 +473,7 @@ const Page = () => {
                                 <button type="submit" style={{
                                     backgroundColor: isEmergency ? 'rgb(255, 207, 34)' : 'rgb(121, 64, 180)',
                                     color: isEmergency ? 'black' : 'white',
-                                }} onClick={() => { }}>Submit {isEmergency ? 'Emergency' : 'Report'}</button>
+                                }} onClick={() => { }}>Submit</button>
                                 <button type="button" style={{
                                     backgroundColor: 'white'
                                 }} onClick={(e) => {

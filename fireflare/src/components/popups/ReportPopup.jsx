@@ -670,7 +670,7 @@ const ReportPopup = ({currentReport, onClose}) => {
                 id="moderatorDescription"
                 name="moderatorDescription"
                 rows="4"
-                className="moderatorDescription"
+                className="moderatorTextArea"
                 placeholder={moderatorWindowStrings[moderatorPanel].inputPlaceholder}
                 style={{
                   width: "100%",
@@ -678,7 +678,7 @@ const ReportPopup = ({currentReport, onClose}) => {
                   border: "1px solid #e0e0e0",
                   borderRadius: "4px",
                   fontSize: "14px",
-                  resize: "vertical"
+                  resize: "none"
                 }}
               ></textarea>
               
@@ -730,6 +730,7 @@ const ReportPopup = ({currentReport, onClose}) => {
                 <textarea
                   id="moderatorBackground"
                   name="moderatorBackground"
+                  className='moderatorTextArea'
                   rows="2"
                   placeholder="Add any background information..."
                   style={{
@@ -738,7 +739,7 @@ const ReportPopup = ({currentReport, onClose}) => {
                     border: "1px solid #e0e0e0",
                     borderRadius: "4px",
                     fontSize: "14px",
-                    resize: "vertical"
+                    resize: "none"
                   }}
                 ></textarea>
               </div>

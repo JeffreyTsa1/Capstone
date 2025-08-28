@@ -102,6 +102,9 @@
     caret-color: #223600;
 }
 
+.settingsPageWrapper p {
+    color: var(--foreground) !important;
+}
 
 .settingsPageWrapper {
     display: flex;

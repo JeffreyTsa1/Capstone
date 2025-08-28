@@ -9,3 +9,4 @@ requests
 pytest
 pytest-flask
 gunicorn
+gevent>=22.10.1

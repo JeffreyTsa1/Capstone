@@ -4,6 +4,22 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '@auth0/nextjs-auth0';
 import './reportPopup.css';
 const moderatorWindowStrings = {
+    "update": {"Title": "Update Report",
+        "description": "Update information about this approved report.",
+        "buttonText": "Update Report",
+        "inputPlaceholder": "Enter update notes here...",
+        "submissionWarning": "Your update will be added to the report history.",
+        "buttonColor": "#3b82f6", // Blue for updates
+        "buttonTextColor": "#fff" // White text for contrast
+    },
+    "contained": {"Title": "Mark as Contained",
+        "description": "Mark this fire as contained or resolved.",
+        "buttonText": "Mark as Contained",
+        "inputPlaceholder": "Enter containment details here...",
+        "submissionWarning": "Are you sure you want to mark this report as contained?",
+        "buttonColor": "#10b981", // Green for contained
+        "buttonTextColor": "#fff" // White text for contrast
+    },
     "approve": {"Title": "Approve Report",
         "description": "Please provide a description for the approval.",
         "buttonText": "Yes, Approve",
@@ -11,7 +27,6 @@ const moderatorWindowStrings = {
         "submissionWarning": "Are you sure you want to approve this report? This action cannot be undone.",
         "buttonColor": "#4CAF50", // Green for approval
         "buttonTextColor": "#fff", // White text for contrast
-
     },
     "reject": {"Title": "Reject Report",
         "description": "Please provide a description for the rejection.",
@@ -184,6 +199,67 @@ const ReportPopup = ({currentReport, onClose}) => {
             showToast("An error occurred while escalating the report", true);
         });
     }
+    
+    const submitUpdate = () => {
+        // API call to backend to update an approved report
+        const body = {
+            ...getModeratorFormData(),
+            action: "update",
+            reportID: currentReport?._id?.$oid,
+            updateType: "information"
+        };
+        
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/reports/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        }).then(response => {
+            if (response.ok) {
+                showToast("Report updated successfully");
+                setModeratorPanel(null);
+                // Reload the page or update the report list
+                window.location.reload();
+            } else {
+                showToast("Failed to update report", true);
+            }
+        }).catch(error => {
+            console.error("Error updating report:", error);
+            showToast("An error occurred while updating the report", true);
+        });
+    }
+    
+    const submitContained = () => {
+        // API call to backend to mark report as contained
+        const body = {
+            ...getModeratorFormData(),
+            action: "update",
+            reportID: currentReport?._id?.$oid,
+            updateType: "contained",
+            fireContained: true
+        };
+        
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/reports/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        }).then(response => {
+            if (response.ok) {
+                showToast("Report marked as contained successfully");
+                setModeratorPanel(null);
+                // Reload the page or update the report list
+                window.location.reload();
+            } else {
+                showToast("Failed to mark report as contained", true);
+            }
+        }).catch(error => {
+            console.error("Error marking report as contained:", error);
+            showToast("An error occurred while updating the report", true);
+        });
+    }
 
   // Helper function to format date
   const formatDate = (dateString) => {
@@ -252,6 +328,89 @@ const ReportPopup = ({currentReport, onClose}) => {
       }}>
         {getStatusText()}
       </div>
+
+      {/* Update Actions - Only shown for approved reports */}
+      {hasModeratorData && currentReport.moderatorDescription[0].approvedAt && canModerate && (
+        <div className="approvedReportActions" style={{
+          display: "flex",
+          gap: "8px",
+          marginBottom: "15px",
+          flexWrap: "wrap"
+        }}>
+          <motion.button 
+            whileHover={{ scale: 1.03 }}
+            onClick={() => handleModeratorPanel("update")}
+            style={{
+              backgroundColor: "#3b82f6",
+              color: "white",
+              padding: "6px 12px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "12px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Update Info
+          </motion.button>
+          
+          {!currentReport.moderatorDescription[0].fireContained && (
+            <motion.button 
+              whileHover={{ scale: 1.03 }}
+              onClick={() => handleModeratorPanel("contained")}
+              style={{
+                backgroundColor: "#10b981",
+                color: "white",
+                padding: "6px 12px",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontSize: "12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              Mark as Contained
+            </motion.button>
+          )}
+          
+          <motion.button 
+            whileHover={{ scale: 1.03 }}
+            onClick={() => handleModeratorPanel("escalate")}
+            style={{
+              backgroundColor: "#FF9800",
+              color: "white",
+              padding: "6px 12px",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "12px",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M13 17l5-5-5-5M6 17l5-5-5-5"></path>
+            </svg>
+            Escalate
+          </motion.button>
+        </div>
+      )}
 
       {/* Moderator Section - Shown if available */}
       {hasModeratorData && (
@@ -326,7 +485,7 @@ const ReportPopup = ({currentReport, onClose}) => {
           fontSize: "13px"
         }}>{currentReport.description}</p>
         
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "10px" }}>
           <div>
             <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Reported By</label>
             <p style={{ margin: "0 0 8px 0" }}>{currentReport.author}</p>
@@ -472,17 +631,23 @@ const ReportPopup = ({currentReport, onClose}) => {
               boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
               border: `1px solid ${
                 moderatorPanel === "approve" ? "#4CAF50" :
-                moderatorPanel === "reject" ? "#F44336" : "#FF9800"
+                moderatorPanel === "reject" ? "#F44336" : 
+                moderatorPanel === "update" ? "#3b82f6" :
+                moderatorPanel === "contained" ? "#10b981" : "#FF9800"
               }`
             }}
           >
             <h4 style={{
               margin: "0 0 15px 0",
               color: moderatorPanel === "approve" ? "#4CAF50" :
-                    moderatorPanel === "reject" ? "#F44336" : "#FF9800",
+                    moderatorPanel === "reject" ? "#F44336" : 
+                    moderatorPanel === "update" ? "#3b82f6" :
+                    moderatorPanel === "contained" ? "#10b981" : "#FF9800",
               borderBottom: `1px solid ${
                 moderatorPanel === "approve" ? "#4CAF50" :
-                moderatorPanel === "reject" ? "#F44336" : "#FF9800"
+                moderatorPanel === "reject" ? "#F44336" : 
+                moderatorPanel === "update" ? "#3b82f6" :
+                moderatorPanel === "contained" ? "#10b981" : "#FF9800"
               }`,
               paddingBottom: "8px"
             }}>
@@ -595,11 +760,15 @@ const ReportPopup = ({currentReport, onClose}) => {
                 className={`${moderatorPanel}Button`} 
                 onClick={
                   moderatorPanel === "approve" ? submitApproval :
-                  moderatorPanel === "reject" ? submitRejection : submitEscalation
+                  moderatorPanel === "reject" ? submitRejection : 
+                  moderatorPanel === "update" ? submitUpdate :
+                  moderatorPanel === "contained" ? submitContained : submitEscalation
                 }
                 style={{
                   backgroundColor: moderatorPanel === "approve" ? "#4CAF50" :
-                                  moderatorPanel === "reject" ? "#F44336" : "#FF9800",
+                                  moderatorPanel === "reject" ? "#F44336" : 
+                                  moderatorPanel === "update" ? "#3b82f6" :
+                                  moderatorPanel === "contained" ? "#10b981" : "#FF9800",
                   color: "white",
                   padding: "10px 20px",
                   border: "none",

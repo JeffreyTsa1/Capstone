@@ -1,7 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState, memo } from "react";
-import './components.css';
+// import '';
 const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports, verifiedReports }) => {
     const [activeTab, setActiveTab] = useState("unverified");
 

@@ -275,7 +275,7 @@
 
 .reportPopupContainer {
   padding: 15px;
-  max-width: 400px;
+  max-width: 420px;
   max-height: 460px;
   overflow: auto;
   position: relative;
@@ -427,8 +427,8 @@
 .toggleWrapper {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   gap: 10px;
-  align-items: center;
   margin: 5px 0px;
 }
 .legend-toggles {

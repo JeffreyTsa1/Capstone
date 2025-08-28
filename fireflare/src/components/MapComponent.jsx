@@ -11,13 +11,14 @@ import { heatmapLayer } from './HeatmapStyling';
 import { useUser } from "@auth0/nextjs-auth0"
 import Onboarding from "./Onboarding";
 import { AnimatePresence, motion } from "motion/react";
-import ModeratorOverlay from "./ModeratorOverlay";
+import ModeratorOverlay from "./overlays/ModeratorOverlay";
 import UserOverlay from "./UserOverlay";
 import ReportPopup from "./popups/ReportPopup";
 import AQILegend from "./AQILegend";
 import WildfireLegend from "./WildfireLegend";
 import AQIPopup from "./popups/AQIPopup";
 import { checkUserInDatabase } from "../lib/api";
+import { ReactServerDOMTurbopackClient } from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
 
 // import { useUser } from "@auth0/nextjs-auth0";
 
@@ -35,7 +36,8 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
     latitude: 43.4436,
     zoom: 4,
   });
-  const [reports, setReports] = useState([]);
+  const [verifiedReports, setVerifiedReports] = useState([]);
+  const [unverifiedReports, setUnverifiedReports] = useState([]);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [marker, setMarker] = useState(null);
   const [currentReport, setCurrentReport] = useState(null);
@@ -46,10 +48,32 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
   
   // 1) state to hold AQ geojson
   const [aqGeoJSON, setAqGeoJSON] = useState({ type: 'FeatureCollection', features: [] });
-  const [showAQILegend, setShowAQILegend] = useState(true);
-  const [showWildfireLegend, setShowWildfireLegend] = useState(true);
-  const [showWildfireLayer, setShowWildfireLayer] = useState(true); 
-  const [showAQILayer, setShowAQILayer] = useState(true);
+  
+  // Helper function to safely access localStorage (only in browser)
+  const getLocalStorageItem = (key, defaultValue) => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(key);
+      return saved !== null ? JSON.parse(saved) : defaultValue;
+    }
+    return defaultValue;
+  };
+  
+  // Initialize state from localStorage or use defaults
+  const [showAQILegend, setShowAQILegend] = useState(() => 
+    getLocalStorageItem('showAQILegend', false)
+  );
+  
+  const [showWildfireLegend, setShowWildfireLegend] = useState(() => 
+    getLocalStorageItem('showWildfireLegend', false)
+  );
+  
+  const [showWildfireLayer, setShowWildfireLayer] = useState(() => 
+    getLocalStorageItem('showWildfireLayer', true)
+  ); 
+  
+  const [showAQILayer, setShowAQILayer] = useState(() => 
+    getLocalStorageItem('showAQILayer', true)
+  );
   
   // State for AQI popup
   const [selectedAQI, setSelectedAQI] = useState(null);
@@ -103,10 +127,36 @@ const handleMapClick = useCallback((event) => {
   }
 }, [isReporting]);// 4) kick off on load, and on moveend
 
-const memoizedSetUserMenuOpen = useCallback(setUserMenuOpen, []);
-const memoizedUserData = useMemo(() => userData, [userData]);
-
-
+  const memoizedSetUserMenuOpen = useCallback(setUserMenuOpen, []);
+  const memoizedUserData = useMemo(() => userData, [userData]);
+  
+  // Helper function to safely set localStorage (only in browser)
+  const setLocalStorageItem = useCallback((key, value) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  }, []);
+  
+  // Custom state setters that also update localStorage
+  const updateShowAQILegend = useCallback((value) => {
+    setShowAQILegend(value);
+    setLocalStorageItem('showAQILegend', value);
+  }, [setLocalStorageItem]);
+  
+  const updateShowWildfireLegend = useCallback((value) => {
+    setShowWildfireLegend(value);
+    setLocalStorageItem('showWildfireLegend', value);
+  }, [setLocalStorageItem]);
+  
+  const updateShowAQILayer = useCallback((value) => {
+    setShowAQILayer(value);
+    setLocalStorageItem('showAQILayer', value);
+  }, [setLocalStorageItem]);
+  
+  const updateShowWildfireLayer = useCallback((value) => {
+    setShowWildfireLayer(value);
+    setLocalStorageItem('showWildfireLayer', value);
+  }, [setLocalStorageItem]);
   const centerMap = useCallback((newLongitude, newLatitude, newZoomLevel) => {
     console.log("Centered the map to: " + newLongitude + ", " + newLatitude + ", zoom: " + newZoomLevel);
     mapRef.current?.flyTo({
@@ -141,7 +191,13 @@ const memoizedUserData = useMemo(() => userData, [userData]);
       .then(response => response.json())
       .then(data => {
         console.log("Reports data loaded:", data);
-        setReports(data); 
+
+        const verified = data.reports.filter(report => report.isVerified === true);
+        const unverified = data.reports.filter(report => report.isVerified === false);
+        console.log("Verified reports:", verified);
+        setUnverifiedReports(unverified); 
+        setVerifiedReports(verified);
+
       })
       .catch(error => {
         console.error("Error loading reports data:", error);
@@ -217,17 +273,11 @@ const memoizedUserData = useMemo(() => userData, [userData]);
 
   }, []);
 
-
-
-
-
   // Function to handle onboarding completion
   const handleOnboardingSkip = () => {
     setShowOnboarding(false);
     setUserExistsInDB(false); // Keep as false so they can be prompted again later
   };
-
-                // console.log("User data:", userData)
 
   const handleMarkerDrop = useCallback((event) => {
     console.log("clicked, but not reporting")
@@ -381,13 +431,13 @@ const memoizedUserData = useMemo(() => userData, [userData]);
                     moderator={moderator}
                     userData={memoizedUserData}
                     showAQI={showAQILegend}
-                    setShowAQI={setShowAQILegend}
+                    setShowAQI={updateShowAQILegend}
                     showWildfire={showWildfireLegend}
-                    setShowWildfire={setShowWildfireLegend}
-                    setShowAQILayer={setShowAQILayer}
+                    setShowWildfire={updateShowWildfireLegend}
+                    setShowAQILayer={updateShowAQILayer}
                     showAQILayer={showAQILayer}
                     showWildfireLayer={showWildfireLayer}
-                    setShowWildfireLayer={setShowWildfireLayer}
+                    setShowWildfireLayer={updateShowWildfireLayer}
                   />
                 )
               }
@@ -455,7 +505,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
       )}
       {
         moderator && user && !isReporting && (
-          <ModeratorOverlay centerMap={centerMap} setCurrentReport={setCurrentReport} />
+          <ModeratorOverlay centerMap={centerMap} setCurrentReport={setCurrentReport} unverifiedReports = {unverifiedReports} verifiedReports = {verifiedReports} />
         )
 
 
@@ -656,7 +706,7 @@ const memoizedUserData = useMemo(() => userData, [userData]);
             onClick={() => console.log(`Clicked marker: ${marker.name}`)}
           />
         )}
-        {moderator && reports && reports.reports.map((report) => (
+        {moderator && unverifiedReports && unverifiedReports.map((report) => (
           <Marker
             key={report._id.$oid}
             longitude={report.location.longitude}
@@ -668,11 +718,26 @@ const memoizedUserData = useMemo(() => userData, [userData]);
           />
         ))}
 
+        {
+          verifiedReports && verifiedReports.map((report) => (
+          <Marker
+            key={report._id.$oid}
+            longitude={report.location.longitude}
+            latitude={report.location.latitude}
+            color="orange"
+            onClick={() => {setCurrentReport(report)
+              centerMap(report.location.longitude, report.location.latitude-0.21, 9);
+            }}
+          />
 
+
+          ))
+
+        }
 
 
         {
-          moderator && currentReport && <Popup
+         currentReport && <Popup
             longitude={currentReport ? currentReport.location.longitude : 0}
             latitude={currentReport ? currentReport.location.latitude : 0}
             closeButton={true}

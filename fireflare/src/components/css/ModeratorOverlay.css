@@ -1,0 +1,65 @@
+
+.moderatorOverlay {
+  bottom: 20px;
+  min-width: 300px;
+  left: 20px;
+  z-index: 10;
+  max-width: 300px;
+  overflow: scroll;
+  z-index: 10;
+  max-height: 380px;
+  padding: 20px 0px;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.69);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(500px);
+  -webkit-backdrop-filter: blur(500px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  font-family: 'nexa', sans-serif;
+  font-size: 1.3rem;
+  /* min-width: 150px; */
+  text-align: center;
+  color: white;
+}
+
+
+.moderatorOverlay ul {
+    padding: 10px 0px;
+}
+
+.moderatorOverlay li {
+    list-style: none;
+    padding: 10px 20px;
+}
+
+.moderatorOverlay li h3 {
+    text-align: start;
+    font-size: 1rem;
+    font-family: 'proxima-nova', sans-serif;
+    font-weight: 600;
+    margin: 0px;
+}
+.moderatorOverlay li h3 span {
+    font-weight: 300;
+    font-size: 1rem;
+}
+.moderatorOverlay li h5 {
+    font-size: 1.4rem;
+    font-family: 'proxima-nova', sans-serif;
+    font-weight: 300;
+    margin: 0px;
+}   
+
+
+.moderatorOverlay li:hover {
+    background-color: var(--accent);
+    color: white;
+    cursor: pointer;
+}
+
+.moderatorOverlay h2 {
+    letter-spacing: 0.25rem;
+    text-transform: uppercase;
+}
+

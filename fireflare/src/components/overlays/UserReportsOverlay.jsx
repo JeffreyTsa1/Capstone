@@ -5,8 +5,9 @@ import { useState, memo } from "react";
 const UserReportsOverlay = memo(({ centerMap, setCurrentReport, verifiedReports }) => {
     const [activeTab, setActiveTab] = useState("reports");
 
-    // Placeholder data for official incidents
+    // Placeholder data for official incidents and crisis reports
     const officialIncidents = []; // This will be replaced with real data later
+    const crisisReports = []; // Placeholder for crisis reports
 
     return (
         <div>
@@ -62,8 +63,8 @@ const UserReportsOverlay = memo(({ centerMap, setCurrentReport, verifiedReports 
                             border: 'none',
                             color: activeTab === "reports" ? '#3b82f6' : '#a0a0a0',
                             fontWeight: activeTab === "reports" ? 600 : 400,
-                            fontSize: '0.9rem',
-                            padding: '5px 10px',
+                            fontSize: '0.8rem',
+                            padding: '5px 8px',
                             borderBottom: activeTab === "reports" ? '2px solid #3b82f6' : 'none',
                             cursor: 'pointer',
                             transition: 'all 0.2s ease'
@@ -75,11 +76,39 @@ const UserReportsOverlay = memo(({ centerMap, setCurrentReport, verifiedReports 
                                 background: 'rgb(121 64 180 / 10%)',
                                 color: 'white',
                                 borderRadius: '50%',
-                                padding: '0px 6px',
-                                fontSize: '0.75rem',
-                                marginLeft: '5px'
+                                padding: '0px 5px',
+                                fontSize: '0.7rem',
+                                marginLeft: '3px'
                             }}>
                                 {verifiedReports.length}
+                            </span>
+                        )}
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab("crisis")} 
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: activeTab === "crisis" ? '#3b82f6' : '#a0a0a0',
+                            fontWeight: activeTab === "crisis" ? 600 : 400,
+                            fontSize: '0.8rem',
+                            padding: '5px 8px',
+                            borderBottom: activeTab === "crisis" ? '2px solid #3b82f6' : 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                        }}
+                    >
+                        Crisis
+                        {crisisReports && crisisReports.length > 0 && (
+                            <span style={{
+                                background: '#dc2626',
+                                color: 'white',
+                                borderRadius: '50%',
+                                padding: '0px 5px',
+                                fontSize: '0.7rem',
+                                marginLeft: '3px'
+                            }}>
+                                {crisisReports.length}
                             </span>
                         )}
                     </button>
@@ -90,22 +119,22 @@ const UserReportsOverlay = memo(({ centerMap, setCurrentReport, verifiedReports 
                             border: 'none',
                             color: activeTab === "official" ? '#3b82f6' : '#a0a0a0',
                             fontWeight: activeTab === "official" ? 600 : 400,
-                            fontSize: '0.9rem',
-                            padding: '5px 10px',
+                            fontSize: '0.8rem',
+                            padding: '5px 8px',
                             borderBottom: activeTab === "official" ? '2px solid #3b82f6' : 'none',
                             cursor: 'pointer',
                             transition: 'all 0.2s ease'
                         }}
                     >
-                        Official Incidents
+                        Official
                         {officialIncidents && officialIncidents.length > 0 && (
                             <span style={{
                                 background: '#f59e0b',
                                 color: 'white',
                                 borderRadius: '50%',
-                                padding: '0px 6px',
-                                fontSize: '0.75rem',
-                                marginLeft: '5px'
+                                padding: '0px 5px',
+                                fontSize: '0.7rem',
+                                marginLeft: '3px'
                             }}>
                                 {officialIncidents.length}
                             </span>
@@ -221,6 +250,58 @@ const UserReportsOverlay = memo(({ centerMap, setCurrentReport, verifiedReports 
                             </div>
                         </motion.li>
                     ))}
+                    
+                    {activeTab === "crisis" && (
+                        <div style={{
+                            padding: '30px 20px',
+                            textAlign: 'center',
+                            color: '#a0a0a0',
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                marginBottom: '15px'
+                            }}>
+                                <span style={{ 
+                                    fontSize: '2rem',
+                                    marginRight: '10px',
+                                    color: '#dc2626'
+                                }}>
+                                    🚨
+                                </span>
+                                <h3 style={{ 
+                                    margin: 0,
+                                    color: '#dc2626',
+                                    fontSize: '1.1rem'
+                                }}>
+                                    Crisis Reports
+                                </h3>
+                            </div>
+                            <p style={{ margin: '0 0 10px 0', color: '#e0e0e0' }}>
+                                Emergency crisis reporting system
+                            </p>
+                            <p style={{ margin: '8px 0 0 0', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                                This feature will provide real-time updates on critical emergencies, 
+                                evacuation notices, and immediate safety alerts from emergency services.
+                            </p>
+                            <div style={{
+                                marginTop: '20px',
+                                padding: '15px',
+                                backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(220, 38, 38, 0.3)'
+                            }}>
+                                <p style={{ 
+                                    margin: 0, 
+                                    fontSize: '0.85rem',
+                                    color: '#fca5a5'
+                                }}>
+                                    📍 Integration with emergency broadcast systems coming soon
+                                </p>
+                            </div>
+                        </div>
+                    )}
                     
                     {activeTab === "official" && (
                         <div style={{

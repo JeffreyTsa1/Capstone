@@ -5,7 +5,7 @@ import styles from './page.module.css';
 import { motion, AnimatePresence } from 'motion/react';
 import { delay } from 'motion';
 import { useUser } from "@auth0/nextjs-auth0"
-
+import { useCallback } from 'react';
 const containerVariants = {
     closed: {
         width: '150px',
@@ -138,6 +138,21 @@ const Page = () => {
     });
 
     const { user } = useUser();
+
+    const handleSetIsReporting = () => {
+
+        if (user) {
+            setIsReporting(!isReporting);
+        } else {
+            // Store the fact that user was trying to report
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('redirectAfterLogin', 'report');
+                // Redirect to login
+                window.location.href = '/auth/login';
+            }
+        }
+
+    };
     // Initialize device info and IP on component mount
     useEffect(() => {
         const initializeMetadata = async () => {
@@ -349,7 +364,7 @@ const Page = () => {
                             key="report-button"
                             className={styles.reportButtonWrapper}
                             // variants={itemVariants}
-                            onClick={() => setIsReporting(true)}
+                            onClick={() => handleSetIsReporting()}
                             style={{
                                 cursor: "pointer",
                                 opacity: isReporting ? 0 : 1,

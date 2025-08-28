@@ -105,9 +105,7 @@ backgroundColor = "white",
         }}
         transition={{
           height: { 
-            type: "spring", 
-            stiffness: 300, 
-            damping: 25,
+            type: "tween", 
             delay: 0,
             duration: 0.4
           },

@@ -356,6 +356,10 @@
     font-size: 2.5rem;
 }
 
+.mapboxgl-popup {
+  max-width: 300px !important; /* or whatever width you need */
+}
+
 
 .moderatorOverlay {
   bottom: 20px;

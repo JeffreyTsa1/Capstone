@@ -46,7 +46,7 @@
     display: flex;
     text-align: center;
     flex-direction: column;
-    width: 50px;
+    width: 75px;
 }
 
 .radioFieldWrapper label {
@@ -142,4 +142,21 @@
     justify-content: center;
     align-items: center;
     font-weight: 800;
-}   
+}
+
+.formToggle {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.formToggle button {
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}

@@ -13,6 +13,7 @@ import Onboarding from "./Onboarding";
 import { AnimatePresence, motion } from "motion/react";
 import ModeratorOverlay from "./overlays/ModeratorOverlay";
 import UserOverlay from "./UserOverlay";
+import UserReportsOverlay from "./overlays/UserReportsOverlay";
 import ReportPopup from "./popups/ReportPopup";
 import AQILegend from "./AQILegend";
 import WildfireLegend from "./WildfireLegend";
@@ -272,6 +273,7 @@ const handleMapClick = useCallback((event) => {
     fetchReports();
 
   }, []);
+  
 
   // Function to handle onboarding completion
   const handleOnboardingSkip = () => {
@@ -358,6 +360,8 @@ const handleMapClick = useCallback((event) => {
     return marker && isReporting ? createCircle(marker, radiusMeters) : null;
   }, [marker, radiusMeters, isReporting, createCircle]);
   // alert(circleData)
+
+
   return (
     <div className="mapWrapper">
       <div >
@@ -505,11 +509,14 @@ const handleMapClick = useCallback((event) => {
       )}
       {
         moderator && user && !isReporting && (
-          <ModeratorOverlay centerMap={centerMap} setCurrentReport={setCurrentReport} unverifiedReports = {unverifiedReports} verifiedReports = {verifiedReports} />
+          <ModeratorOverlay centerMap={centerMap} setCurrentReport={setCurrentReport} unverifiedReports={unverifiedReports} verifiedReports={verifiedReports} />
         )
-
-
       }
+      
+      {/* User Reports Overlay - Only shown for regular users when not reporting */}
+      {!moderator && user && !isReporting && (
+        <UserReportsOverlay centerMap={centerMap} setCurrentReport={setCurrentReport} verifiedReports={verifiedReports} />
+      )}
       {/* Loading indicator for user check */}
       {checkingUser && (
         <div className="user-check-loading" style={{

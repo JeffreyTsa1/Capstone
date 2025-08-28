@@ -80,7 +80,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                         Verified
                         {verifiedReports && verifiedReports.length > 0 && (
                             <span style={{
-                                background: '#10b981',
+                                background: 'rgb(121 64 180 / 10%)',
                                 color: 'white',
                                 borderRadius: '50%',
                                 padding: '0px 6px',
@@ -196,16 +196,16 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                                 setCurrentReport(report)
                             }}
                             style={{
-                                background: 'rgba(16, 185, 129, 0.1)',
+                                background: 'rgb(121 64 180 / 10%)',
                                 borderRadius: '10px',
                                 margin: '10px 12px',
                                 padding: '14px 14px 10px 14px',
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
                                 cursor: 'pointer',
-                                border: '1px solid rgba(16, 185, 129, 0.2)',
+                                border: '1px solid rgb(121 64 180 / 10%)',
                                 transition: 'background 0.18s',
                             }}
-                            whileHover={{ backgroundColor: 'rgba(16, 185, 129, 0.15)' }}
+                            whileHover={{ backgroundColor: 'rgba(121, 64, 180,0.15)' }}
                         >
                             <div style={{
                                 display: 'flex', 
@@ -216,7 +216,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                                     Reported By: <span style={{ fontWeight: 400, color: '#cbd5e1' }}>{report.author}</span>
                                 </h3>
                                 <span style={{
-                                    backgroundColor: '#10b981',
+                                    backgroundColor: 'rgb(121 64 180 / 10%)',
                                     borderRadius: '0.25rem',
                                     color: '#fff',
                                     padding: '3px 8px',
@@ -280,16 +280,16 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                                 setCurrentReport(report)
                             }}
                             style={{
-                                background: report.isVerified ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.03)',
+                                background: report.isVerified ? 'rgb(121 64 180 / 10%)' : 'rgba(255,255,255,0.03)',
                                 borderRadius: '10px',
                                 margin: '10px 12px',
                                 padding: '14px 14px 10px 14px',
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
                                 cursor: 'pointer',
-                                border: report.isVerified ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(255,255,255,0.06)',
+                                border: report.isVerified ? '1px solid rgb(121 64 180 / 10%)' : '1px solid rgba(255,255,255,0.06)',
                                 transition: 'background 0.18s',
                             }}
-                            whileHover={{ backgroundColor: report.isVerified ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59,130,246,0.10)' }}
+                            whileHover={{ backgroundColor: report.isVerified ? 'rgb(121 64 180 / 15%)' : 'rgba(59,130,246,0.10)' }}
                         >
                             <div style={{
                                 display: 'flex', 
@@ -301,7 +301,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                                 </h3>
                                 {report.isVerified && (
                                     <span style={{
-                                        backgroundColor: '#10b981',
+                                        backgroundColor: 'rgb(121 64 180 / 10%)',
                                         borderRadius: '0.25rem',
                                         color: '#fff',
                                         padding: '3px 8px',

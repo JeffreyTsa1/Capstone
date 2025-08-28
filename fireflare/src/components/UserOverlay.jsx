@@ -58,7 +58,6 @@ const UserOverlay = memo(({
             <ul>
               <li className="legend-option">
                 <div className="legend-toggles">
-                  <span className="legend-header">Reports</span>
                   <div className="toggleWrapper">
                     <div 
                       className={`option ${showReportsOverlay ? 'option-active' : ''}`}

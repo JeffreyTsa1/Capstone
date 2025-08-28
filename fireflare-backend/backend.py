@@ -128,14 +128,17 @@ def broadcast_notification_to_clients(user_ids: list, message: dict):
 
 @app.route('/notifications/stream', methods=['GET'])
 def notification_stream():
+    
     user_id = request.args.get('userID')
     if not user_id:
         return jsonify({"error": "Missing userID in query params"}), 400
-
     q = deque()
     client = {"queue": q, "userID": user_id}
     notification_clients.append(client)
 
+    print("✅ Client connected:", user_id)
+    print("🔁 Current clients:", [c['userID'] for c in notification_clients])
+    
     def event_stream():
         try:
             while True:
@@ -203,7 +206,8 @@ def test_notification_all_users():
             "seen": False,
             "type": "test"
         })
-
+    print("📣 Broadcasting to:", user_ids)
+    print("📡 Connected clients:", [c.get("userID") for c in notification_clients])
     # Send to connected clients in real-time
     broadcast_notification_to_clients(user_ids, message)
     return jsonify({"message": "Notification sent to clients"}), 200

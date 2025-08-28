@@ -12,7 +12,7 @@ const userMenuVariants = {
   },
   open: {
     width: '260px',
-    height: '390px', // Increased height to accommodate legend options
+    height: '400px', // Increased height to accommodate legend options
     justifyContent: 'flex-start',
     transition: {
       delay: 0.1,

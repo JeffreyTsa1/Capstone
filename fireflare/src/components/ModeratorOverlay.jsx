@@ -13,7 +13,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                 border: '1px solid rgba(255,255,255,0.10)',
                 padding: '18px 0 10px 0',
                 minWidth: 300,
-                maxWidth: 340,
+                maxWidth: 350,
                 color: 'white',
                 fontFamily: 'proxima-nova, sans-serif',
             }}>
@@ -91,7 +91,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                             </span>
                         )}
                     </button>
-                    <button 
+                    {/* <button 
                         onClick={() => setActiveTab("all")} 
                         style={{
                             background: 'none',
@@ -106,7 +106,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                         }}
                     >
                         All Reports
-                    </button>
+                    </button> */}
                 </div>
                 
                 <ul style={{

@@ -463,7 +463,7 @@ const ReportPopup = ({currentReport, onClose}) => {
               borderRadius: "4px",
               fontSize: "13px",
               border: "1px solid #e0e0e0"
-            }}>{currentReport.moderatorDescription[0].description || "No notes provided"}</p>
+            }}>{currentReport.moderatorDescription[0].moderatorDescription || "No notes provided"}</p>
           </div>
         </div>
       )}

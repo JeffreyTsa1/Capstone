@@ -169,7 +169,7 @@ const UserReportsOverlay = memo(({ centerMap, setCurrentReport, verifiedReports 
                                 border: '1px solid rgb(121 64 180 / 10%)',
                                 transition: 'background 0.18s',
                             }}
-                            whileHover={{ backgroundColor: 'rgb(121 64 180 / 20%)' }}
+                            whileHover={{ backgroundColor: 'rgba(121,64,180,0.2)' }}
                         >
                             <div style={{
                                 display: 'flex', 
@@ -235,7 +235,7 @@ const UserReportsOverlay = memo(({ centerMap, setCurrentReport, verifiedReports 
                                 <label style={{ fontSize: '0.85rem', color: '#b3b3b3' }}>Description</label>
                                 <p style={{ margin: '4px 0 0 0', color: '#e0e0e0', fontSize: '0.97rem', fontWeight: 400 }}>{report.description}</p>
                             </div>
-                            <div className="splitRow" style={{ margin: '10px 0 0 0', gap: 16 }}>
+                            <div style={{ margin: '10px 0 0 0', gap: 16 }}>
                                 <div>
                                     <label style={{ fontSize: '0.85rem', color: '#b3b3b3' }}>Location</label>
                                     <h5 style={{ margin: 0, fontWeight: 500 }}>

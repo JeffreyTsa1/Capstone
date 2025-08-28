@@ -135,7 +135,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                                 border: '1px solid rgba(255,255,255,0.06)',
                                 transition: 'background 0.18s',
                             }}
-                            whileHover={{ backgroundColor: 'rgba(59,130,246,0.10)' }}
+                            whileHover={{ backgroundColor: 'rgba(121,64,180,0.2)' }}
                         >
                             <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#fff' }}>
                                 Reported By: <span style={{ fontWeight: 400, color: '#cbd5e1' }}>{report.author}</span>
@@ -205,7 +205,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                                 border: '1px solid rgba(16, 185, 129, 0.2)',
                                 transition: 'background 0.18s',
                             }}
-                            whileHover={{ backgroundColor: 'rgba(16, 185, 129, 0.15)' }}
+                            whileHover={{ backgroundColor: 'rgba(121,64,180,0.2)' }}
                         >
                             <div style={{
                                 display: 'flex', 
@@ -289,7 +289,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                                 border: report.isVerified ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(255,255,255,0.06)',
                                 transition: 'background 0.18s',
                             }}
-                            whileHover={{ backgroundColor: report.isVerified ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59,130,246,0.10)' }}
+                            whileHover={{ backgroundColor: report.isVerified ? 'rgba(121,64,180,0.2)' : 'rgba(59,130,246,0.10)' }}
                         >
                             <div style={{
                                 display: 'flex', 

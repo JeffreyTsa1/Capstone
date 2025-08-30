@@ -233,7 +233,7 @@ const UserReportsOverlay = memo(({ centerMap, setCurrentReport, verifiedReports 
                             </div>
                             <div style={{ margin: '10px 0 0 0' }}>
                                 <label style={{ fontSize: '0.85rem', color: '#b3b3b3' }}>Description</label>
-                                <p style={{ margin: '4px 0 0 0', color: '#e0e0e0', fontSize: '0.97rem', fontWeight: 400 }}>{report.description}</p>
+                                <p style={{ margin: '4px 0 0 0', color: '#e0e0e0', fontSize: '1rem', fontWeight: 400 }}>{report.description}</p>
                             </div>
                             <div style={{ margin: '10px 0 0 0', gap: 16 }}>
                                 <div>

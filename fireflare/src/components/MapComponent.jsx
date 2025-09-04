@@ -20,6 +20,7 @@ import WildfireLegend from "./WildfireLegend";
 import AQIPopup from "./popups/AQIPopup";
 import { checkUserInDatabase } from "../lib/api";
 import { ReactServerDOMTurbopackClient } from "next/dist/server/route-modules/app-page/vendored/ssr/entrypoints";
+import { useIsMobile } from "@/lib/hooks/useIsMobile";
 
 // import { useUser } from "@auth0/nextjs-auth0";
 
@@ -47,6 +48,8 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
   const [wildfires, setWildfires] = useState(null);
   const [radiusMeters, setRadiusMeters] = useState(1000); // Default radius in meters
   
+  const isMobile = useIsMobile();
+
   // 1) state to hold AQ geojson
   const [aqGeoJSON, setAqGeoJSON] = useState({ type: 'FeatureCollection', features: [] });
   
@@ -380,9 +383,11 @@ const handleMapClick = useCallback((event) => {
                 isReporting && user && <>
                 <motion.div className="locationOverlay">
                   <div className="locationOverlayHeader">
-                    <h2>Current Viewpoint</h2>
                   </div>
                   <div className="locationOverlayContent">
+               { !isMobile && (
+                    <div>
+                    <h2>Current Location</h2>
                     <div className="splitRow">
                       <div>
                         <label>Longitude</label>
@@ -397,7 +402,10 @@ const handleMapClick = useCallback((event) => {
                         <h5>{viewState.zoom.toFixed(2)}</h5>
                       </div>
                     </div>
-                    <div style={{ marginTop: 16 }}>
+                    </div>
+                    )
+              }
+                    <div>
                       <h2 >Marker Location</h2>
                       <div className="splitRow">
                         <div>

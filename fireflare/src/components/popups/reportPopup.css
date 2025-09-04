@@ -2,3 +2,269 @@
     font-family: nexa-text, sans-serif;
     resize: none;
 }
+
+.statusBadge {
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.approvedReportActions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.actionButton {
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.updateButton {
+    background-color: #3b82f6;
+}
+
+.containedButton {
+    background-color: #10b981;
+}
+
+.escalateActionButton {
+    background-color: #FF9800;
+}
+
+.moderatorSection {
+    background-color: #f1f7fa;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+}
+
+.moderatorSectionTitle {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+}
+
+.moderatorGrid {
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    gap: 10px;
+}
+
+.fieldLabel {
+    font-weight: bold;
+    font-size: 12px;
+    color: #546e7a;
+}
+
+.fieldValue {
+    margin: 0 0 8px 0;
+}
+
+.moderatorNotes {
+    margin: 0;
+    padding: 8px;
+    background-color: #ffffff;
+    border-radius: 4px;
+    font-size: 13px;
+    border: 1px solid #e0e0e0;
+}
+
+.reportDetailsSection {
+    background-color: #f5f5f5;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.reportDetailsTitle {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #2c3e50;
+}
+
+.reportDescription {
+    margin: 0 0 10px 0;
+    padding: 8px;
+    background-color: #ffffff;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.reportDetailsGrid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 10px;
+}
+
+.splitRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.coordinateLabel {
+    font-size: 11px;
+    color: #757575;
+}
+
+.coordinateValue {
+    margin: 0;
+    font-weight: bold;
+}
+
+.reportImage {
+    margin-bottom: 15px;
+    overflow: hidden;
+    border-radius: 6px;
+}
+
+.reportImageImg {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.reportActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.mainActionButton {
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.approveButton {
+    background-color: #4CAF50;
+}
+
+.rejectButton {
+    background-color: #F44336;
+}
+
+.escalateButton {
+    background-color: #FF9800;
+}
+
+.moderatorWindow {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.moderatorWindowTitle {
+    margin: 0 0 15px 0;
+    padding-bottom: 8px;
+}
+
+.moderatorForm {
+    margin-bottom: 15px;
+}
+
+.moderatorLabel {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #546e7a;
+}
+
+.moderatorTextarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: none;
+}
+
+.fireContainedSection {
+    margin-top: 15px;
+}
+
+.fireContainedOptions {
+    display: flex;
+    gap: 15px;
+}
+
+.fireContainedOption {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.fireContainedRadio {
+    margin-right: 5px;
+}
+
+.backgroundSection {
+    margin-top: 15px;
+}
+
+.submissionWarning {
+    background-color: #FFF3E0;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    border-left: 4px solid #FF9800;
+    font-size: 14px;
+}
+
+.moderatorButtonGroup {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.moderatorSubmitButton {
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    flex: 1;
+}
+
+.cancelButton {
+    background-color: #f5f5f5;
+    color: #333;
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.marginTop10 {
+    margin-top: 10px;
+}
+
+.backgroundInfo {
+    font-size: 13px;
+}
+
+.textCapitalize {
+    text-transform: capitalize;
+}

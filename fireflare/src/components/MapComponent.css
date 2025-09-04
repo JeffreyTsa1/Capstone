@@ -127,6 +127,24 @@
   text-align: center;
 }
 
+.locationOverlayContent {
+  display: flex;
+  flex-direction: row;
+  gap:20px;
+}
+
+.locationOverlayContent h5 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+@media screen and (min-width: 768px) {
+
+  .locationOverlayContent {
+    flex-direction: column;
+  }
+}
+
 .locationOverlayContent .splitRow {
   text-align: center;
 }

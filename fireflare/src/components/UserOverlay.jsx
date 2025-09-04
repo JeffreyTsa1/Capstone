@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { memo } from "react";
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 const userMenuVariants = {
   closed: {
@@ -36,6 +37,9 @@ const UserOverlay = memo(({
   showReportsOverlay,
   setShowReportsOverlay
 }) => {
+
+  const isMobile = useIsMobile();
+
   return (
     <motion.div
       className="userOverlay"
@@ -81,8 +85,11 @@ const UserOverlay = memo(({
               {/* Legend Toggle Options */}
               <li className="legend-option">
                 <div className="legend-toggles">
-                  <span className="legend-header">Map Legend</span>
-                  <div className="toggleWrapper">
+                  {
+                    !isMobile && (
+                      <>
+                        <span className="legend-header">Map Legend</span>
+                        <div className="toggleWrapper">
 
                     <div 
                       className={`option ${showAQI ? 'option-active' : ''}`} 
@@ -109,6 +116,9 @@ const UserOverlay = memo(({
                       <span className="option-label">Wildfires</span>
                     </div>
                   </div>
+                    </>
+                    )
+                  }
                   <span className="legend-header">Map Layers</span>
                   <div className="toggleWrapper">
                     <div 

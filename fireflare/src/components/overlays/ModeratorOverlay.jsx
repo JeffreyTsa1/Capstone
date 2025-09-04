@@ -105,7 +105,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                             transition: 'all 0.2s ease'
                         }}
                     >
-                        All Reports
+                        All
                     </button>
                 </div>
                 

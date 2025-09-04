@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { delay } from 'motion';
 import { useUser } from "@auth0/nextjs-auth0"
 import { useCallback } from 'react';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 const containerVariants = {
     closed: {
         width: '150px',
@@ -14,8 +15,16 @@ const containerVariants = {
     },
     open: {
         width: '300px',
-        height: '450px',
+        height: '400px',
         // maxHeight: '50vh',
+        justifyContent: 'flex-start',
+        transition: {
+            delay: 0.1,
+        },
+    },
+    mobilepreselected: {
+        width: '300px',
+        height: '100px',
         justifyContent: 'flex-start',
         transition: {
             delay: 0.1,
@@ -131,7 +140,8 @@ const Page = () => {
     const [userLocation, setUserLocation] = useState(null);
     const [isEmergency, setIsEmergency] = useState(true); // true for emergency, false for non-emergency
     
-    
+    const isMobile = useIsMobile();
+
     const { user } = useUser();
 
     // // Fetch unseen notifications and mark them as seen on page load
@@ -330,7 +340,7 @@ const Page = () => {
                     variants={containerVariants}
                     whileTap={{ scale: !isReporting ? 0.95 : 1 }}
                     initial="closed"
-                    animate={isReporting ? "open" : "closed"}
+                    animate={isReporting && isMobile && !reportMarker ? "mobilepreselected" : isReporting ? "open" : "closed"}
                     onClick={() => setIsReporting(true)}
                 >
                     <AnimatePresence>
@@ -355,6 +365,9 @@ const Page = () => {
                                 ✕
                             </motion.button>
 
+                            {isReporting && isMobile && !reportMarker && (<motion.p>
+                                Please place a marker on the map
+                            </motion.p>)}
                             <motion.h2 variants={itemVariants}>{isEmergency ? "Report a Fire" : "Report a Crisis"}</motion.h2>
                             
                             <motion.div 

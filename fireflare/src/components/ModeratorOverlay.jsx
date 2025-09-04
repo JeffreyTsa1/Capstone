@@ -8,14 +8,6 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
     return (
         <div>
             <div className="moderatorOverlay" style={{
-                borderRadius: '16px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-                border: '1px solid rgba(255,255,255,0.10)',
-                padding: '18px 0 10px 0',
-                minWidth: 300,
-                maxWidth: 350,
-                color: 'white',
-                fontFamily: 'proxima-nova, sans-serif',
             }}>
                 <h2 style={{
                     fontSize: '1.1rem',

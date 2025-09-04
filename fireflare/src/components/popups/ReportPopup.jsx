@@ -289,9 +289,7 @@ const ReportPopup = ({currentReport, onClose}) => {
   };
 
   return (
-    <div className="reportPopupContainer" style={{ 
-
-    }}>
+    <div className="reportPopupContainer">
       {/* Close button
       <div 
         onClick={closeReport}
@@ -316,43 +314,20 @@ const ReportPopup = ({currentReport, onClose}) => {
         ✕
       </div> */}
       {/* Status Badge */}
-      <div style={{ 
-        background: getStatusColor(),
-        color: "white",
-        padding: "5px 10px",
-        borderRadius: "4px",
-        display: "inline-block",
-        marginBottom: "10px",
-        fontSize: "14px",
-        fontWeight: "bold"
-      }}>
+      <div 
+        className="statusBadge" 
+        style={{ background: getStatusColor() }}
+      >
         {getStatusText()}
       </div>
 
       {/* Update Actions - Only shown for approved reports */}
       {hasModeratorData && currentReport.moderatorDescription[0].approvedAt && canModerate && (
-        <div className="approvedReportActions" style={{
-          display: "flex",
-          gap: "8px",
-          marginBottom: "15px",
-          flexWrap: "wrap"
-        }}>
+        <div className="approvedReportActions">
           <motion.button 
             whileHover={{ scale: 1.03 }}
             onClick={() => handleModeratorPanel("update")}
-            style={{
-              backgroundColor: "#3b82f6",
-              color: "white",
-              padding: "6px 12px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "12px",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px"
-            }}
+            className="actionButton updateButton"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -365,19 +340,7 @@ const ReportPopup = ({currentReport, onClose}) => {
             <motion.button 
               whileHover={{ scale: 1.03 }}
               onClick={() => handleModeratorPanel("contained")}
-              style={{
-                backgroundColor: "#10b981",
-                color: "white",
-                padding: "6px 12px",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontWeight: "bold",
-                fontSize: "12px",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px"
-              }}
+              className="actionButton containedButton"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -390,19 +353,7 @@ const ReportPopup = ({currentReport, onClose}) => {
           <motion.button 
             whileHover={{ scale: 1.03 }}
             onClick={() => handleModeratorPanel("escalate")}
-            style={{
-              backgroundColor: "#FF9800",
-              color: "white",
-              padding: "6px 12px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "12px",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px"
-            }}
+            className="actionButton escalateActionButton"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13 17l5-5-5-5M6 17l5-5-5-5"></path>
@@ -414,188 +365,121 @@ const ReportPopup = ({currentReport, onClose}) => {
 
       {/* Moderator Section - Shown if available */}
       {hasModeratorData && (
-        <div style={{ 
-          backgroundColor: "#f1f7fa", 
-          padding: "12px",
-          marginBottom: "15px",
-          borderRadius: "6px",
-          borderLeft: `4px solid ${getStatusColor()}`
-        }}>
-          <h3 style={{ margin: "0 0 10px 0", color: "#2c3e50" }}>Moderator Review</h3>
+        <div 
+          className="moderatorSection" 
+          style={{ borderLeft: `4px solid ${getStatusColor()}` }}
+        >
+          <h3 className="moderatorSectionTitle">Moderator Review</h3>
           
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr", gap: "10px" }}>
+          <div className="moderatorGrid">
             <div>
-              <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Moderator</label>
-              <p style={{ margin: "0 0 8px 0" }}>{currentReport.moderatorDescription[0].moderatorName}</p>
+              <label className="fieldLabel">Moderator</label>
+              <p className="fieldValue">{currentReport.moderatorDescription[0].moderatorName}</p>
             </div>
             
             <div>
-              <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Reviewed On</label>
-              <p style={{ margin: "0 0 8px 0" }}>{formatDate(currentReport.moderatorDescription[0].lastModeratedAt)}</p>
+              <label className="fieldLabel">Reviewed On</label>
+              <p className="fieldValue">{formatDate(currentReport.moderatorDescription[0].lastModeratedAt)}</p>
             </div>
             
-
-            
             <div>
-              <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Fire Contained</label>
-              <p style={{ margin: "0 0 8px 0" }}>{currentReport.moderatorDescription[0].fireContained ? "Yes" : "No"}</p>
+              <label className="fieldLabel">Fire Contained</label>
+              <p className="fieldValue">{currentReport.moderatorDescription[0].fireContained ? "Yes" : "No"}</p>
             </div>
                         {currentReport.moderatorDescription[0].approvedAt && (
               <div>
-                <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Approved On</label>
-                <p style={{ margin: "0 0 8px 0" }}>{formatDate(currentReport.moderatorDescription[0].approvedAt)}</p>
+                <label className="fieldLabel">Approved On</label>
+                <p className="fieldValue">{formatDate(currentReport.moderatorDescription[0].approvedAt)}</p>
               </div>
             )}
           </div>
           
-          
-          <div style={{ marginTop: "10px" }}>
-            <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Background</label>
-            <p style={{ margin: "0 0 8px 0", fontSize: "13px" }}>{currentReport.moderatorDescription[0].moderatorBackground || "Not provided"}</p>
+          <div className="marginTop10">
+            <label className="fieldLabel">Background</label>
+            <p className="fieldValue backgroundInfo">{currentReport.moderatorDescription[0].moderatorBackground || "Not provided"}</p>
           </div>
           
-          <div style={{ marginTop: "10px" }}>
-            <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Notes</label>
-            <p style={{ 
-              margin: "0", 
-              padding: "8px",
-              backgroundColor: "#ffffff",
-              borderRadius: "4px",
-              fontSize: "13px",
-              border: "1px solid #e0e0e0"
-            }}>{currentReport.moderatorDescription[0].moderatorDescription || "No notes provided"}</p>
+          <div className="marginTop10">
+            <label className="fieldLabel">Notes</label>
+            <p className="moderatorNotes">{currentReport.moderatorDescription[0].moderatorDescription || "No notes provided"}</p>
           </div>
         </div>
       )}
 
       {/* Report Details Section */}
-      <div style={{ 
-        backgroundColor: "#f5f5f5", 
-        padding: "12px",
-        borderRadius: "6px",
-        marginBottom: "15px"
-      }}>
-        <h3 style={{ margin: "0 0 10px 0", fontSize: "16px", color: "#2c3e50" }}>Report Details</h3>
+      <div className="reportDetailsSection">
+        <h3 className="reportDetailsTitle">Report Details</h3>
         
-        <p style={{ 
-          margin: "0 0 10px 0", 
-          padding: "8px", 
-          backgroundColor: "#ffffff", 
-          borderRadius: "4px", 
-          fontSize: "13px"
-        }}>{currentReport.description}</p>
+        <p className="reportDescription">{currentReport.description}</p>
         
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "10px" }}>
+        <div className="reportDetailsGrid">
           <div>
-            <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Reported By</label>
-            <p style={{ margin: "0 0 8px 0" }}>{currentReport.author}</p>
+            <label className="fieldLabel">Reported By</label>
+            <p className="fieldValue">{currentReport.author}</p>
           </div>
           
           <div>
-            <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Report Type</label>
-            <p style={{ margin: "0 0 8px 0", textTransform: "capitalize" }}>{currentReport.type || "N/A"}</p>
+            <label className="fieldLabel">Report Type</label>
+            <p className="fieldValue textCapitalize">{currentReport.type || "N/A"}</p>
           </div>
           
           <div>
-            <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Severity</label>
-            <p style={{ margin: "0 0 8px 0", textTransform: "capitalize" }}>{currentReport.severity || "N/A"}</p>
+            <label className="fieldLabel">Severity</label>
+            <p className="fieldValue textCapitalize">{currentReport.severity || "N/A"}</p>
           </div>
           
           <div>
-            <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Reported At</label>
-            <p style={{ margin: "0 0 8px 0" }}>{formatDate(currentReport.reportedAt)}</p>
+            <label className="fieldLabel">Reported At</label>
+            <p className="fieldValue">{formatDate(currentReport.reportedAt)}</p>
           </div>
         </div>
         
-        <div style={{ marginTop: "10px" }}>
-          <label style={{ fontWeight: "bold", fontSize: "12px", color: "#546e7a" }}>Location</label>
-          <div className="splitRow" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div className="marginTop10">
+          <label className="fieldLabel">Location</label>
+          <div className="splitRow">
             <div>
-              <label style={{ fontSize: "11px", color: "#757575" }}>Longitude</label>
-              <p style={{ margin: "0", fontWeight: "bold" }}>{currentReport.location.longitude.toFixed(4)}</p>
+              <label className="coordinateLabel">Longitude</label>
+              <p className="coordinateValue">{currentReport.location.longitude.toFixed(4)}</p>
             </div>
             <div>
-              <label style={{ fontSize: "11px", color: "#757575" }}>Latitude</label>
-              <p style={{ margin: "0", fontWeight: "bold" }}>{currentReport.location.latitude.toFixed(4)}</p>
+              <label className="coordinateLabel">Latitude</label>
+              <p className="coordinateValue">{currentReport.location.latitude.toFixed(4)}</p>
             </div>
           </div>
         </div>
       </div>
       {/* Image Display - if there's an image */}
       {currentReport.image && (
-        <div style={{ 
-          marginBottom: "15px",
-          overflow: "hidden",
-          borderRadius: "6px"
-        }}>
+        <div className="reportImage">
           <img 
             src={currentReport.image} 
             alt="Report image" 
-            style={{ 
-              width: "100%", 
-              height: "auto",
-              objectFit: "cover" 
-            }} 
+            className="reportImageImg"
           />
         </div>
       )}
       
       {/* Action Buttons - Only shown for not yet moderated reports */}
       {currentReport.moderatorDescription.length === 0 && (
-        <div className="reportActions" style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: "10px",
-          marginTop: "15px"
-        }}>
+        <div className="reportActions">
           <motion.button 
             whileHover={{ scale: 1.03 }}
-            className="approveButton" 
+            className="mainActionButton approveButton" 
             onClick={() => handleModeratorPanel("approve")}
-            style={{
-              backgroundColor: "#4CAF50",
-              color: "white",
-              padding: "10px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-            }}
           >
             Approve
           </motion.button>
           <motion.button 
             whileHover={{ scale: 1.03 }}
-            className="rejectButton" 
+            className="mainActionButton rejectButton" 
             onClick={() => handleModeratorPanel("reject")}
-            style={{
-              backgroundColor: "#F44336",
-              color: "white",
-              padding: "10px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-            }}
           >
             Reject
           </motion.button>
           <motion.button 
             whileHover={{ scale: 1.03 }}
-            className="escalateButton" 
+            className="mainActionButton escalateButton" 
             onClick={() => handleModeratorPanel("escalate")}
-            style={{
-              backgroundColor: "#FF9800",
-              color: "white",
-              padding: "10px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-            }}
           >
             Escalate
           </motion.button>
@@ -624,11 +508,6 @@ const ReportPopup = ({currentReport, onClose}) => {
               }
             }}
             style={{
-              marginTop: "15px",
-              padding: "15px",
-              backgroundColor: "#ffffff",
-              borderRadius: "6px",
-              boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
               border: `1px solid ${
                 moderatorPanel === "approve" ? "#4CAF50" :
                 moderatorPanel === "reject" ? "#F44336" : 
@@ -637,32 +516,28 @@ const ReportPopup = ({currentReport, onClose}) => {
               }`
             }}
           >
-            <h4 style={{
-              margin: "0 0 15px 0",
-              color: moderatorPanel === "approve" ? "#4CAF50" :
-                    moderatorPanel === "reject" ? "#F44336" : 
-                    moderatorPanel === "update" ? "#3b82f6" :
-                    moderatorPanel === "contained" ? "#10b981" : "#FF9800",
-              borderBottom: `1px solid ${
-                moderatorPanel === "approve" ? "#4CAF50" :
-                moderatorPanel === "reject" ? "#F44336" : 
-                moderatorPanel === "update" ? "#3b82f6" :
-                moderatorPanel === "contained" ? "#10b981" : "#FF9800"
-              }`,
-              paddingBottom: "8px"
-            }}>
+            <h4 
+              className="moderatorWindowTitle"
+              style={{
+                color: moderatorPanel === "approve" ? "#4CAF50" :
+                      moderatorPanel === "reject" ? "#F44336" : 
+                      moderatorPanel === "update" ? "#3b82f6" :
+                      moderatorPanel === "contained" ? "#10b981" : "#FF9800",
+                borderBottom: `1px solid ${
+                  moderatorPanel === "approve" ? "#4CAF50" :
+                  moderatorPanel === "reject" ? "#F44336" : 
+                  moderatorPanel === "update" ? "#3b82f6" :
+                  moderatorPanel === "contained" ? "#10b981" : "#FF9800"
+                }`
+              }}
+            >
               {moderatorWindowStrings[moderatorPanel].Title}
             </h4>
 
-            <form style={{ marginBottom: "15px" }}>
+            <form className="moderatorForm">
               <label 
                 htmlFor="moderatorDescription"
-                style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "bold",
-                  color: "#546e7a"
-                }}
+                className="moderatorLabel"
               >
                 Moderator Notes:
               </label>
@@ -670,44 +545,31 @@ const ReportPopup = ({currentReport, onClose}) => {
                 id="moderatorDescription"
                 name="moderatorDescription"
                 rows="4"
-                className="moderatorTextArea"
+                className="moderatorTextArea moderatorTextarea"
                 placeholder={moderatorWindowStrings[moderatorPanel].inputPlaceholder}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "4px",
-                  fontSize: "14px",
-                  resize: "none"
-                }}
               ></textarea>
               
               {/* Additional fields - can be expanded */}
-              <div style={{ marginTop: "15px" }}>
-                <label style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "bold",
-                  color: "#546e7a"
-                }}>
+              <div className="fireContainedSection">
+                <label className="moderatorLabel">
                   Fire Contained:
                 </label>
-                <div style={{ display: "flex", gap: "15px" }}>
-                  <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                <div className="fireContainedOptions">
+                  <label className="fireContainedOption">
                     <input 
                       type="radio" 
                       name="fireContained" 
                       value="yes" 
-                      style={{ marginRight: "5px" }}
+                      className="fireContainedRadio"
                     />
                     Yes
                   </label>
-                  <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                  <label className="fireContainedOption">
                     <input 
                       type="radio" 
                       name="fireContained" 
                       value="no" 
-                      style={{ marginRight: "5px" }}
+                      className="fireContainedRadio"
                       defaultChecked
                     />
                     No
@@ -715,50 +577,30 @@ const ReportPopup = ({currentReport, onClose}) => {
                 </div>
               </div>
               
-              <div style={{ marginTop: "15px" }}>
+              <div className="backgroundSection">
                 <label 
                   htmlFor="moderatorBackground"
-                  style={{
-                    display: "block",
-                    marginBottom: "8px",
-                    fontWeight: "bold",
-                    color: "#546e7a"
-                  }}
+                  className="moderatorLabel"
                 >
                   Background Information (optional):
                 </label>
                 <textarea
                   id="moderatorBackground"
                   name="moderatorBackground"
-                  className='moderatorTextArea'
+                  className='moderatorTextArea moderatorTextarea'
                   rows="2"
                   placeholder="Add any background information..."
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    border: "1px solid #e0e0e0",
-                    borderRadius: "4px",
-                    fontSize: "14px",
-                    resize: "none"
-                  }}
                 ></textarea>
               </div>
             </form>
             
-            <p style={{ 
-              backgroundColor: "#FFF3E0", 
-              padding: "10px", 
-              borderRadius: "4px", 
-              marginBottom: "15px",
-              borderLeft: "4px solid #FF9800",
-              fontSize: "14px"
-            }}>
+            <p className="submissionWarning">
               {moderatorWindowStrings[moderatorPanel].submissionWarning}
             </p>
             
-            <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
+            <div className="moderatorButtonGroup">
               <button 
-                className={`${moderatorPanel}Button`} 
+                className={`moderatorSubmitButton ${moderatorPanel}Button`} 
                 onClick={
                   moderatorPanel === "approve" ? submitApproval :
                   moderatorPanel === "reject" ? submitRejection : 
@@ -769,14 +611,7 @@ const ReportPopup = ({currentReport, onClose}) => {
                   backgroundColor: moderatorPanel === "approve" ? "#4CAF50" :
                                   moderatorPanel === "reject" ? "#F44336" : 
                                   moderatorPanel === "update" ? "#3b82f6" :
-                                  moderatorPanel === "contained" ? "#10b981" : "#FF9800",
-                  color: "white",
-                  padding: "10px 20px",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  flex: "1"
+                                  moderatorPanel === "contained" ? "#10b981" : "#FF9800"
                 }}
               >
                 {moderatorWindowStrings[moderatorPanel].buttonText}
@@ -784,15 +619,6 @@ const ReportPopup = ({currentReport, onClose}) => {
               <button 
                 className="cancelButton" 
                 onClick={() => setModeratorPanel(null)}
-                style={{
-                  backgroundColor: "#f5f5f5",
-                  color: "#333",
-                  padding: "10px 20px",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  flex: "1"
-                }}
               >
                 Cancel
               </button>

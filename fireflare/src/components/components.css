@@ -363,16 +363,16 @@
 
 .moderatorOverlay {
   bottom: 20px;
-  min-width: 300px;
+  min-width: 240px;
   left: 20px;
   z-index: 10;
-  max-width: 300px;
+  max-width: 280px;
   overflow: scroll;
   z-index: 10;
   max-height: 380px;
   padding: 20px 0px;
   position: absolute;
-  background: rgba(0, 0, 0, 0.69);
+  background: rgba(0, 0, 0, 0.55);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(500px);
   -webkit-backdrop-filter: blur(500px);
@@ -465,6 +465,12 @@
 
 
 @media screen and (min-width: 768px) {
+
+    .moderatorOverlay {
+        max-width: 200px;
+    }
+
+
     .onboardingContent {
         padding: 50px 80px;
         height: auto;

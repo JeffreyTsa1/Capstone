@@ -879,27 +879,66 @@ def getNasaWildfires():
                 should_fetch_new = False
                 print("Using cached wildfire data from database")
                 
-                # Return cached data
-                geojson_data = latest_data.get("geojsonData", {
-                    "type": "FeatureCollection",
-                    "features": []
-                })
+                # Return cached clustered data (for performance) 
+                # Check for new data structure first, fallback to old structure
+                if "clusteredData" in latest_data:
+                    geojson_data = latest_data["clusteredData"]
+                    print(f"Returning cached clustered data with {len(geojson_data.get('features', []))} features")
+                elif "geojsonData" in latest_data:
+                    # Legacy data - apply clustering on-the-fly
+                    print("Legacy data detected - applying clustering on-the-fly...")
+                    legacy_geojson = latest_data["geojsonData"]
+                    legacy_features = legacy_geojson.get("features", [])
+                    
+                    if len(legacy_features) > 1 and clustering_config['enable_clustering']:
+                        from utils.externalapi import cluster_geojson_points
+                        clustered_features = cluster_geojson_points(
+                            legacy_features, 
+                            clustering_config['cluster_distance_km']
+                        )
+                        print(f"Applied clustering: {len(legacy_features)} → {len(clustered_features)} features")
+                        geojson_data = {
+                            "type": "FeatureCollection",
+                            "features": clustered_features
+                        }
+                    else:
+                        geojson_data = legacy_geojson
+                        print("Using legacy data without clustering")
+                else:
+                    # No data found
+                    geojson_data = {
+                        "type": "FeatureCollection", 
+                        "features": []
+                    }
+                    print("No data found - returning empty collection")
+                
                 return jsonify(geojson_data), 200, {'Content-Type': 'application/json'}
         
         if should_fetch_new:
             print("Fetching fresh wildfire data from NASA API")
-            # Fetch fresh data from NASA API
-            geojson_data = fetch_nasa_geojson(
+            # Fetch both original and clustered data from NASA API
+            nasa_data = fetch_nasa_geojson(
                 map_key=mapbox_api,
                 source="VIIRS_SNPP_NRT",
                 bbox=[-140, 24, -50, 72],
-                days=2
+                days=2,
+                enable_clustering=clustering_config['enable_clustering'],
+                cluster_distance_km=clustering_config['cluster_distance_km'],
+                return_both=True
             )
             
-            # Store the new data in the database
+            # Store both versions in the database
             wildfire_document = {
                 "lastUpdated": current_time.isoformat(),
-                "geojsonData": geojson_data,
+                "originalData": nasa_data["original"],          # Full NASA data
+                "clusteredData": nasa_data["clustered"],        # Optimized for frontend
+                "clusteringMetadata": {
+                    "enabled": nasa_data["clustering_enabled"],
+                    "distance_km": nasa_data["cluster_distance_km"],
+                    "original_count": nasa_data["original_count"],
+                    "clustered_count": nasa_data["clustered_count"],
+                    "reduction_percent": round(((nasa_data["original_count"] - nasa_data["clustered_count"]) / nasa_data["original_count"] * 100), 2) if nasa_data["original_count"] > 0 else 0
+                },
                 "source": "NASA_VIIRS_SNPP_NRT",
                 "bbox": [-140, 24, -50, 72],
                 "days": 4,
@@ -913,9 +952,10 @@ def getNasaWildfires():
             
             # Insert new data
             nasaWildfiresCollection.insert_one(wildfire_document)
-            print(f"Updated wildfire database with {len(geojson_data.get('features', []))} features")
+            print(f"Updated wildfire database with {nasa_data['original_count']} original features, {nasa_data['clustered_count']} clustered features")
             
-            return jsonify(geojson_data), 200, {'Content-Type': 'application/json'}
+            # Return the clustered data to the client (optimized payload)
+            return jsonify(nasa_data["clustered"]), 200, {'Content-Type': 'application/json'}
             
     except Exception as e:
         print(f"Error in getNasaWildfires: {str(e)}")
@@ -938,17 +978,28 @@ def refreshNasaWildfires():
     """Force refresh wildfire data from NASA API"""
     try:
         print("Force refreshing wildfire data from NASA API")
-        geojson_data = fetch_nasa_geojson(
+        nasa_data = fetch_nasa_geojson(
             map_key=mapbox_api,
             source="VIIRS_SNPP_NRT",
             bbox=[-140, 24, -50, 72],
-            days=2
+            days=2,
+            enable_clustering=clustering_config['enable_clustering'],
+            cluster_distance_km=clustering_config['cluster_distance_km'],
+            return_both=True
         )
         
         current_time = datetime.datetime.now()
         wildfire_document = {
             "lastUpdated": current_time.isoformat(),
-            "geojsonData": geojson_data,
+            "originalData": nasa_data["original"],          # Full NASA data
+            "clusteredData": nasa_data["clustered"],        # Optimized for frontend
+            "clusteringMetadata": {
+                "enabled": nasa_data["clustering_enabled"],
+                "distance_km": nasa_data["cluster_distance_km"],
+                "original_count": nasa_data["original_count"],
+                "clustered_count": nasa_data["clustered_count"],
+                "reduction_percent": round(((nasa_data["original_count"] - nasa_data["clustered_count"]) / nasa_data["original_count"] * 100), 2) if nasa_data["original_count"] > 0 else 0
+            },
             "source": "NASA_VIIRS_SNPP_NRT",
             "bbox": [-140, 24, -50, 72],
             "days": 2,
@@ -958,11 +1009,13 @@ def refreshNasaWildfires():
         
         # Insert new data
         nasaWildfiresCollection.insert_one(wildfire_document)
-        print(f"Force updated wildfire database with {len(geojson_data.get('features', []))} features")
+        print(f"Force updated wildfire database with {nasa_data['original_count']} original features, {nasa_data['clustered_count']} clustered features")
         
         return jsonify({
             "message": "Wildfire data refreshed successfully",
-            "features_count": len(geojson_data.get('features', [])),
+            "original_count": nasa_data["original_count"],
+            "clustered_count": nasa_data["clustered_count"],
+            "reduction_percent": wildfire_document["clusteringMetadata"]["reduction_percent"],
             "updated_at": current_time.isoformat()
         }), 200
         
@@ -1057,6 +1110,123 @@ def health_check():
     except Exception as e:
         print(f"Health check failed: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/wildfires/nasa/original', methods=['GET'])
+def getNasaWildfiresOriginal():
+    """Get the original (non-clustered) NASA wildfire data"""
+    try:
+        # Get the latest data from database
+        latest_data = nasaWildfiresCollection.find_one({}, sort=[("lastUpdated", -1)])
+        
+        if not latest_data:
+            return jsonify({"error": "No wildfire data available"}), 404
+        
+        # Return original data if available
+        if "originalData" in latest_data:
+            original_data = latest_data["originalData"]
+            metadata = latest_data.get("clusteringMetadata", {})
+            
+            return jsonify({
+                "data": original_data,
+                "metadata": {
+                    "original_count": metadata.get("original_count", len(original_data.get("features", []))),
+                    "last_updated": latest_data.get("lastUpdated"),
+                    "source": latest_data.get("source", "NASA_VIIRS_SNPP_NRT"),
+                    "note": "This is the complete, unfiltered NASA FIRMS data"
+                }
+            }), 200
+        else:
+            # Fallback for legacy data structure
+            legacy_data = latest_data.get("geojsonData", {
+                "type": "FeatureCollection",
+                "features": []
+            })
+            return jsonify({
+                "data": legacy_data,
+                "metadata": {
+                    "original_count": len(legacy_data.get("features", [])),
+                    "last_updated": latest_data.get("lastUpdated"),
+                    "source": latest_data.get("source", "NASA_VIIRS_SNPP_NRT"),
+                    "note": "Legacy data format - clustering not available"
+                }
+            }), 200
+            
+    except Exception as e:
+        print(f"Error in getNasaWildfiresOriginal: {str(e)}")
+        return jsonify({"error": "Failed to fetch original wildfire data", "message": str(e)}), 500
+
+@app.route('/wildfires/clustering/stats', methods=['GET'])
+def get_clustering_stats():
+    """Get clustering statistics from the latest dataset"""
+    try:
+        latest_data = nasaWildfiresCollection.find_one({}, sort=[("lastUpdated", -1)])
+        
+        if not latest_data:
+            return jsonify({"error": "No wildfire data available"}), 404
+        
+        if "clusteringMetadata" in latest_data:
+            metadata = latest_data["clusteringMetadata"]
+            return jsonify({
+                "clustering_enabled": metadata.get("enabled", False),
+                "cluster_distance_km": metadata.get("distance_km", 0),
+                "original_count": metadata.get("original_count", 0),
+                "clustered_count": metadata.get("clustered_count", 0),
+                "reduction_percent": metadata.get("reduction_percent", 0),
+                "data_saved": f"{metadata.get('reduction_percent', 0):.1f}% reduction in payload size",
+                "last_updated": latest_data.get("lastUpdated"),
+                "current_config": clustering_config
+            }), 200
+        else:
+            # Legacy data without clustering metadata
+            features_count = len(latest_data.get("geojsonData", {}).get("features", []))
+            return jsonify({
+                "clustering_enabled": False,
+                "original_count": features_count,
+                "clustered_count": features_count,
+                "reduction_percent": 0,
+                "note": "Legacy data format - clustering metadata not available",
+                "last_updated": latest_data.get("lastUpdated"),
+                "current_config": clustering_config
+            }), 200
+            
+    except Exception as e:
+        print(f"Error in get_clustering_stats: {str(e)}")
+        return jsonify({"error": "Failed to fetch clustering statistics", "message": str(e)}), 500
+
+# Global clustering configuration
+clustering_config = {
+    "enable_clustering": True,
+    "cluster_distance_km": 5.0
+}
+
+@app.route('/wildfires/clustering/config', methods=['GET'])
+def get_clustering_config():
+    """Get current clustering configuration."""
+    return jsonify(clustering_config), 200
+
+@app.route('/wildfires/clustering/config', methods=['POST'])
+def set_clustering_config():
+    """Update clustering configuration."""
+    try:
+        data = request.get_json()
+        
+        if 'enable_clustering' in data:
+            clustering_config['enable_clustering'] = bool(data['enable_clustering'])
+        
+        if 'cluster_distance_km' in data:
+            distance = float(data['cluster_distance_km'])
+            if distance > 0:
+                clustering_config['cluster_distance_km'] = distance
+            else:
+                return jsonify({"error": "cluster_distance_km must be positive"}), 400
+        
+        return jsonify({
+            "message": "Clustering configuration updated",
+            "config": clustering_config
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))

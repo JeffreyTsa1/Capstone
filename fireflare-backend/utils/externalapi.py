@@ -4,6 +4,7 @@ import os
 from io import StringIO
 from dotenv import load_dotenv
 from pathlib import Path
+import math
 
 # Find .env.local file - try multiple locations
 current_file = Path(__file__)
@@ -39,22 +40,154 @@ OPENAQ_API_KEY = os.getenv("OPEN_AQ_API_KEY")
 
 
 
-def fetch_nasa_geojson(map_key, source, bbox, days):
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """Calculate the great circle distance between two points on Earth in kilometers."""
+    R = 6371  # Earth's radius in kilometers
+    
+    # Convert latitude and longitude to radians
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+    
+    # Haversine formula
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    c = 2 * math.asin(math.sqrt(a))
+    
+    return R * c
+
+def cluster_geojson_points(features, cluster_distance_km=5.0):
+    """
+    Cluster nearby GeoJSON points together to reduce data size.
+    
+    Args:
+        features: List of GeoJSON features with Point geometries
+        cluster_distance_km: Distance threshold in kilometers for clustering
+    
+    Returns:
+        List of clustered features with aggregated properties
+    """
+    if not features:
+        return features
+    
+    clusters = []
+    used_indices = set()
+    
+    for i, feature in enumerate(features):
+        if i in used_indices:
+            continue
+            
+        # Start a new cluster with this feature
+        cluster_features = [feature]
+        used_indices.add(i)
+        
+        lat1 = feature["geometry"]["coordinates"][1]
+        lon1 = feature["geometry"]["coordinates"][0]
+        
+        # Find all nearby features to add to this cluster
+        for j, other_feature in enumerate(features):
+            if j in used_indices:
+                continue
+                
+            lat2 = other_feature["geometry"]["coordinates"][1]
+            lon2 = other_feature["geometry"]["coordinates"][0]
+            
+            if haversine_distance(lat1, lon1, lat2, lon2) <= cluster_distance_km:
+                cluster_features.append(other_feature)
+                used_indices.add(j)
+        
+        # Create clustered feature
+        if len(cluster_features) == 1:
+            # Single point, no clustering needed
+            clusters.append(cluster_features[0])
+        else:
+            # Multiple points, create cluster
+            cluster = create_cluster_feature(cluster_features)
+            clusters.append(cluster)
+    
+    return clusters
+
+def create_cluster_feature(features):
+    """
+    Create a single clustered feature from multiple nearby features.
+    Uses centroid for coordinates and aggregates properties.
+    """
+    if len(features) == 1:
+        return features[0]
+    
+    # Calculate centroid
+    total_lat = sum(f["geometry"]["coordinates"][1] for f in features)
+    total_lon = sum(f["geometry"]["coordinates"][0] for f in features)
+    centroid_lat = total_lat / len(features)
+    centroid_lon = total_lon / len(features)
+    
+    # Aggregate properties
+    cluster_properties = {
+        "cluster_size": len(features),
+        "cluster_type": "wildfire_cluster"
+    }
+    
+    # For numeric properties, calculate averages
+    numeric_props = ["brightness", "bright_t31", "frp", "confidence"]
+    for prop in numeric_props:
+        values = []
+        for feature in features:
+            if prop in feature["properties"]:
+                try:
+                    values.append(float(feature["properties"][prop]))
+                except (ValueError, TypeError):
+                    continue
+        
+        if values:
+            cluster_properties[f"avg_{prop}"] = round(sum(values) / len(values), 2)
+            cluster_properties[f"max_{prop}"] = round(max(values), 2)
+            cluster_properties[f"min_{prop}"] = round(min(values), 2)
+    
+    # For categorical properties, collect unique values
+    categorical_props = ["satellite", "instrument", "version", "track", "type"]
+    for prop in categorical_props:
+        unique_values = set()
+        for feature in features:
+            if prop in feature["properties"] and feature["properties"][prop]:
+                unique_values.add(str(feature["properties"][prop]))
+        
+        if unique_values:
+            cluster_properties[prop] = list(unique_values)
+    
+    # Keep latest acquisition date/time
+    acq_dates = []
+    for feature in features:
+        if "acq_date" in feature["properties"]:
+            acq_dates.append(feature["properties"]["acq_date"])
+    
+    if acq_dates:
+        cluster_properties["latest_acq_date"] = max(acq_dates)
+        cluster_properties["earliest_acq_date"] = min(acq_dates)
+    
+    return {
+        "type": "Feature",
+        "geometry": {
+            "type": "Point",
+            "coordinates": [centroid_lon, centroid_lat]
+        },
+        "properties": cluster_properties
+    }
+
+def fetch_nasa_geojson(map_key, source, bbox, days, enable_clustering=True, cluster_distance_km=5.0, return_both=False):
     base_url = "https://firms.modaps.eosdis.nasa.gov/api/area/csv"
     coords = ",".join(map(str, bbox))  # [west, south, east, north]
     url = f"{base_url}/{map_key}/{source}/{coords}/{days}/"
-    print(url)
-    features = []
+    print(f"Fetching NASA data from: {url}")
+    
+    original_features = []
     response = requests.get(url, timeout=15)
 
     if not response.ok:
         raise RuntimeError(f"NASA API error: {response.status_code}")
-    count = 0
+    
     f = StringIO(response.text.lstrip("\ufeff"))  # strip BOM if present
     reader = csv.DictReader(f)
 
     for row in reader:
-        # print(row)
         try:
             lat = float(row["latitude"])
             lon = float(row["longitude"])
@@ -68,15 +201,44 @@ def fetch_nasa_geojson(map_key, source, bbox, days):
                     k: v for k, v in row.items() if k not in ["latitude", "longitude"]
                 }
             }
-            features.append(feature)
+            original_features.append(feature)
         except (ValueError, KeyError) as e:
             print("Skipping row:", row)
             continue
 
-    return {
+    print(f"Original features count: {len(original_features)}")
+    
+    # Create original GeoJSON
+    original_geojson = {
         "type": "FeatureCollection",
-        "features": features
+        "features": original_features
     }
+    
+    # Apply clustering if enabled
+    clustered_features = original_features.copy()
+    if enable_clustering and len(original_features) > 1:
+        clustered_features = cluster_geojson_points(original_features, cluster_distance_km)
+        print(f"Clustered features count: {len(clustered_features)}")
+        reduction_percent = ((len(original_features) - len(clustered_features)) / len(original_features) * 100) if len(original_features) > 0 else 0
+        print(f"Data reduction: {reduction_percent:.1f}% fewer points")
+    
+    clustered_geojson = {
+        "type": "FeatureCollection",
+        "features": clustered_features
+    }
+    
+    if return_both:
+        return {
+            "original": original_geojson,
+            "clustered": clustered_geojson,
+            "clustering_enabled": enable_clustering,
+            "cluster_distance_km": cluster_distance_km,
+            "original_count": len(original_features),
+            "clustered_count": len(clustered_features)
+        }
+    else:
+        # Return clustered version for backward compatibility
+        return clustered_geojson
 
 def _openaq_headers():
     print("=== OpenAQ Headers Debug ===")

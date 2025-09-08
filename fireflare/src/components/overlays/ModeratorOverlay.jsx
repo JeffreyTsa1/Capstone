@@ -3,7 +3,16 @@ import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState, memo } from "react";
 // import '';
 const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports, verifiedReports }) => {
-    const [activeTab, setActiveTab] = useState("unverified");
+    const [activeTab, setActiveTab] = useState("all");
+
+    const handleTabClick = (tabName) => {
+        // If clicking the already active tab, deselect it and go back to "all"
+        if (activeTab === tabName) {
+            setActiveTab("all");
+        } else {
+            setActiveTab(tabName);
+        }
+    };
 
     return (
         <div>
@@ -13,7 +22,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                 border: '1px solid rgba(255,255,255,0.10)',
                 padding: '18px 0 10px 0',
                 minWidth: 300,
-                maxWidth: 340,
+                maxWidth: 320,
                 color: 'white',
                 fontFamily: 'proxima-nova, sans-serif',
             }}>
@@ -36,7 +45,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                     paddingBottom: '8px'
                 }}>
                     <button 
-                        onClick={() => setActiveTab("unverified")} 
+                        onClick={() => handleTabClick("unverified")} 
                         style={{
                             background: 'none',
                             border: 'none',
@@ -64,7 +73,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                         )}
                     </button>
                     <button 
-                        onClick={() => setActiveTab("verified")} 
+                        onClick={() => handleTabClick("verified")} 
                         style={{
                             background: 'none',
                             border: 'none',
@@ -90,22 +99,6 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                                 {verifiedReports.length}
                             </span>
                         )}
-                    </button>
-                    <button 
-                        onClick={() => setActiveTab("all")} 
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: activeTab === "all" ? '#3b82f6' : '#a0a0a0',
-                            fontWeight: activeTab === "all" ? 600 : 400,
-                            fontSize: '0.9rem',
-                            padding: '5px 10px',
-                            borderBottom: activeTab === "all" ? '2px solid #3b82f6' : 'none',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                        }}
-                    >
-                        All
                     </button>
                 </div>
                 
@@ -269,7 +262,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                         </motion.li>
                     ))}
                     
-                    {activeTab === "all" && [...(verifiedReports || []), ...(unverifiedReports || [])].map(report => (
+                    {(activeTab !== "unverified" && activeTab !== "verified") && [...(verifiedReports || []), ...(unverifiedReports || [])].map(report => (
                         <motion.li
                             key={report._id.$oid}
                             initial={{ opacity: 0 }}
@@ -364,7 +357,7 @@ const ModeratorOverlay = memo(({ centerMap, setCurrentReport, unverifiedReports,
                     {/* Show a message when there are no reports in the current tab */}
                     {((activeTab === "unverified" && (!unverifiedReports || unverifiedReports.length === 0)) ||
                       (activeTab === "verified" && (!verifiedReports || verifiedReports.length === 0)) ||
-                      (activeTab === "all" && (!unverifiedReports || unverifiedReports.length === 0) && (!verifiedReports || verifiedReports.length === 0))) && (
+                      (activeTab !== "unverified" && activeTab !== "verified" && (!unverifiedReports || unverifiedReports.length === 0) && (!verifiedReports || verifiedReports.length === 0))) && (
                         <div style={{
                             padding: '30px 20px',
                             textAlign: 'center',

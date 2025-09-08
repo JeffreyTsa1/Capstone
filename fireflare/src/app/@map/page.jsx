@@ -23,7 +23,7 @@ const containerVariants = {
         },
     },
     mobilepreselected: {
-        width: '300px',
+        width: '340px',
         height: '100px',
         justifyContent: 'flex-start',
         transition: {
@@ -365,8 +365,8 @@ const Page = () => {
                                 ✕
                             </motion.button>
 
-                            {isReporting && isMobile && !reportMarker && (<motion.p>
-                                Please place a marker on the map
+                            {isReporting && isMobile && !reportMarker && (<motion.p className="markerWarning">
+                                Please click on the map to place a marker
                             </motion.p>)}
                             <motion.h2 variants={itemVariants}>{isEmergency ? "Report a Fire" : "Report a Crisis"}</motion.h2>
                             
@@ -398,7 +398,7 @@ const Page = () => {
                                         boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
                                     }}
                                 >
-                                    Switch to {isEmergency ? 'Non-Emergency' : 'Emergency'} Report
+                                    Switch to {isEmergency ? 'Crisis' : 'Emergency'} Report
                                 </button>
                             </motion.div>
                             

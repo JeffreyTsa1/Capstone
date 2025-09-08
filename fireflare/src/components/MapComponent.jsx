@@ -419,8 +419,7 @@ const handleMapClick = useCallback((event) => {
                       </div>
                       {!marker && <p className="markerWarning">Please place a marker.</p>}
                     </div>
-                    <div style={{ marginTop: 10, textAlign: 'center' }}>
-                      <label><span style={{fontFamily: 'nexa',fontWeight:600}}>Radius:</span> <span style={{ fontFamily: 'nexa-text',fontSize: '1.25rem' }}>{radiusMeters} m</span></label>
+                    <div style={{ marginTop: 0, textAlign: 'center' }}>
                       <input
                         type="range"
                         min="100"
@@ -433,6 +432,8 @@ const handleMapClick = useCallback((event) => {
                           setRadius(Number(e.target.value));
                         }}
                       />
+                      <label><span style={{fontFamily: 'nexa',fontWeight:600}}>Radius:</span> <span style={{ fontFamily: 'nexa-text',fontSize: '1.25rem' }}>{radiusMeters} m</span></label>
+
                     </div>
                   </div>
                 </motion.div>

@@ -85,7 +85,7 @@
 .radiusSlider {
   display: block;
   width: 100%;
-  margin-top: 20px;
+  margin-bottom: 20px;
   -webkit-appearance: none;
   background: var(--accent);
   height: 11px;
@@ -129,7 +129,7 @@
 
 .locationOverlayContent {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap:20px;
 }
 

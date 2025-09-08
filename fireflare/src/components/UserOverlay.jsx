@@ -85,8 +85,6 @@ const UserOverlay = memo(({
               {/* Legend Toggle Options */}
               <li className="legend-option">
                 <div className="legend-toggles">
-                  {
-                    !isMobile && (
                       <>
                         <span className="legend-header">Map Legend</span>
                         <div className="toggleWrapper">
@@ -117,8 +115,7 @@ const UserOverlay = memo(({
                     </div>
                   </div>
                     </>
-                    )
-                  }
+
                   <span className="legend-header">Map Layers</span>
                   <div className="toggleWrapper">
                     <div 

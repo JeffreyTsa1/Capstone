@@ -14,7 +14,7 @@ export default function RootLayout({ children, map }) {
 
       </head>
             <body>
-        <div style={{ height: '100vh', width: '100vw' }}>
+        <div>
           {map}
         </div>
         <div style={{}}>

@@ -405,7 +405,7 @@ const handleMapClick = useCallback((event) => {
                     </div>
                     )
               }
-                    <div>
+                    <div className="markerLocation">
                       <h2 >Marker Location</h2>
                       <div className="splitRow">
                         <div>
@@ -554,8 +554,8 @@ const handleMapClick = useCallback((event) => {
         onMove={evt => setViewState(evt.viewState)}
         ref={mapRef}
         style={{
-          width: '100vw',
-          height: '100vh',
+          width: '100dvw',
+          height: '100dvh',
         }}
         mapboxAccessToken={mapboxToken}
         // mapStyle="mapbox://styles/mapbox/standard"

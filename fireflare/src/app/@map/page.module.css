@@ -12,10 +12,15 @@
 .reportForm {
     overflow: scroll;
     font-family: nexa, sans-serif;
-    padding: 20px 30px;
+    padding: 15px 18px;
     color: white;
-    height: 100%;
-    
+    height: 100%;    
+}
+
+@media (min-width: 768px) {
+    .reportForm {
+        padding: 20px 30px;
+    }
 }
 
 .reportForm h2{

@@ -365,8 +365,8 @@ const Page = () => {
                                 ✕
                             </motion.button>
 
-                            {isReporting && isMobile && !reportMarker && (<motion.p className="markerWarning">
-                                Please click on the map to place a marker
+                            {isReporting && isMobile && !reportMarker && (<motion.p className="markerWarning mobileMarkerWarning">
+                                Click anywhere on the map to place a marker. You can hit the <img src="/gps.png" alt="GPS" style={{width: "16px", height: "16px", display: "inline", verticalAlign: "middle", filter: "brightness(0) saturate(100%) invert(100%)"}} /> button on the top right to center the map to your location (enable location)
                             </motion.p>)}
                             <motion.h2 variants={itemVariants}>{isEmergency ? "Report a Fire" : "Report a Crisis"}</motion.h2>
                             

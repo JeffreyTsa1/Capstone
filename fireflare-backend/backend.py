@@ -113,6 +113,15 @@ nasaWildfiresCollection = db.NasaWildfires
 notificationsCollection = db.Notifications
 addressesCollection = db.Addresses
 crisisCollection = db.Crises
+
+# Create indexes for better performance
+try:
+    # Index for lastUpdated field to avoid memory limit issues with sorting
+    nasaWildfiresCollection.create_index([("lastUpdated", -1)])
+    print("✅ Created index on nasaWildfiresCollection.lastUpdated")
+except Exception as e:
+    print(f"⚠️ Index creation info: {e}")
+
 # Global list of connected SSE clients
 notification_clients = []
 
@@ -855,10 +864,12 @@ def getWildfires():
 def getNasaWildfires():
     try:
         # Check if we have recent data in the database
-        latest_data = nasaWildfiresCollection.find_one(
-            {}, 
-            sort=[("lastUpdated", -1)]  # Get the most recent entry
-        )
+        # Use limit(1) to avoid memory issues with large collections
+        latest_data_cursor = nasaWildfiresCollection.find({}).sort([("lastUpdated", -1)]).limit(1)
+        latest_data = None
+        for doc in latest_data_cursor:
+            latest_data = doc
+            break
         
         current_time = datetime.datetime.now()
         should_fetch_new = True
@@ -945,12 +956,7 @@ def getNasaWildfires():
                 "fetchedAt": current_time.isoformat()
             }
             
-            # Remove old entries (keep only the latest 5 for backup)
-            old_entries = list(nasaWildfiresCollection.find({}, sort=[("lastUpdated", -1)]).skip(4))
-            for entry in old_entries:
-                nasaWildfiresCollection.delete_one({"_id": entry["_id"]})
-            
-            # Insert new data
+            # Insert new data (keep all historical entries as backup)
             nasaWildfiresCollection.insert_one(wildfire_document)
             print(f"Updated wildfire database with {nasa_data['original_count']} original features, {nasa_data['clustered_count']} clustered features")
             
@@ -961,14 +967,21 @@ def getNasaWildfires():
         print(f"Error in getNasaWildfires: {str(e)}")
         # Fallback: try to return any available data from database
         try:
-            fallback_data = nasaWildfiresCollection.find_one({}, sort=[("lastUpdated", -1)])
+            # Use limit(1) for fallback as well
+            fallback_cursor = nasaWildfiresCollection.find({}).sort([("lastUpdated", -1)]).limit(1)
+            fallback_data = None
+            for doc in fallback_cursor:
+                fallback_data = doc
+                break
+                
             if fallback_data:
-                return jsonify(fallback_data.get("geojsonData", {
-                    "type": "FeatureCollection", 
-                    "features": []
-                })), 200, {'Content-Type': 'application/json'}
-        except:
-            pass
+                # Return clustered data if available, otherwise legacy data
+                if "clusteredData" in fallback_data:
+                    return jsonify(fallback_data["clusteredData"]), 200, {'Content-Type': 'application/json'}
+                elif "geojsonData" in fallback_data:
+                    return jsonify(fallback_data["geojsonData"]), 200, {'Content-Type': 'application/json'}
+        except Exception as fallback_error:
+            print(f"Fallback also failed: {str(fallback_error)}")
         
         return jsonify({"error": "Failed to fetch wildfire data", "message": str(e)}), 500
 
@@ -1115,8 +1128,12 @@ def health_check():
 def getNasaWildfiresOriginal():
     """Get the original (non-clustered) NASA wildfire data"""
     try:
-        # Get the latest data from database
-        latest_data = nasaWildfiresCollection.find_one({}, sort=[("lastUpdated", -1)])
+        # Get the latest data from database using limit(1)
+        latest_data_cursor = nasaWildfiresCollection.find({}).sort([("lastUpdated", -1)]).limit(1)
+        latest_data = None
+        for doc in latest_data_cursor:
+            latest_data = doc
+            break
         
         if not latest_data:
             return jsonify({"error": "No wildfire data available"}), 404
@@ -1159,7 +1176,12 @@ def getNasaWildfiresOriginal():
 def get_clustering_stats():
     """Get clustering statistics from the latest dataset"""
     try:
-        latest_data = nasaWildfiresCollection.find_one({}, sort=[("lastUpdated", -1)])
+        # Use limit(1) for consistency
+        latest_data_cursor = nasaWildfiresCollection.find({}).sort([("lastUpdated", -1)]).limit(1)
+        latest_data = None
+        for doc in latest_data_cursor:
+            latest_data = doc
+            break
         
         if not latest_data:
             return jsonify({"error": "No wildfire data available"}), 404
@@ -1196,7 +1218,7 @@ def get_clustering_stats():
 # Global clustering configuration
 clustering_config = {
     "enable_clustering": True,
-    "cluster_distance_km": 5.0
+    "cluster_distance_km": 2.0
 }
 
 @app.route('/wildfires/clustering/config', methods=['GET'])

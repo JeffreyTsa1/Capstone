@@ -7,6 +7,7 @@ import { delay } from 'motion';
 import { useUser } from "@auth0/nextjs-auth0"
 import { useCallback } from 'react';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
+import WelcomeModal from '@/components/modals/WelcomeModal';
 const containerVariants = {
     closed: {
         width: '150px',
@@ -139,10 +140,20 @@ const Page = () => {
     const [userIP, setUserIP] = useState(null);
     const [userLocation, setUserLocation] = useState(null);
     const [isEmergency, setIsEmergency] = useState(true); // true for emergency, false for non-emergency
+    const [showWelcomeModal, setShowWelcomeModal] = useState(false);
     
     const isMobile = useIsMobile();
 
     const { user } = useUser();
+
+    // Check if user has seen welcome modal before
+    useEffect(() => {
+        const hasSeenWelcome = localStorage.getItem('fireflareWelcomeSeen');
+        if (!hasSeenWelcome && !user) {
+            // Show welcome modal for first-time visitors who aren't logged in
+            setShowWelcomeModal(true);
+        }
+    }, [user]);
 
     // // Fetch unseen notifications and mark them as seen on page load
     // useEffect(() => {
@@ -510,6 +521,12 @@ const Page = () => {
                     </AnimatePresence>
                 </motion.div>
             </div>
+            
+            {/* Welcome Modal */}
+            <WelcomeModal 
+                isOpen={showWelcomeModal} 
+                onClose={() => setShowWelcomeModal(false)} 
+            />
         </>
     )
 

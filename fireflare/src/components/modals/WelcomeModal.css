@@ -1,0 +1,287 @@
+/* Welcome Modal Styles */
+.welcome-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+.welcome-modal {
+    background: linear-gradient(135deg, #2d1a2e 0%, #3e163c 50%, #600f54 100%);
+    border-radius: 24px;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    position: relative;
+    overflow: hidden;
+    color: white;
+    font-family: 'proxima-nova', sans-serif;
+}
+
+.welcome-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.welcome-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.welcome-slide-container {
+    padding: 60px 40px 40px;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-slide {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+}
+
+.welcome-slide-image {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 120px;
+}
+
+.welcome-slide-image img {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 16px;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.welcome-slide-image img:hover {
+    transform: scale(1.05);
+}
+
+.welcome-slide-content h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    background: linear-gradient(135deg, #ff6b6b, #ffa726);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+}
+
+.welcome-slide-content h3 {
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin: 0 0 20px 0;
+    color: #e2e8f0;
+    opacity: 0.9;
+}
+
+.welcome-slide-content p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #cbd5e1;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.welcome-progress {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0;
+    padding: 0 40px;
+}
+
+.welcome-progress-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.welcome-progress-dot.active {
+    background: linear-gradient(135deg, #ff6b6b, #ffa726);
+    transform: scale(1.2);
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.5);
+}
+
+.welcome-progress-dot:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.welcome-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px 30px;
+    gap: 20px;
+}
+
+.welcome-nav-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    font-family: inherit;
+}
+
+.welcome-nav-button.prev {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.welcome-nav-button.prev:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-2px);
+}
+
+.welcome-nav-button.next {
+    background: linear-gradient(135deg, #ff6b6b, #ffa726);
+    color: white;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.welcome-nav-button.next:hover {
+    background: linear-gradient(135deg, #ff5252, #ff9800);
+
+    transform: translateX(2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.welcome-nav-button.get-started {
+    background: linear-gradient(135deg, #ffbf00, #ffd726);
+    color: white;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    padding: 14px 28px;
+}
+
+.welcome-nav-button.get-started:hover {
+    background: linear-gradient(135deg, #ffac00, #ffcc26);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 18px rgba(255, 186, 37, 0.33);
+}
+
+.welcome-nav-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.welcome-skip {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+    font-family: inherit;
+}
+
+.welcome-skip:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .welcome-modal {
+        margin: 10px;
+        max-width: none;
+        border-radius: 16px;
+    }
+    
+    .welcome-slide-container {
+        padding: 40px 20px 20px;
+        min-height: 350px;
+    }
+    
+    .welcome-slide-content h2 {
+        font-size: 2rem;
+    }
+    
+    .welcome-slide-content h3 {
+        font-size: 1.1rem;
+    }
+    
+    .welcome-slide-content p {
+        font-size: 0.9rem;
+    }
+    
+    .welcome-navigation {
+        padding: 0 20px 20px;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .welcome-nav-button {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .welcome-progress {
+        padding: 0 20px;
+    }
+}
+
+/* Animation for slide transitions */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.welcome-slide {
+    animation: slideIn 0.5s ease-out;
+}

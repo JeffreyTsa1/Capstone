@@ -415,7 +415,7 @@
 
 
 .moderatorOverlay li:hover {
-    background-color: var(--accent);
+    /* background-color: var(--accent); */
     color: white;
     cursor: pointer;
 }

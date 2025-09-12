@@ -80,7 +80,12 @@ const MapComponent = ({ isReporting, setReportMarker, setRadius }) => {
   );
   
   // State to control visibility of reports overlay
-  const [showReportsOverlay, setShowReportsOverlay] = useState(true);
+  const [showReportsOverlay, setShowReportsOverlay] = useState(false);
+  
+  // Update reports overlay visibility when mobile state changes
+  useEffect(() => {
+    setShowReportsOverlay(!isMobile);
+  }, [isMobile]);
   
   // State for AQI popup
   const [selectedAQI, setSelectedAQI] = useState(null);

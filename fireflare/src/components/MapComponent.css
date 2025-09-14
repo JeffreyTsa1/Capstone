@@ -195,7 +195,6 @@ padding-top: 20px;
   position: absolute;
   left: 0;
   width: 100%;
-  height: 250px; /* Increased height to accommodate the legend options */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 

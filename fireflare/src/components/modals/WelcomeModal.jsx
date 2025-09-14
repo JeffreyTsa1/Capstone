@@ -9,27 +9,33 @@ const WelcomeModal = ({ isOpen, onClose }) => {
     const slides = [
         {
             title: "Welcome to Fireflare",
-            content: "Your community-driven wildfire monitoring and crisis reporting platform",
+            content: "Your community-driven wildfire monitoring platform",
             image: "",
-            description: "Fireflare is a community-driven wildfire and emergency map. Report incidents in real time and see verified reports near you. Stay informed about environmental hazards in your area with real-time community-driven data."
+            description: "Register to report incidents and see verified reports near you. Stay informed about environmental hazards in your area with real-time community-driven data."
         },
         {
-            title: "Real-Time Wildfire Data",
-            content: "Monitor active wildfires with NASA satellite data",
+            title: "Cross-Verification Layers",
+            content: "",
             image: "/fire-icon.svg", // You'll need to add this
-            description: "Get up-to-date information about wildfire locations, intensity, and air quality conditions powered by NASA's satellite monitoring systems."
+            description: "This map layers real-time wildfire data from NASA's satellites (FIRMS), cross-referenced with air quality (AQI) data points, and user reports to ensure accuracy and reliability."
         },
         {
             title: "Community Reporting",
-            content: "Report incidents and help keep your community safe",
+            content: "Report fire incidents and crisis events",
             image: "/community-icon.svg", // You'll need to add this
-            description: "Quickly report fires, smoke, or other emergencies to help authorities and neighbors stay informed about local conditions."
+            description: "Quickly report fires, smoke, or other emergencies. You can report crisis events if you need help from others in your community."
         },
         {
             title: "Stay Connected",
             content: "Get notifications and updates that matter to you",
             image: "/notification-icon.svg", // You'll need to add this
-            description: "Receive alerts about nearby incidents, air quality changes, and important safety information for your area."
+            description: "After you register, receive alerts about nearby incidents, air quality changes, and important safety information for your area(s)."
+        },
+        {
+            title: "Customize Your Experience",
+            content: "Tailor the app to your needs",
+            image: "", // You'll need to add this
+            description: "Adjust settings, notifications, and map layers in the user menu on the top left corner to create a personalized experience."
         }
     ];
 
@@ -214,12 +220,14 @@ const WelcomeModal = ({ isOpen, onClose }) => {
                         </div>
 
                         {/* Skip option */}
-                        <button 
-                            className="welcome-skip"
-                            onClick={handleGetStarted}
-                        >
-                            Skip tutorial
-                        </button>
+                        <div className="welcome-skip-wrapper">
+                            <button 
+                                className="welcome-skip"
+                                onClick={handleGetStarted}
+                            >
+                                Skip tutorial
+                            </button>
+                        </div>
                     </motion.div>
                 </motion.div>
             )}

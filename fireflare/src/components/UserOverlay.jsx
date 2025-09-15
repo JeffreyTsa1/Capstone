@@ -60,7 +60,43 @@ const UserOverlay = memo(({
             exit={{ opacity: 0, y: -10 }}
           >
             <ul>
+
+              {/* Legend Toggle Options */}
               <li className="legend-option">
+                <div className="legend-toggles">
+                  <>
+                    <span className="legend-header">Map Legend</span>
+                    <div className="toggleWrapper">
+
+                      <div
+                        className={`option ${showAQI ? 'option-active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowAQI(!showAQI);
+                        }}
+                      >
+                        <div className={`toggle-indicator ${showAQI ? 'active' : ''}`}>
+                          <span className="toggle-dot"></span>
+                        </div>
+                        <span className="option-label">Air Quality</span>
+                      </div>
+                      <div
+                        className={`option ${showWildfire ? 'option-active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowWildfire(!showWildfire);
+                        }}
+                      >
+                        <div className={`toggle-indicator ${showWildfire ? 'active' : ''}`}>
+                          <span className="toggle-dot"></span>
+                        </div>
+                        <span className="option-label">Wildfires</span>
+                      </div>
+                    </div>
+                  </>
+                </div>
+              </li>
+                            <li className="legend-option">
                 <div className="legend-toggles">
                   <div className="toggleWrapper">
                     <div 
@@ -78,47 +114,13 @@ const UserOverlay = memo(({
                   </div>
                 </div>
               </li>
-              <li>
-                <Link onClick={(e) => e.stopPropagation()} href="/settings">Settings</Link>
-              </li>
-
-              {/* Legend Toggle Options */}
               <li className="legend-option">
                 <div className="legend-toggles">
-                      <>
-                        <span className="legend-header">Map Legend</span>
-                        <div className="toggleWrapper">
 
-                    <div 
-                      className={`option ${showAQI ? 'option-active' : ''}`} 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowAQI(!showAQI);
-                      }}
-                    >
-                      <div className={`toggle-indicator ${showAQI ? 'active' : ''}`}>
-                        <span className="toggle-dot"></span>
-                      </div>
-                      <span className="option-label">Air Quality</span>
-                    </div>
-                    <div 
-                      className={`option ${showWildfire ? 'option-active' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowWildfire(!showWildfire);
-                      }}
-                    >
-                      <div className={`toggle-indicator ${showWildfire ? 'active' : ''}`}>
-                        <span className="toggle-dot"></span>
-                      </div>
-                      <span className="option-label">Wildfires</span>
-                    </div>
-                  </div>
-                    </>
 
                   <span className="legend-header">Map Layers</span>
                   <div className="toggleWrapper">
-                    <div 
+                    <div
                       className={`option ${showWildfireLayer ? 'option-active' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -131,7 +133,7 @@ const UserOverlay = memo(({
                       <span className="option-label">NASA Satellite</span>
                     </div>
 
-                    <div 
+                    <div
                       className={`option ${showAQILayer ? 'option-active' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -147,7 +149,9 @@ const UserOverlay = memo(({
                 </div>
 
               </li>
-
+              <li>
+                <Link onClick={(e) => e.stopPropagation()} href="/settings">Settings</Link>
+              </li>
               <li>
                 <Link onClick={(e) => e.stopPropagation()} href="/auth/logout" className="logout-link">
                   Logout

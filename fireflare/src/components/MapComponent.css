@@ -247,7 +247,7 @@ padding-top: 20px;
 }
 
 .userOverlay p {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   padding-bottom: 10px;
   font-weight: 800;
   letter-spacing: 0.07rem;
@@ -477,7 +477,6 @@ padding-top: 20px;
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.3s ease;
-  margin-bottom: 3px;
   position: relative;
 }
 
@@ -498,7 +497,7 @@ padding-top: 20px;
 }
 
 .legend-toggles .option.option-active .option-label {
-  font-weight: 700;
+  /* font-weight: 700; */
 }
 
 /* New Toggle Indicator Styling */

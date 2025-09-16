@@ -10,26 +10,26 @@ const WelcomeModal = ({ isOpen, onClose }) => {
         {
             title: "Welcome to Fireflare",
             content: "Your community-driven wildfire monitoring platform",
-            image: "",
-            description: "Register to report incidents and see verified reports near you. Stay informed about environmental hazards in your area with real-time community-driven data."
+            image: "/ff.png",
+            description: "Sign up to report wildfire incidents and see verified reports near you. Stay informed about hazards in your area with real-time community-driven data."
         },
         {
             title: "Cross-Verification Layers",
             content: "",
             image: "/fire-icon.svg", // You'll need to add this
-            description: "This map layers real-time wildfire data from NASA's satellites (FIRMS), cross-referenced with air quality (AQI) data points, and user reports to ensure accuracy and reliability."
+            description: "We layer real-time data from NASA's satellites (FIRMS), cross-referenced with air quality (AQI) data points, and community reports onto a map so users can visualize the impact of wildfires. Check the legend overlays to learn more."
         },
         {
             title: "Community Reporting",
-            content: "Report fire incidents and crisis events",
+            content: "",
             image: "/community-icon.svg", // You'll need to add this
-            description: "Quickly report fires, smoke, or other emergencies. You can report crisis events if you need help from others in your community."
+            description: "Quickly report fires, smoke, or other emergencies. You can report a crisis event that you're experiencing and request help from others in your community."
         },
         {
             title: "Stay Connected",
-            content: "Get notifications and updates that matter to you",
+            content: "",
             image: "/notification-icon.svg", // You'll need to add this
-            description: "After you register, receive alerts about nearby incidents, air quality changes, and important safety information for your area(s)."
+            description: "After you register and add the addresses you want to monitor, receive alerts about nearby incidents, air quality changes, and important safety information for your area(s)."
         },
         {
             title: "Customize Your Experience",
@@ -62,51 +62,53 @@ const WelcomeModal = ({ isOpen, onClose }) => {
     };
 
     const modalVariants = {
-        hidden: {
-            opacity: 0,
-            scale: 0.8,
-        },
-        visible: {
-            opacity: 1,
-            scale: 1,
-            transition: {
-                type: "spring",
-                damping: 25,
-                stiffness: 300
+            hidden: {
+                opacity: 0,
+                scale: 0.95,
+            },
+            visible: {
+                opacity: 1,
+                scale: 1,
+                transition: {
+                    duration: 0.45,
+                    ease: "easeOut"
+                }
+            },
+            exit: {
+                opacity: 0,
+                scale: 0.95,
+                transition: {
+                    duration: 0.3,
+                    ease: "easeIn"
+                }
             }
-        },
-        exit: {
-            opacity: 0,
-            scale: 0.8,
-            transition: {
-                duration: 0.2
-            }
-        }
     };
 
     const slideVariants = {
-        enter: (direction) => ({
-            x: direction > 0 ? 300 : -300,
-            opacity: 0
-        }),
-        center: {
-            x: 0,
-            opacity: 1,
-            transition: {
-                type: "spring",
-                damping: 25,
-                stiffness: 300
-            }
-        },
-        exit: (direction) => ({
-            x: direction < 0 ? 300 : -300,
-            opacity: 0,
-            transition: {
-                type: "spring",
-                damping: 25,
-                stiffness: 300
-            }
-        })
+            enter: (direction) => ({
+                x: direction > 0 ? 120 : -120,
+                opacity: 0,
+                transition: {
+                    duration: 0.35,
+                    ease: "easeOut"
+                }
+            }),
+            center: {
+                x: 0,
+                opacity: 1,
+                transition: {
+                    duration: 0.45,
+                    ease: "easeOut"
+                }
+            },
+            exit: (direction) => ({
+                x: direction < 0 ? 120 : -120,
+                opacity: 0,
+                transition: {
+                    duration: 0.35,
+                    ease: "easeIn"
+                }
+            })
     };
 
     if (!isOpen) return null;

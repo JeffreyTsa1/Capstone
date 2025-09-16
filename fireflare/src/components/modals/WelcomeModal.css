@@ -60,10 +60,11 @@
 
 .welcome-slide-container {
     padding: 40px 40px 0px 40px;
-    min-height: 250px;
+    min-height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
+            height: 350px;
     position: relative;
     overflow: hidden;
 }
@@ -249,6 +250,8 @@
     .welcome-slide-container {
         padding: 40px 20px 20px;
         min-height: 350px;
+        height: 350px;
+
     }
     
     .welcome-slide-content h2 {

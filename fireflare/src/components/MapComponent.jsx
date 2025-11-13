@@ -1,6 +1,5 @@
 "use client";
 import { appStore } from "../../store/Store";
-import mapboxgl from "mapbox-gl";
 import MapGL, { Layer, Marker, NavigationControl, GeolocateControl, Source, Popup } from "react-map-gl/mapbox";
 // import { Map, Marker, NavigationControl, GeolocateControl } from "react-map-gl";
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";

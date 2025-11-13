@@ -303,6 +303,16 @@ const ReportPopup = ({currentReport, onClose}) => {
     return classMap[severity?.toLowerCase()] || '';
   };
 
+  // Helper function to get contained status display
+  const getContainedDisplay = (contained) => {
+    return contained ? "Contained" : "Active";
+  };
+
+  // Helper function to get contained CSS class
+  const getContainedClass = (contained) => {
+    return contained ? "contained" : "notContained";
+  };
+
   // Helper function to format date
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -421,17 +431,19 @@ const ReportPopup = ({currentReport, onClose}) => {
             
             <div>
               <label className="fieldLabel">Reviewed On</label>
-              <p className="fieldValue">{formatDate(currentReport.moderatorDescription[0].lastModeratedAt)}</p>
+              <p className="moderatorDateValue">{formatDate(currentReport.moderatorDescription[0].lastModeratedAt)}</p>
             </div>
             
             <div>
-              <label className="fieldLabel">Fire Contained</label>
-              <p className="fieldValue">{currentReport.moderatorDescription[0].fireContained ? "Yes" : "No"}</p>
+              <label className="fieldLabel">Contained</label>
+              <div className={`containedBadge ${getContainedClass(currentReport.moderatorDescription[0].fireContained)}`}>
+                {getContainedDisplay(currentReport.moderatorDescription[0].fireContained)}
+              </div>
             </div>
                         {currentReport.moderatorDescription[0].approvedAt && (
               <div>
                 <label className="fieldLabel">Approved On</label>
-                <p className="fieldValue">{formatDate(currentReport.moderatorDescription[0].approvedAt)}</p>
+                <p className="moderatorDateValue">{formatDate(currentReport.moderatorDescription[0].approvedAt)}</p>
               </div>
             )}
           </div>

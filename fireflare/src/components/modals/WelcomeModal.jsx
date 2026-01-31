@@ -209,7 +209,7 @@ const WelcomeModal = ({ isOpen, onClose }) => {
                                     className="welcome-nav-button get-started"
                                     onClick={handleGetStarted}
                                 >
-                                    Get Started 🔥
+                                    Get Started
                                 </button>
                             ) : (
                                 <button 

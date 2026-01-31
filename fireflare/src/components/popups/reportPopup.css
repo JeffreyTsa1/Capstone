@@ -59,7 +59,7 @@
 
 .moderatorGrid {
     display: grid;
-    grid-template-columns: 2fr 3fr;
+    grid-template-columns: 2fr 2fr;
     gap: 10px;
 }
 
@@ -110,7 +110,7 @@
 
 .reportDetailsTitle::before {
     content: "📋";
-    font-size: 16px;
+    font-size: 22px;
 }
 
 .reportDescription {
@@ -127,16 +127,13 @@
 
 .reportDetailsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(107px, 1fr));
     gap: 16px;
     margin-bottom: 20px;
 }
 
 .reportDetailsField {
-    background: rgba(248, 250, 252, 0.7);
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+
     transition: all 0.2s ease;
 }
 
@@ -422,10 +419,11 @@
 
 /* Date Styling */
 .dateValue {
+    text-align: center;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 10px;
+    padding: 4px 10px;
     background: linear-gradient(135deg, #f8fafc, #e2e8f0);
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -464,9 +462,17 @@
     color: white;
 }
 
+.moderatorDateField {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
 
 /* Moderator Date Styling */
 .moderatorDateValue {
+    text-align: center;
+    max-width: 100px;
     display: inline-flex;
     align-items: center;
     gap: 6px;

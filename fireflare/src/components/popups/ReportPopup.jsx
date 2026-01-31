@@ -429,7 +429,7 @@ const ReportPopup = ({currentReport, onClose}) => {
               <p className="fieldValue">{currentReport.moderatorDescription[0].moderatorName}</p>
             </div>
             
-            <div>
+            <div className="moderatorDateField">
               <label className="fieldLabel">Reviewed On</label>
               <p className="moderatorDateValue">{formatDate(currentReport.moderatorDescription[0].lastModeratedAt)}</p>
             </div>
@@ -441,7 +441,7 @@ const ReportPopup = ({currentReport, onClose}) => {
               </div>
             </div>
                         {currentReport.moderatorDescription[0].approvedAt && (
-              <div>
+              <div className="moderatorDateField">
                 <label className="fieldLabel">Approved On</label>
                 <p className="moderatorDateValue">{formatDate(currentReport.moderatorDescription[0].approvedAt)}</p>
               </div>

@@ -1,0 +1,297 @@
+/* Mobile First Responsive Design */
+/* Base styles for mobile (320px and up) */
+
+.moderatorOverlay {
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.10);
+  padding: 18px 0 10px 0;
+  min-width: 280px;
+  max-width: 300px;
+  color: white;
+  font-family: 'proxima-nova', sans-serif;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0 0 10px 0;
+  text-align: center;
+  color: #e2e8f0;
+  text-transform: uppercase;
+}
+
+.tabNavigation {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin: 0 12px 10px;
+  padding-bottom: 8px;
+}
+
+.tabButton {
+  background: none;
+  border: none;
+  color: #a0a0a0;
+  font-weight: 400;
+  font-size: 0.85rem;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: none;
+}
+
+.tabButtonActive {
+  color: #3b82f6;
+  font-weight: 600;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.tabBadge {
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  padding: 0px 5px;
+  font-size: 0.7rem;
+  margin-left: 4px;
+}
+
+.tabBadgeVerified {
+  background: rgb(121 64 180 / 10%);
+}
+
+.reportsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.reportItem {
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  margin: 8px 10px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.18s;
+}
+
+.reportItemVerified {
+  background: rgb(121 64 180 / 10%);
+  border: 1px solid rgb(121 64 180 / 10%);
+}
+
+.reportHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.reportAuthor {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+  color: #fff;
+}
+
+.reportAuthorName {
+  font-weight: 400;
+  color: #cbd5e1;
+}
+
+.verifiedBadge {
+  background-color: rgb(121 64 180 / 10%);
+  border-radius: 0.25rem;
+  color: #fff;
+  padding: 3px 6px;
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+.splitRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 0 0;
+}
+
+.splitRowItem {
+  flex: 1;
+}
+
+.fieldLabel {
+  font-size: 0.8rem;
+  color: #b3b3b3;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.fieldValue {
+  margin: 0;
+  font-weight: 500;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.fieldValueType {
+  color: #fbbf24;
+}
+
+.severityBadge {
+  border-radius: 0.25rem;
+  color: #fff;
+  padding: 3px 6px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.severityHigh {
+  background-color: #ff0000;
+}
+
+.severityMedium {
+  background-color: #ffa500;
+}
+
+.severityLow {
+  background-color: #00ff00;
+}
+
+.descriptionSection {
+  margin: 10px 0 0 0;
+}
+
+.description {
+  margin: 4px 0 0 0;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.timestampSection {
+  margin: 10px 0 0 0;
+}
+
+.timestampValue {
+  margin: 0;
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+.emptyState {
+  padding: 25px 15px;
+  text-align: center;
+  color: #a0a0a0;
+  font-size: 0.9rem;
+}
+
+/* Tablet Portrait: 768px and up */
+@media screen and (min-width: 768px) {
+  .moderatorOverlay {
+    min-width: 320px;
+    max-width: 340px;
+  }
+  
+  .title {
+    font-size: 1.1rem;
+  }
+  
+  .tabButton {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+  }
+  
+  .tabBadge {
+    padding: 0px 6px;
+    font-size: 0.75rem;
+    margin-left: 5px;
+  }
+  
+  .reportsList {
+    max-height: 460px;
+  }
+  
+  .reportItem {
+    margin: 10px 12px;
+    padding: 14px 14px 10px 14px;
+  }
+  
+  .reportAuthor {
+    font-size: 1rem;
+  }
+  
+  .fieldLabel {
+    font-size: 0.85rem;
+  }
+  
+  .fieldValue {
+    font-size: 1rem;
+  }
+  
+  .description {
+    font-size: 0.97rem;
+  }
+  
+  .splitRow {
+    gap: 16px;
+  }
+  
+  .verifiedBadge {
+    padding: 3px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .emptyState {
+    padding: 30px 20px;
+  }
+}
+
+/* Tablet Landscape: 1024px and up */
+@media screen and (min-width: 1024px) {
+  .moderatorOverlay {
+    max-width: 360px;
+  }
+}
+
+/* Desktop: 1200px and up */
+@media screen and (min-width: 1200px) {
+  .moderatorOverlay {
+    max-width: 380px;
+  }
+  
+  .reportsList {
+    max-height: 500px;
+  }
+}
+
+/* Large Desktop: 1440px and up */
+@media screen and (min-width: 1440px) {
+  .moderatorOverlay {
+    max-width: 400px;
+  }
+}
+
+/* Height-based breakpoints for better vertical spacing */
+@media screen and (min-height: 600px) {
+  .reportsList {
+    max-height: 420px;
+  }
+}
+
+@media screen and (min-height: 768px) {
+  .reportsList {
+    max-height: 500px;
+  }
+}
+
+@media screen and (min-height: 900px) {
+  .reportsList {
+    max-height: 600px;
+  }
+}

@@ -14,15 +14,16 @@
 
  .addressSearchInput {
     
-        width: 100%;
+    width: 100%;
     font-size: 16px;
-    color: #000;
-    background-color: #EAEAEA;
+    color: #fff;
+    /* background-color: #EAEAEA; */
+    background-color: #223646;
     outline: none;
     border: none;
-    padding: 15px 25px;
+    padding: 15px 85px 15px 25px;
     /* min-height:50px; */
-    font-family: sofia-pro, sans-serif;
+    font-family: 'Greycliff CF', sans-serif;
     font-size: 1rem;
     border-radius: 7.5px;
  }
@@ -256,6 +257,7 @@
 
 .onboardingResults {
     padding-top:30px;
+    border-radius: 8px;
     position: relative;
     opacity: 0;
     margin-top: -30px;
@@ -264,21 +266,26 @@
 
 
 .onboardingResults ul {
-    padding-top: 40px;
-    margin-top: -30px;
+    max-height: 25dvh;
+    overflow-y: auto;
+    padding-top: 28px;
+    padding-bottom: 10px;
+    margin-top: -25px;
     z-index: 1;
     display: flex;
     flex-direction: column;
     background: #223646;
     border-radius: 10px;
 
+    font-family: 'Greycliff CF', sans-serif;
 }
 
 .onboardingResults ul li {
-    padding: 15px 20px 15px 20px;
+    padding: 10px 25px;
+    line-height: 1.5rem;
+    font-weight: 600;
     border-radius: 15px;
     color: white;
-    margin-bottom: 10px;
 }
 
 /* buttons */

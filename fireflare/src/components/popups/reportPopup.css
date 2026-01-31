@@ -64,13 +64,20 @@
 }
 
 .fieldLabel {
-    font-weight: bold;
+    font-weight: 600;
     font-size: 12px;
-    color: #546e7a;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: block;
 }
 
 .fieldValue {
-    margin: 0 0 8px 0;
+    margin: 0;
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 500;
 }
 
 .moderatorNotes {
@@ -83,33 +90,88 @@
 }
 
 .reportDetailsSection {
-    background-color: #f5f5f5;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 15px;
+    /* background: linear-gradient(145deg, #ffffff, #f8fafc); */
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    /* border: 1px solid #e2e8f0; */
+    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); */
 }
 
 .reportDetailsTitle {
-    margin: 0 0 10px 0;
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.reportDetailsTitle::before {
+    content: "📋";
     font-size: 16px;
-    color: #2c3e50;
 }
 
 .reportDescription {
-    margin: 0 0 10px 0;
-    padding: 8px;
-    background-color: #ffffff;
-    border-radius: 4px;
-    font-size: 13px;
+    margin: 0 0 20px 0;
+    padding: 16px;
+    background-color: #f1f5f9;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    border-left: 4px solid #3b82f6;
+    color: #334155;
+    font-style: italic;
 }
 
 .reportDetailsGrid {
     display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
 }
 
-.splitRow {
+.reportDetailsField {
+    background: rgba(248, 250, 252, 0.7);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.reportDetailsField:hover {
+    background: rgba(241, 245, 249, 0.9);
+    border-color: #cbd5e1;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .reportDetailsSection {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .reportDetailsTitle {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+    
+    .reportDescription {
+        padding: 12px;
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+    
+    .reportDetailsGrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .reportDetailsField {
+        padding: 10px;
+    }
 }
 
 .coordinateLabel {
@@ -264,4 +326,160 @@
 
 .textCapitalize {
     text-transform: capitalize;
+}
+
+/* Report Type Badges */
+.reportTypeBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.reportTypeBadge.visibleSmoke {
+    background: linear-gradient(135deg, #64748b, #475569);
+    color: white;
+}
+
+.reportTypeBadge.smokeSmell {
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+    color: white;
+}
+
+.reportTypeBadge.visibleFire {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+}
+
+.reportTypeBadge::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.8;
+}
+
+/* Severity Badges */
+.severityBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.severityBadge.low {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: white;
+}
+
+.severityBadge.medium {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: white;
+}
+
+.severityBadge.high {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    color: white;
+}
+
+.severityBadge.critical {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.severityBadge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.9;
+}
+
+/* Date Styling */
+.dateValue {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    margin: 0;
+}
+
+.dateValue::before {
+    font-size: 14px;
+}
+
+/* Contained Status Badges */
+.containedBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.containedBadge.contained {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: white;
+}
+
+.containedBadge.notContained {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    color: white;
+}
+
+
+/* Moderator Date Styling */
+.moderatorDateValue {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #475569;
+    margin: 0;
+}
+
+.moderatorDateValue::before {
+    font-size: 12px;
 }

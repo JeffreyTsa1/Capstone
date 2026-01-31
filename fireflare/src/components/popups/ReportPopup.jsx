@@ -261,6 +261,58 @@ const ReportPopup = ({currentReport, onClose}) => {
         });
     }
 
+  // Helper function to get report type display name
+  const getReportTypeDisplay = (type) => {
+    const typeMap = {
+      'visible_smoke': 'Visible Smoke',
+      'smoke_smell': 'Smoke Smell', 
+      'visible_fire': 'Visible Fire'
+    };
+    return typeMap[type] || type || 'N/A';
+  };
+
+  // Helper function to get report type CSS class
+  const getReportTypeClass = (type) => {
+    const classMap = {
+      'visible_smoke': 'visibleSmoke',
+      'smoke_smell': 'smokeSmell',
+      'visible_fire': 'visibleFire'
+    };
+    return classMap[type] || '';
+  };
+
+  // Helper function to get severity display name
+  const getSeverityDisplay = (severity) => {
+    const severityMap = {
+      'low': 'Low',
+      'medium': 'Medium', 
+      'high': 'High',
+      'critical': 'Critical'
+    };
+    return severityMap[severity?.toLowerCase()] || severity || 'N/A';
+  };
+
+  // Helper function to get severity CSS class
+  const getSeverityClass = (severity) => {
+    const classMap = {
+      'low': 'low',
+      'medium': 'medium',
+      'high': 'high', 
+      'critical': 'critical'
+    };
+    return classMap[severity?.toLowerCase()] || '';
+  };
+
+  // Helper function to get contained status display
+  const getContainedDisplay = (contained) => {
+    return contained ? "Contained" : "Active";
+  };
+
+  // Helper function to get contained CSS class
+  const getContainedClass = (contained) => {
+    return contained ? "contained" : "notContained";
+  };
+
   // Helper function to format date
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -379,17 +431,19 @@ const ReportPopup = ({currentReport, onClose}) => {
             
             <div>
               <label className="fieldLabel">Reviewed On</label>
-              <p className="fieldValue">{formatDate(currentReport.moderatorDescription[0].lastModeratedAt)}</p>
+              <p className="moderatorDateValue">{formatDate(currentReport.moderatorDescription[0].lastModeratedAt)}</p>
             </div>
             
             <div>
-              <label className="fieldLabel">Fire Contained</label>
-              <p className="fieldValue">{currentReport.moderatorDescription[0].fireContained ? "Yes" : "No"}</p>
+              <label className="fieldLabel">Contained</label>
+              <div className={`containedBadge ${getContainedClass(currentReport.moderatorDescription[0].fireContained)}`}>
+                {getContainedDisplay(currentReport.moderatorDescription[0].fireContained)}
+              </div>
             </div>
                         {currentReport.moderatorDescription[0].approvedAt && (
               <div>
                 <label className="fieldLabel">Approved On</label>
-                <p className="fieldValue">{formatDate(currentReport.moderatorDescription[0].approvedAt)}</p>
+                <p className="moderatorDateValue">{formatDate(currentReport.moderatorDescription[0].approvedAt)}</p>
               </div>
             )}
           </div>
@@ -399,10 +453,14 @@ const ReportPopup = ({currentReport, onClose}) => {
             <p className="fieldValue backgroundInfo">{currentReport.moderatorDescription[0].moderatorBackground || "Not provided"}</p>
           </div>
           
-          <div className="marginTop10">
-            <label className="fieldLabel">Notes</label>
-            <p className="moderatorNotes">{currentReport.moderatorDescription[0].moderatorDescription || "No notes provided"}</p>
-          </div>
+          {currentReport.moderatorDescription[0].moderatorDescription && 
+           currentReport.moderatorDescription[0].moderatorDescription.trim() !== "" && 
+           currentReport.moderatorDescription[0].moderatorDescription !== "No notes provided" && (
+            <div className="marginTop10">
+              <label className="fieldLabel">Notes</label>
+              <p className="moderatorNotes">{currentReport.moderatorDescription[0].moderatorDescription}</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -410,27 +468,32 @@ const ReportPopup = ({currentReport, onClose}) => {
       <div className="reportDetailsSection">
         <h3 className="reportDetailsTitle">Report Details</h3>
         
-        <p className="reportDescription">{currentReport.description}</p>
-        
+        { currentReport.description &&
+          (<p className="reportDescription">{currentReport.description}</p>)
+      }
         <div className="reportDetailsGrid">
-          <div>
+          <div className="reportDetailsField">
             <label className="fieldLabel">Reported By</label>
             <p className="fieldValue">{currentReport.author}</p>
           </div>
           
-          <div>
+          <div className="reportDetailsField">
             <label className="fieldLabel">Report Type</label>
-            <p className="fieldValue textCapitalize">{currentReport.type || "N/A"}</p>
+            <div className={`reportTypeBadge ${getReportTypeClass(currentReport.type)}`}>
+              {getReportTypeDisplay(currentReport.type)}
+            </div>
           </div>
           
-          <div>
+          <div className="reportDetailsField">
             <label className="fieldLabel">Severity</label>
-            <p className="fieldValue textCapitalize">{currentReport.severity || "N/A"}</p>
+            <div className={`severityBadge ${getSeverityClass(currentReport.severity)}`}>
+              {getSeverityDisplay(currentReport.severity)}
+            </div>
           </div>
           
-          <div>
+          <div className="reportDetailsField">
             <label className="fieldLabel">Reported At</label>
-            <p className="fieldValue">{formatDate(currentReport.reportedAt)}</p>
+            <p className="dateValue">{formatDate(currentReport.reportedAt)}</p>
           </div>
         </div>
         

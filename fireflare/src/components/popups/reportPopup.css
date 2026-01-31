@@ -46,7 +46,7 @@
 }
 
 .moderatorSection {
-    background-color: #f1f7fa;
+    background-color: #ecfceb;
     padding: 12px;
     margin-bottom: 15px;
     border-radius: 6px;
@@ -125,11 +125,16 @@
     font-style: italic;
 }
 
+
 .reportDetailsGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(107px, 1fr));
     gap: 16px;
     margin-bottom: 20px;
+}
+.reportDetailsGrid > :nth-child(even) {
+    /* Your styles for 2nd, 4th, 6th elements */
+    text-align: center;
 }
 
 .reportDetailsField {
@@ -329,9 +334,8 @@
 .reportTypeBadge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 16px;
+    padding: 5px 9px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
     text-transform: none;
@@ -355,7 +359,6 @@
 }
 
 .reportTypeBadge::before {
-    content: "";
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -409,7 +412,6 @@
 }
 
 .severityBadge::before {
-    content: "";
     width: 6px;
     height: 6px;
     border-radius: 50%;

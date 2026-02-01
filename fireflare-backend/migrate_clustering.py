@@ -9,7 +9,7 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from backend import db, nasaWildfiresCollection
-from utils.externalapi import cluster_geojson_points
+from utils.geo import cluster_geojson_points
 import datetime
 
 def migrate_legacy_data():

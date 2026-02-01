@@ -7,8 +7,11 @@ from utils.externalapi import (
     openaq_param_pm25_latest,
     openaq_param_latest_to_geojson_aqi
 )
+from utils.geo import (
+    cluster_geojson_points
+
+)
 from flask_cors import CORS
-from dotenv import load_dotenv
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 from collections import deque
@@ -24,81 +27,10 @@ import smtplib
 import ssl
 import requests
 
-sampleUserSchema = {
-    "userID": "user_9f8d7e6a5b4c3d2e1f0a",
-    "email": "user@example.com",
-    "firstName": "John",
-    "lastName": "Doe",
-    "location": {
-      "type": "Point",
-      "coordinates": [-123.1207, 49.2827]
-    },
-    "verified": True,
-    "addresses": ["123 Main St, Vancouver, BC, Canada"],
-    "trustScore": 75,
-    "createdAt": "2025-07-17T20:35:00Z",
-    "updatedAt": "2025-07-17T21:00:00Z"
-}
-
-
-sampleModeratorSchema = {  
-        "userID": "user_9f8d7e6a5b4c3d2e1f0a",
-    "email": "user@example.com",
-    "firstName": "John",
-    "lastName": "Doe",
-    "location": {
-      "type": "Point",
-      "coordinates": [-123.1207, 49.2827]
-    },
-    "verified": True,
-    "address": "123 Main St, Vancouver, BC, Canada",
-    "trustScore": 75,
-    "createdAt": "2025-07-17T20:35:00Z",
-    "updatedAt": "2025-07-17T21:00:00Z",
-    "lastModeratedAt": "2025-07-17T20:35:00Z",
-    "status": "active",  # or "inactive", "suspended"
-    "approvedReports": ["report_01H6XZ1234567890ABCDEF", "report_01H6XZ1234567890ABCDEF"],  # List of report IDs
-    "moderatorName": "Jane Smith",
-    "moderatorBackground": "Experienced in wildfire management and environmental science.",
-    "moderatorContact": {
-        "email": "jane.smith@example.com",
-        "phone": "+1-234-567-8901"
-    }
-}
-
-sampleReportSchema = {
-  "id": "report_01H6XZ1234567890ABCDEF",  
-  "author": "user_9f8d7e6a5b4c3d2e1f0a",  
-  "location": {
-    "latitude": 49.2827,
-    "longitude": -123.1207,
-    "accuracy": 10
-  },
-  "radiusMeters": 250,
-  "type": "smoke",
-  "severity": "moderate",
-  "description": "Dense smoke visible from Stanley Park.",
-  "metadata": {
-    "schemaVersion": "1.0",
-    "source": "web-app",
-    "deviceInfo": {
-      "deviceType": "iPhone 15",
-      "osVersion": "iOS 18.0.2"
-    }
-  },
-  "reportedAt": "2025-07-17T20:35:00Z",
-  "syncedAt": "2025-07-17T21:00:00Z",
-  "editedAt": "2025-07-17T21:00:00Z",
-  "approvedAt": "2025-07-17",
-  "isDeleted": False,
-  "isVerified": False,  # Assuming a field to indicate if the report is valid
-}
-
 
 from pprint import PrettyPrinter
 
 app = Flask(__name__)
-load_dotenv(dotenv_path='.env.local') # Explicitly load .env.local
 CORS(app)
 mapbox_api = os.getenv("MAP_KEY")
 cluster = os.getenv("MONGO_CLUSTER_URL")
@@ -902,7 +834,6 @@ def getNasaWildfires():
                     legacy_features = legacy_geojson.get("features", [])
                     
                     if len(legacy_features) > 1 and clustering_config['enable_clustering']:
-                        from utils.externalapi import cluster_geojson_points
                         clustered_features = cluster_geojson_points(
                             legacy_features, 
                             clustering_config['cluster_distance_km']
@@ -1250,11 +1181,13 @@ def set_clustering_config():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
+
+
+
+
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=True)
-
-
-
 
 

@@ -10,7 +10,7 @@ import pytest
 # Add parent directories to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from utils.externalapi import cluster_geojson_points, haversine_distance
+from utils.geo import cluster_geojson_points, haversine_distance
 
 class TestClustering:
     """Test cases for the GeoJSON clustering functionality."""

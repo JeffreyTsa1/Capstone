@@ -219,7 +219,7 @@ docker run -p 8080:8080 fireflare-backend
 
 ## Air Quality Data
 
-Air quality data was originally sourced from OpenAQ, a free online API sourcing air quality data. OpenAQ provided enough data for its purpose: it demonstrated that air quality data is contextually critical and useful to measure when considering wildfires, but not enough data for it to be a viable solution. I realized this early on, but could no seek out a more consistent reliable source in such a short time crunch. I knew that there would have to be a significant effort taken to integrate air quality data in. This was refactored and enhanced in early 2026 to source data from open weather instead.
+Air quality data was originally sourced from OpenAQ, a free online API sourcing air quality data. OpenAQ provided enough data for its purpose: it demonstrated that air quality data is contextually critical and useful to measure when considering wildfires, but not enough data for it to be a viable solution. I realized this early on, but could not seek out a more consistent, reliable source in such a short time crunch. I knew that there would have to be a significant effort taken to integrate air quality data in. This was refactored and enhanced in early 2026 to source data from open weather instead.
 
 # Open AQ
 

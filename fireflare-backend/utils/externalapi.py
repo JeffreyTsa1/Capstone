@@ -5,6 +5,7 @@ from io import StringIO
 from dotenv import load_dotenv
 from pathlib import Path
 import math
+from .geo import cluster_geojson_points
 
 # Find .env.local file - try multiple locations
 current_file = Path(__file__)

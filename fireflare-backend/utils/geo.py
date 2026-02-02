@@ -3,10 +3,20 @@
 # import csv
 # import json
 
+import math
 # def convert_csv_to_geojson(csv_path, geojson_path):
 
-from calculate import haversine_distance
+from dataclasses import dataclass
+from utils.calculate import haversine_distance
+from utils.boundaries import WILDFIRE_ZONES
 
+@dataclass
+class GridPoint:
+    lat: float
+    lon: float
+    zone: str
+    spacing_km: int
+    priority: int
 
 def cluster_geojson_points(features, cluster_distance_km=5.0):
     """
@@ -133,16 +143,16 @@ def get_wildfire_zone(lat: float, lon: float):
     Returns the zone name and WildfireZone object.
     Defaults to 'default_zone' if no specific zone matches.
     """
-    from utils.boundaries import WILDFIRE_ZONES
-    
+
     for zone_name, zone in WILDFIRE_ZONES.items():
         bounds = zone.bounds
         if (bounds['lat_min'] <= lat <= bounds['lat_max'] and
             bounds['lon_min'] <= lon <= bounds['lon_max']):
+            
             return zone_name, zone
     
-    # Default zone if none match
-    default_zone = WILDFIRE_ZONES.get('default_zone')
+    default_zone = WILDFIRE_ZONES['eastern_us_plains']
+
     return 'default_zone', default_zone
     
 
@@ -155,29 +165,26 @@ def generate_points_grid():
     """
     grid_points = []
     
-    # Continental US bounds
-    US_BOUNDS = {
-        'lat_min': 25.0,
-        'lat_max': 49.0,
-        'lon_min': -125.0,
-        'lon_max': -66.0
-    }
+    # Import North America bounds to include Canada and Alaska
+    from .boundaries import NORTH_AMERICA_BOUNDS
     
     print("Generating wildfire grid...")
-    print(f"Bounds: {US_BOUNDS}")
+    print(f"Bounds: {NORTH_AMERICA_BOUNDS}")
     
-    lat = US_BOUNDS['lat_min']
+    lat = NORTH_AMERICA_BOUNDS['lat_min']
     total_processed = 0
     
-    while lat <= US_BOUNDS['lat_max']:
-        lon = US_BOUNDS['lon_min']
+    while lat <= NORTH_AMERICA_BOUNDS['lat_max']:
+        lon = NORTH_AMERICA_BOUNDS['lon_min']
         points_in_row = 0
         
-        while lon <= US_BOUNDS['lon_max']:
+        while lon <= NORTH_AMERICA_BOUNDS['lon_max']:
             # Get zone for this point
             zone_name, zone = get_wildfire_zone(lat, lon)
             
             # Add point
+            if zone is None:
+                print(f"⚠️  Warning: No zone found for point {lat}, {lon}")
             grid_points.append(GridPoint(
                 lat=round(lat, 4),
                 lon=round(lon, 4),
@@ -194,7 +201,7 @@ def generate_points_grid():
             lon += lon_spacing
         
         # For latitude, sample at midpoint to get average spacing for this row
-        mid_lon = (US_BOUNDS['lon_min'] + US_BOUNDS['lon_max']) / 2
+        mid_lon = (NORTH_AMERICA_BOUNDS['lon_min'] + NORTH_AMERICA_BOUNDS['lon_max']) / 2
         _, sample_zone = get_wildfire_zone(lat, mid_lon)
         lat_spacing = sample_zone.spacing_km / 111
         lat += lat_spacing
@@ -202,5 +209,5 @@ def generate_points_grid():
         if total_processed % 500 == 0:
             print(f"  Processed {total_processed} points...")
     
-    print(f"✅ Generated {len(grid_points)} total points")
+    print(f"Finished generating grid with {len(grid_points)} total points")
     return grid_points

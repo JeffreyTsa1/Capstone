@@ -6,12 +6,23 @@ import os
 import time
 import asyncio
 import aiohttp
+from dotenv import load_dotenv
+from pymongo import MongoClient
+from flask import jsonify
 from datetime import datetime
+from utils.geo import generate_points_grid
+from utils.externalapi import pm25_to_aqi
 from pathlib import Path
 from typing import List, Dict, Optional
 from dataclasses import dataclass, asdict
 
+if os.path.exists(".env.local"):
+    load_dotenv(dotenv_path=".env.local")
+else:
+    load_dotenv()  # fallback to .env
+
 cluster = os.getenv("MONGO_CLUSTER_URL")
+openWeatherApiKey = os.getenv("OPENWEATHER_API_KEY")
 client = MongoClient(cluster)
 db = client.Fireflare
 
@@ -24,7 +35,9 @@ class AQIReading:
     timestamp: str
     zone: str
     priority: int
-    aqi: Optional[int] = None
+    aqi: Optional[int] = None  # EPA AQI (0-500 scale)
+    openweather_aqi: Optional[int] = None  # OpenWeather AQI (1-5 scale)
+    pm25_concentration: Optional[float] = None  # PM2.5 µg/m³
     components: Optional[Dict] = None
     success: bool = False
     error: Optional[str] = None
@@ -46,9 +59,21 @@ class AQIFetcher:
             async with session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
+                    components = data['list'][0]['components']
+                    openweather_aqi = data['list'][0]['main']['aqi']  # 1-5 scale
+                    
+                    # Extract PM2.5 concentration (µg/m³) and convert to EPA AQI
+                    pm25_concentration = components.get('pm2_5')
+                    epa_aqi = None
+                    
+                    if pm25_concentration is not None:
+                        epa_aqi = pm25_to_aqi(pm25_concentration)
+                    
                     return {
-                        'aqi': data['list'][0]['main']['aqi'],
-                        'components': data['list'][0]['components'],
+                        'aqi': epa_aqi,  # EPA AQI (0-500 scale)
+                        'openweather_aqi': openweather_aqi,  # Keep original 1-5 scale
+                        'pm25_concentration': pm25_concentration,  # Raw PM2.5 µg/m³
+                        'components': components,
                         'success': True
                     }
                 else:
@@ -67,17 +92,19 @@ class AQIFetcher:
         results = []
         
         for i, point in enumerate(points):
-            print(f"  Processing {i + 1}/{len(points)}: {point['lat']:.4f}, {point['lon']:.4f}")
+            # print(f"  Processing {i + 1}/{len(points)}: {point.lat:.4f}, {point.lon:.4f}")
             
-            result = await self.fetch_aqi(session, point['lat'], point['lon'])
+            result = await self.fetch_aqi(session, point.lat, point.lon)
             
             reading = AQIReading(
-                lat=point['lat'],
-                lon=point['lon'],
-                timestamp=datetime.utcnow().isoformat() + 'Z',
-                zone=point['zone'],
-                priority=point['priority'],
-                aqi=result.get('aqi'),
+                lat=point.lat,
+                lon=point.lon,
+                timestamp=datetime.now().isoformat() + 'Z',
+                zone=point.zone,
+                priority=point.priority,
+                aqi=result.get('aqi'),  # EPA AQI
+                openweather_aqi=result.get('openweather_aqi'),  # 1-5 scale
+                pm25_concentration=result.get('pm25_concentration'),  # µg/m³
                 components=result.get('components'),
                 success=result['success'],
                 error=result.get('error')
@@ -119,7 +146,7 @@ class AQIFetcher:
         return all_results
     
 
-async def store_results(results: List[AQIReading]):
+def store_results(results: List[AQIReading]):
     
     # Try to store results to Database
     try:
@@ -131,80 +158,92 @@ async def store_results(results: List[AQIReading]):
             latest_data = doc
             break
     
-        current_time = datetime.datetime.now()
+        current_time = datetime.now()
         should_fetch_new = True
         if latest_data:
             last_updated = latest_data.get("lastUpdated")
             if isinstance(last_updated, str):
-                last_updated = datetime.datetime.fromisoformat(last_updated)
-            elif isinstance(last_updated, datetime.datetime):
+                last_updated = datetime.fromisoformat(last_updated)
+            elif isinstance(last_updated, datetime):
                 pass  # Already a datetime object
             else:
-                last_updated = datetime.datetime.min  # Force update if invalid format
+                last_updated = datetime.min  # Force update if invalid format
             print(f"Last updated: {last_updated}, Current time: {current_time}")
             
             # Check if data is less than 4 hours old (adjust as needed)
             time_diff = current_time - last_updated
             if time_diff.total_seconds() < 14400:  # 4 hours in seconds
                 should_fetch_new = False
-                print("Using cached wildfire data from database")
-                
-                # Return cached clustered data (for performance) 
-                # Check for new data structure first, fallback to old structure
-                if "clusteredData" in latest_data:
-                    geojson_data = latest_data["clusteredData"]
-                    print(f"Returning cached clustered data with {len(geojson_data.get('features', []))} features")
-                elif "geojsonData" in latest_data:
-                    # Legacy data - apply clustering on-the-fly
-                    print("Legacy data detected - applying clustering on-the-fly...")
-                    legacy_geojson = latest_data["geojsonData"]
-                    legacy_features = legacy_geojson.get("features", [])
-                    
-                    if len(legacy_features) > 1 and clustering_config['enable_clustering']:
-                        clustered_features = cluster_geojson_points(
-                            legacy_features, 
-                            clustering_config['cluster_distance_km']
-                        )
-                        print(f"Applied clustering: {len(legacy_features)} → {len(clustered_features)} features")
-                        geojson_data = {
-                            "type": "FeatureCollection",
-                            "features": clustered_features
-                        }
-                    else:
-                        geojson_data = legacy_geojson
-                        print("Using legacy data without clustering")
-                else:
-                    # No data found
-                    geojson_data = {
-                        "type": "FeatureCollection", 
-                        "features": []
-                    }
-                    print("No data found - returning empty collection")
-                
-                return jsonify(geojson_data), 200, {'Content-Type': 'application/json'}
+                print("Using cached AQI data from database")
+                return {'status_code': 200, 'message': 'Using cached data'}
         
         if should_fetch_new:
-            print("Fetching fresh wildfire data from NASA API")
+            print("Fetching fresh AQI data from OpenWeather API")
 
+            # Convert AQIReading objects to GeoJSON FeatureCollection
+            features = []
+            successful_count = 0
+            
+            for reading in results:
+                # Only include successful readings with valid AQI
+                if not reading.success or reading.aqi is None:
+                    continue
+                    
+                # Create GeoJSON feature
+                feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point", 
+                        "coordinates": [reading.lon, reading.lat]
+                    },
+                    "properties": {
+                        "aqi": reading.aqi,  # EPA AQI (0-500 scale)
+                        "openweather_aqi": reading.openweather_aqi,  # 1-5 scale
+                        "pm25_concentration": reading.pm25_concentration,  # µg/m³
+                        "components": reading.components or {},
+                        "zone": reading.zone,
+                        "priority": reading.priority,
+                        "timestamp": reading.timestamp,
+                        "success": reading.success,
+                        "error": reading.error
+                    }
+                }
+                features.append(feature)
+                successful_count += 1
+            
+            # Create GeoJSON FeatureCollection
+            geojson_data = {
+                "type": "FeatureCollection",
+                "features": features,
+                "metadata": {
+                    "source": "Open Weather Air Pollution API",
+                    "totalReadings": len(results),
+                    "successfulReadings": successful_count,
+                    "gridGenerationInfo": "Generated from wildfire zones"
+                }
+            }
             
             # Store both versions in the database
             new_aqi_doc = {
                 "lastUpdated": current_time.isoformat(),
-                "originalData": nasa_data["original"],          # Full NASA data
+                "originalData": geojson_data,  # GeoJSON FeatureCollection
+                "rawReadings": [asdict(reading) for reading in results],  # Keep raw data as backup
                 "source": "Open Weather Air Pollution API",
                 "fetchedAt": current_time.isoformat()
             }
             
             # Insert new data (keep all historical entries as backup)
-            nasaWildfiresCollection.insert_one(wildfire_document)
-            print(f"Updated wildfire database with {nasa_data['original_count']} original features, {nasa_data['clustered_count']} clustered features")
-            
-            # Return the clustered data to the client (optimized payload)
-            return jsonify(nasa_data["clustered"]), 200, {'Content-Type': 'application/json'}
-            
+            response_after_insert = aqiCollection.insert_one(new_aqi_doc)
+            if response_after_insert.acknowledged:
+                print(f"Inserted GeoJSON with {len(features)} features (ID: {response_after_insert.inserted_id})")
+                return {'status_code': 200, 'message': 'GeoJSON data stored successfully'}
+            else:
+                print("❌ Failed to insert new AQI data!")
+                return {'status_code': 500, 'message': 'Failed to insert data'}
 
-    except:
-        print(f"❌ Failed to store data into database!")
+    except Exception as e:
+        print(f"❌ Failed to store data into database! Error: {e}")
+        return {'status_code': 500, 'message': f'Database error: {str(e)}'}
 
 
 
@@ -215,22 +254,12 @@ async def main():
     print("=" * 60)
     
     # Load environment variables
-    api_key = os.getenv('OPENWEATHER_API_KEY')
+    api_key = openWeatherApiKey    
     if not api_key:
-        raise ValueError("OPENWEATHER_API_KEY environment variable not set!")
-    
-    # Load grid
-    grid_path = Path('grid/wildfire_grid.json')
-    if not grid_path.exists():
-        raise FileNotFoundError(f"Grid file not found: {grid_path}")
-    
-    with open(grid_path) as f:
-        grid_data = json.load(f)
-    
-    grid_points = grid_data['points']
-    print(f"Loaded {len(grid_points)} grid points")
-    print(f"Distribution: {grid_data.get('distribution', {})}")
-    
+        print("❌ OPENWEATHER_API_KEY not set in environment variables!")
+        return 
+    # Generate Grid
+    grid_points = generate_points_grid()
     # Fetch AQI data
     fetcher = AQIFetcher(api_key, batch_size=50, delay_ms=100)
     results = await fetcher.fetch_all(grid_points)
@@ -238,10 +267,10 @@ async def main():
     # Save results
     response = store_results(results)
     
-    if response.status_code == 200:
+    if response['status_code'] == 200:
         print("✅ Results successfully stored in database!")
     else:
-        print(f"❌ Failed to store results: {response.status_code} - {response.text}")
+        print(f"❌ Failed to store results: {response['status_code']} - {response['message']}")
 
     # Summary
     successful = sum(1 for r in results if r.success)

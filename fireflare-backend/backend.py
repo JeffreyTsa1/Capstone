@@ -7,10 +7,7 @@ from utils.externalapi import (
     openaq_param_pm25_latest,
     openaq_param_latest_to_geojson_aqi
 )
-from utils.geo import (
-    cluster_geojson_points
-
-)
+from utils.geo import cluster_geojson_points
 from flask_cors import CORS
 from pymongo import MongoClient
 from bson import json_util, ObjectId
@@ -45,6 +42,7 @@ nasaWildfiresCollection = db.NasaWildfires
 notificationsCollection = db.Notifications
 addressesCollection = db.Addresses
 crisisCollection = db.Crises
+aqiCollection = db.openWeatherAQIData
 
 # Create indexes for better performance
 try:
@@ -969,6 +967,39 @@ def refreshNasaWildfires():
 
 
 ##################### AQI Data #####################
+
+@app.route('/aq/openweather/latest', methods=['GET'])
+def api_openweather_latest():
+    """
+    Fetch latest OpenWeather AQI data from database (returns pre-formatted GeoJSON).
+    No processing - returns originalData directly.
+    """
+    try:
+        # Get the latest OpenWeather AQI data from database
+        latest_data_cursor = aqiCollection.find({}).sort([("lastUpdated", -1)]).limit(1)
+        latest_data = None
+        for doc in latest_data_cursor:
+            latest_data = doc
+            break
+            
+        if not latest_data:
+            return jsonify({"error": "No OpenWeather AQI data found"}), 404
+            
+        # Return the original data directly (already in GeoJSON format)
+        original_data = latest_data.get("originalData", {})
+        
+        if not original_data:
+            return jsonify({"error": "No original data found"}), 404
+            
+        return jsonify(original_data), 200, {'Content-Type': 'application/json'}
+        
+    except Exception as e:
+        print(f"Error in api_openweather_latest: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "Failed to fetch OpenWeather AQI data", "details": str(e)}), 500
+
+
 @app.route('/aq/openaq/latest', methods=['GET'])
 def api_openaq_latest():
     """
@@ -1149,7 +1180,7 @@ def get_clustering_stats():
 # Global clustering configuration
 clustering_config = {
     "enable_clustering": True,
-    "cluster_distance_km": 2.0
+    "cluster_distance_km": 0.2
 }
 
 @app.route('/wildfires/clustering/config', methods=['GET'])

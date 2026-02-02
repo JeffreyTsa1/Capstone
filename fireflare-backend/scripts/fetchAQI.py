@@ -49,7 +49,7 @@ class AQIFetcher:
         self.api_key = api_key
         self.batch_size = batch_size
         self.delay_ms = delay_ms
-        self.base_url = "http://api.openweathermap.org/data/2.5/air_pollution"
+        self.base_url = "https://api.openweathermap.org/data/2.5/air_pollution"
     
     async def fetch_aqi(self, session: aiohttp.ClientSession, lat: float, lon: float) -> Dict:
         """Fetch AQI data for a single point."""

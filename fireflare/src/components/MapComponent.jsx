@@ -345,13 +345,13 @@ const handleMapClick = useCallback((event) => {
     const distanceX = radiusInMeters / (111320 * Math.cos(center.latitude * Math.PI / 180));
     const distanceY = radiusInMeters / 110540;
 
-    for (let i = 0; i < points; i++) {
-      const theta = (i / points) * (2 * Math.PI);
-      const x = distanceX * Math.cos(theta);
-      const y = distanceY * Math.sin(theta);
-      coords.push([center.longitude + x, center.latitude + y]);
-    }
-    coords.push(coords[0]); // Close the circle
+      for (let i = 0; i < points; i++) {
+        const theta = (i / points) * (2 * Math.PI);
+        const x = distanceX * Math.cos(theta) * ringRadius;
+        const y = distanceY * Math.sin(theta) * ringRadius;
+        coords.push([center.longitude + x, center.latitude + y]);
+      }
+      coords.push(coords[0]); // Close the circle
 
     return {
       type: "FeatureCollection",
@@ -603,7 +603,7 @@ const handleMapClick = useCallback((event) => {
         // Use a more linear weight that reduces density clustering effects
         'heatmap-weight': [
           'interpolate', ['linear'], ['get', 'aqi'],
-          0, 0,       // No AQI = no contribution
+          0, 0.05,       // No AQI = no contribution
           25, 0.1,    // Very good
           50, 0.2,    // Good 
           100, 0.4,   // Moderate
@@ -619,7 +619,7 @@ const handleMapClick = useCallback((event) => {
           8, 25,      // Medium radius
           12, 15      // Smaller radius when zoomed in
         ],
-        // Color ramp based purely on AQI values, not density
+        // Color ramp based on heatmap density (which is weighted by AQI)
         'heatmap-color': [
           'interpolate', ['linear'], ['heatmap-density'],
           0, 'rgba(0,228,0,0)',         // Transparent
@@ -633,9 +633,9 @@ const handleMapClick = useCallback((event) => {
         // Reduced intensity to minimize density clustering
         'heatmap-intensity': [
           'interpolate', ['linear'], ['zoom'],
-          5, 0.4,     // Much lower intensity when zoomed out
-          8, 0.6,     // Medium zoom  
-          10, 0.8     // Higher zoom
+          5, 0.6,     // Much lower intensity when zoomed out
+          8, 0.8,     // Medium zoom  
+          10, 1.0     // Higher zoom
         ],
         // Lower opacity to reduce overwhelming density effects
         'heatmap-opacity': [
@@ -650,9 +650,9 @@ const handleMapClick = useCallback((event) => {
     <Layer
       id="aq-markers"
       type="circle"
-      minzoom={8} // Only show individual markers when zoomed in
+      minzoom={7} // Only show individual markers when zoomed in
       paint={{
-        'circle-radius': 13,
+        'circle-radius': 11,
         'circle-color': [
           'step', ['get','aqi'],
           '#00e400', 50,    // 0-50 Good (Green)
@@ -662,13 +662,13 @@ const handleMapClick = useCallback((event) => {
           '#8f3f97', 300,   // 201–300 Very Unhealthy (Purple)
           '#7e0023'         // 300+ Hazardous (Maroon)
         ],
-        'circle-stroke-color': '#ffffff',
-        'circle-stroke-width': 1.5,
+        // 'circle-stroke-color': '#ffffff',
+        // 'circle-stroke-width': 1.5,
         'circle-opacity': [
           'interpolate', ['linear'], ['get', 'aqi'],
-          0, 0.2,      // Very low AQI - less visible
-          25, 0.4,     // Low AQI - still less visible
-          50, 0.6,     // AQI 50+ - more visible
+          0, 0,      // Very low AQI - less visible
+          25, 0.2,     // Low AQI - still less visible
+          50, 0.4,     // AQI 50+ - more visible
           100, 0.8,   // Moderate - good visibility
           150, 0.85,    // Unhealthy for sensitive - very visible
           200, 0.9,   // Unhealthy - highly visible
@@ -681,7 +681,7 @@ const handleMapClick = useCallback((event) => {
     <Layer
       id="aq-labels"
       type="symbol"
-      minzoom={9} // Show labels at slightly lower zoom level
+      minzoom={7.7} // Show labels at slightly lower zoom level
       layout={{
         'text-field': ['to-string', ['get', 'aqi']],
         'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],

@@ -347,8 +347,8 @@ const handleMapClick = useCallback((event) => {
 
       for (let i = 0; i < points; i++) {
         const theta = (i / points) * (2 * Math.PI);
-        const x = distanceX * Math.cos(theta) * ringRadius;
-        const y = distanceY * Math.sin(theta) * ringRadius;
+        const x = distanceX * Math.cos(theta);
+        const y = distanceY * Math.sin(theta);
         coords.push([center.longitude + x, center.latitude + y]);
       }
       coords.push(coords[0]); // Close the circle

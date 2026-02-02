@@ -619,7 +619,7 @@ const handleMapClick = useCallback((event) => {
           8, 25,      // Medium radius
           12, 15      // Smaller radius when zoomed in
         ],
-        // Color ramp based purely on AQI values, not density
+        // Color ramp based on heatmap density (which is weighted by AQI)
         'heatmap-color': [
           'interpolate', ['linear'], ['heatmap-density'],
           0, 'rgba(0,228,0,0)',         // Transparent

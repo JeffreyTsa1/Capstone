@@ -223,7 +223,7 @@ Air quality data was originally sourced from OpenAQ, a free online API sourcing 
 
 # Open AQ
 
-OpenAQ provides free data, but this data doesn't cover North America, rather it only polls specific random points around the United States. The random points are inconsistent and can move around every single day. It also requries us to do several costly computations to convert data into a interpretable air quality metric, consistent with civilian-facing weather data. 
+OpenAQ provides free data, but this data doesn't cover North America, rather it only polls specific random points around the United States. The random points are inconsistent and can move around every single day. It also requires us to do several costly computations to convert data into a interpretable air quality metric, consistent with civilian-facing weather data. 
 
 # OpenWeather
 

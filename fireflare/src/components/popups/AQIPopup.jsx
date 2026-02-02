@@ -8,7 +8,7 @@ const AQIPopup = ({ data }) => {
   // Helper function to get color based on AQI value
   const getAQIColor = (aqi) => {
     if (aqi <= 50) return '#00e400';          // Good
-    if (aqi <= 100) return '#ffff00';         // Moderate
+    if (aqi <= 100) return '#ffe02e';         // Moderate
     if (aqi <= 150) return '#ff7e00';         // Unhealthy for Sensitive Groups
     if (aqi <= 200) return '#ff0000';         // Unhealthy
     if (aqi <= 300) return '#8f3f97';         // Very Unhealthy
@@ -37,6 +37,7 @@ const AQIPopup = ({ data }) => {
 
   const aqiValue = data.properties.aqi || 0;
   const color = getAQIColor(aqiValue);
+  const textColor = aqiValue > 150 ? '#ffffff' : '#000000';
   const category = getCategory(aqiValue);
   const recommendation = getHealthRecommendation(aqiValue);
   
@@ -47,7 +48,7 @@ const AQIPopup = ({ data }) => {
 
   return (
     <div className="aqi-popup-container">
-      <div className="aqi-popup-header" style={{ backgroundColor: color }}>
+      <div className="aqi-popup-header" style={{ backgroundColor: color, color: textColor  }}>
         <h3>Air Quality Index</h3>
         <div className="aqi-value">{aqiValue}</div>
       </div>

@@ -117,11 +117,11 @@ const getBbox = useCallback(() => {
 const fetchAQ = useCallback(async () => {
   const bbox = getBbox();
   if (!bbox) return;
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/aq/openaq/latest?bbox=${bbox.join(',')}&min_aqi=50&limit=1000`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/aq/openweather/latest`;
   const res = await fetch(url);
   if (!res.ok) return;
   const fc = await res.json();
-  console.log("Fetched AQ data:", fc);
+  console.log("Fetched OpenWeather AQ data:", fc);
   setAqGeoJSON(fc);
 }, [getBbox]);
 
@@ -600,46 +600,48 @@ const handleMapClick = useCallback((event) => {
       id="aq-heatmap"
       type="heatmap"
       paint={{
-        // Modified weight scale to prioritize higher AQI values
+        // Use a more linear weight that reduces density clustering effects
         'heatmap-weight': [
           'interpolate', ['linear'], ['get', 'aqi'],
-          0, 0.1,     // Very low AQI - minimal contribution
-          50, 0.2,    // Good - reduced contribution
-          100, 0.4,   // Moderate - moderate contribution
-          150, 1.0,   // Unhealthy for sensitive groups
-          200, 1.7,   // Unhealthy - significant contribution
-          300, 2.5,   // Very unhealthy - high contribution  
-          500, 3.0    // Hazardous - maximum contribution
+          0, 0,       // No AQI = no contribution
+          25, 0.1,    // Very good
+          50, 0.2,    // Good 
+          100, 0.4,   // Moderate
+          150, 0.6,   // Unhealthy for sensitive groups
+          200, 0.8,   // Unhealthy
+          300, 1.0,   // Very unhealthy
+          500, 1.0    // Hazardous - cap the weight to reduce density effects
         ],
-        // Larger radius as we zoom out
+        // Larger, more consistent radius to normalize density effects
         'heatmap-radius': [
           'interpolate', ['linear'], ['zoom'],
-          5, 20,
-          8, 15,
-          12, 10
+          5, 35,      // Larger radius at far zoom to smooth density
+          8, 25,      // Medium radius
+          12, 15      // Smaller radius when zoomed in
         ],
-        // Color ramp for heatmap based on AQI standards
+        // Color ramp based purely on AQI values, not density
         'heatmap-color': [
           'interpolate', ['linear'], ['heatmap-density'],
-          0, 'rgba(0,228,0,0)',       // Green (transparent)
-          0.1, 'rgba(255,255,0,0.6)', // Yellow (Moderate)
-          0.3, 'rgba(255,126,0,0.7)', // Orange (Unhealthy for Sensitive Groups)
-          0.5, 'rgba(255,0,0,0.8)',   // Red (Unhealthy)
-          0.7, 'rgba(143,63,151,0.8)', // Purple (Very Unhealthy)
-          1.0, 'rgba(126,0,35,0.8)',  // Maroon (Hazardous)
+          0, 'rgba(0,228,0,0)',         // Transparent
+          0.1, 'rgba(0,228,0,0.3)',     // Green (Good)
+          0.2, 'rgba(255,255,0,0.5)',   // Yellow (Moderate)  
+          0.4, 'rgba(255,126,0,0.7)',   // Orange (Unhealthy for Sensitive)
+          0.6, 'rgba(255,0,0,0.8)',     // Red (Unhealthy)
+          0.8, 'rgba(143,63,151,0.9)',  // Purple (Very Unhealthy)
+          1.0, 'rgba(126,0,35,1.0)',    // Maroon (Hazardous)
         ],
-        // Slightly reduced intensity at lower zoom levels to minimize density effect
+        // Reduced intensity to minimize density clustering
         'heatmap-intensity': [
           'interpolate', ['linear'], ['zoom'],
-          5, 0.8,     // Lower intensity when zoomed out (where density effects are most problematic)
-          8, 0.9,     // Medium zoom
-          10, 1.0     // Closer zoom (where individual points are more relevant)
+          5, 0.4,     // Much lower intensity when zoomed out
+          8, 0.6,     // Medium zoom  
+          10, 0.8     // Higher zoom
         ],
-        // Opacity based on zoom level
+        // Lower opacity to reduce overwhelming density effects
         'heatmap-opacity': [
           'interpolate', ['linear'], ['zoom'],
-          7, 0.9,
-          14, 0.6
+          7, 0.6,
+          14, 0.4
         ]
       }}
     />
@@ -650,13 +652,7 @@ const handleMapClick = useCallback((event) => {
       type="circle"
       minzoom={8} // Only show individual markers when zoomed in
       paint={{
-        'circle-radius': [
-          'interpolate', ['linear'], ['zoom'],
-          4, 6,
-          8, 10,
-          12, 20,
-          16, 18
-        ],
+        'circle-radius': 13,
         'circle-color': [
           'step', ['get','aqi'],
           '#00e400', 50,    // 0-50 Good (Green)
@@ -668,7 +664,16 @@ const handleMapClick = useCallback((event) => {
         ],
         'circle-stroke-color': '#ffffff',
         'circle-stroke-width': 1.5,
-        'circle-opacity': 0.85
+        'circle-opacity': [
+          'interpolate', ['linear'], ['get', 'aqi'],
+          0, 0.2,      // Very low AQI - less visible
+          25, 0.4,     // Low AQI - still less visible
+          50, 0.6,     // AQI 50+ - more visible
+          100, 0.8,   // Moderate - good visibility
+          150, 0.85,    // Unhealthy for sensitive - very visible
+          200, 0.9,   // Unhealthy - highly visible
+          300, 1.0     // Very unhealthy/hazardous - maximum visibility
+        ]
       }}
     />
     
@@ -676,7 +681,7 @@ const handleMapClick = useCallback((event) => {
     <Layer
       id="aq-labels"
       type="symbol"
-      minzoom={8} // Show labels at slightly lower zoom level
+      minzoom={9} // Show labels at slightly lower zoom level
       layout={{
         'text-field': ['to-string', ['get', 'aqi']],
         'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],

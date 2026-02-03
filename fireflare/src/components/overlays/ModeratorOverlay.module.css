@@ -2,20 +2,30 @@
 /* Base styles for mobile (320px and up) */
 
 .moderatorOverlay {
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.10);
-  padding: 18px 0 10px 0;
-  min-width: 280px;
-  max-width: 300px;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+  min-width: 240px;
+  max-width: 280px;
+  max-height: 380px;
+  overflow: scroll;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(500px);
+  -webkit-backdrop-filter: blur(500px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px 0px;
   color: white;
   font-family: 'proxima-nova', sans-serif;
+  text-align: center;
 }
 
 .title {
   font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.25rem;
   margin: 0 0 10px 0;
   text-align: center;
   color: #e2e8f0;
@@ -288,10 +298,34 @@
   .reportsList {
     max-height: 500px;
   }
+  
+  .moderatorOverlay {
+    max-width: 200px;
+  }
 }
 
 @media screen and (min-height: 900px) {
   .reportsList {
     max-height: 600px;
   }
+}
+
+.splitRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  padding: 5px 0px;
+}
+
+.splitRow p {
+  font-size: 1.4rem;
+  font-family: 'proxima-nova', sans-serif;
+  font-weight: 400;
+  margin: 0px;
+}
+
+.splitRow label {
+  font-weight: 600;
+  font-size: 0.9rem;
 }
